@@ -1,0 +1,1367 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Named motion tokens — avoids ambiguous arbitrary values like duration-[450ms]. */
+@layer utilities {
+  .duration-drawer-swipe {
+    transition-duration: calc(var(--drawer-swipe-strength, 1) * 400ms);
+  }
+}
+
+@layer base {
+  :root {
+    /* Warm ink neutrals — listening-room feel, not sterile cool gray */
+    --background: 40 24% 97%;
+    --foreground: 30 12% 10%;
+    --card: 40 20% 99%;
+    --card-foreground: 30 12% 10%;
+    --popover: 40 20% 99%;
+    --popover-foreground: 30 12% 10%;
+    --primary: 30 10% 14%;
+    --primary-foreground: 40 24% 97%;
+    --secondary: 35 14% 93%;
+    --secondary-foreground: 30 10% 16%;
+    --muted: 35 12% 93%;
+    --muted-foreground: 30 6% 42%;
+    --accent: 35 14% 93%;
+    --accent-foreground: 30 10% 16%;
+    --destructive: 0 62% 48%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 35 12% 88%;
+    --input: 35 12% 88%;
+    --ring: 30 10% 30%;
+    --radius: 0.75rem;
+    --sidebar: 40 18% 95.5%;
+    --player: 40 20% 98%;
+    --font-lyrics:
+      "Source Serif 4", "Noto Serif SC", "Songti SC", SimSun, Georgia, serif;
+
+    /* Hot-search heat scale — warm → cool, desaturated for both themes */
+    --heat-1: 350 52% 46%;
+    --heat-2: 18 56% 46%;
+    --heat-3: 38 52% 42%;
+    --heat-4: 168 40% 34%;
+    --heat-5: 215 22% 44%;
+  }
+
+  .dark {
+    /* Off-black charcoal with a warm cast — never pure #000 */
+    --background: 30 8% 7%;
+    --foreground: 40 12% 96%;
+    --card: 30 7% 9%;
+    --card-foreground: 40 12% 96%;
+    --popover: 30 7% 10%;
+    --popover-foreground: 40 12% 96%;
+    --primary: 40 14% 94%;
+    --primary-foreground: 30 10% 12%;
+    --secondary: 30 6% 14%;
+    --secondary-foreground: 40 12% 96%;
+    --muted: 30 6% 14%;
+    --muted-foreground: 30 5% 58%;
+    --accent: 30 6% 15%;
+    --accent-foreground: 40 12% 96%;
+    --destructive: 0 48% 38%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 6% 16%;
+    --input: 30 6% 16%;
+    --ring: 40 10% 72%;
+    --sidebar: 30 8% 8.5%;
+    --player: 30 7% 8.5%;
+
+    --heat-1: 350 58% 68%;
+    --heat-2: 18 62% 64%;
+    --heat-3: 40 58% 62%;
+    --heat-4: 168 44% 56%;
+    --heat-5: 215 18% 62%;
+  }
+
+  /* Accent palettes — desaturated so they sit with neutrals, not scream.
+     Applied after .dark so they win in both light and dark mode. */
+  [data-palette="violet"] {
+    --primary: 262 48% 52%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 262 48% 52%;
+  }
+  [data-palette="blue"] {
+    --primary: 212 52% 48%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 212 52% 48%;
+  }
+  [data-palette="emerald"] {
+    --primary: 158 42% 36%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 158 42% 36%;
+  }
+  [data-palette="rose"] {
+    --primary: 350 48% 48%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 350 48% 48%;
+  }
+  [data-palette="teal"] {
+    --primary: 186 52% 34%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 186 52% 34%;
+  }
+  .dark[data-palette="teal"] {
+    --primary: 186 50% 58%;
+    --primary-foreground: 30 10% 12%;
+    --ring: 186 50% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  /* Transparent chrome layers — any opaque color here shows as square
+     corners outside .app-shell's radius on a light desktop. */
+  html {
+    scroll-behavior: smooth;
+    height: 100%;
+    background: transparent !important;
+  }
+  body {
+    @apply text-foreground;
+    position: relative;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: transparent !important;
+    /* Bundled serifs everywhere — Source Serif 4 (Latin) + Noto Serif SC (CJK) */
+    font-family: var(--font-lyrics);
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+    font-optical-sizing: auto;
+    /* Subpixel keeps small UI text sharper than grayscale antialiased in WebView2 */
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+  }
+  html:has(.desktop-lyrics-window),
+  body:has(.desktop-lyrics-window) {
+    overflow: visible;
+    scrollbar-width: none;
+  }
+  html:has(.desktop-lyrics-window)::-webkit-scrollbar,
+  body:has(.desktop-lyrics-window)::-webkit-scrollbar {
+    display: none;
+  }
+  #root {
+    height: 100%;
+    background: transparent !important;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+  }
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Soft depth — warm-tinted shadows, not generic black */
+  :root {
+    --shadow-border:
+      0px 0px 0px 1px hsl(30 12% 10% / 0.05),
+      0px 1px 2px -1px hsl(30 20% 20% / 0.06),
+      0px 2px 6px 0px hsl(30 18% 18% / 0.04);
+    --shadow-border-hover:
+      0px 0px 0px 1px hsl(30 12% 10% / 0.07),
+      0px 1px 3px -1px hsl(30 20% 20% / 0.08),
+      0px 4px 10px 0px hsl(30 18% 18% / 0.06);
+    --shadow-elevated:
+      0 8px 24px -8px hsl(30 25% 18% / 0.14),
+      0 2px 6px -2px hsl(30 20% 20% / 0.08);
+  }
+  .dark {
+    --shadow-border:
+      0 0 0 1px hsl(40 12% 100% / 0.07), 0 1px 2px hsl(0 0% 0% / 0.35);
+    --shadow-border-hover:
+      0 0 0 1px hsl(40 12% 100% / 0.12), 0 2px 8px hsl(0 0% 0% / 0.4);
+    --shadow-elevated:
+      0 12px 32px -10px hsl(0 0% 0% / 0.55), 0 0 0 1px hsl(40 12% 100% / 0.06);
+  }
+}
+
+/* Window chrome:
+   - Windows/Linux (frameless): CSS radius + inset edge on .app-shell.
+   - macOS (Overlay + decorations): system clips the window and draws the
+     native shadow — skip CSS radius so it doesn't fight AppKit. */
+.app-shell {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: hsl(var(--background));
+}
+
+.desktop-lyrics-window {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  overflow: visible;
+  padding: 0;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: var(--font-lyrics);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+.desktop-lyrics-heading-group {
+  position: relative;
+  display: flex;
+  width: max-content;
+  max-width: none;
+  min-width: 0;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: visible;
+}
+
+.desktop-lyrics-toolbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  padding: 0 0 6px;
+  background: transparent;
+  box-shadow: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.desktop-lyrics-divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 2px;
+  background: hsl(var(--foreground) / 0.14);
+}
+
+.desktop-lyrics-window:not([data-interaction-mode="locked"])
+  .desktop-lyrics-heading-group[data-lyrics-active="true"]
+  .desktop-lyrics-toolbar,
+.desktop-lyrics-window:not([data-interaction-mode="locked"])
+  .desktop-lyrics-heading-group:focus-within
+  .desktop-lyrics-toolbar {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.desktop-lyrics-window[data-interaction-mode="locked"] .desktop-lyrics-toolbar {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.desktop-lyrics-close,
+.desktop-lyrics-mode {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--background) / 0.82);
+  box-shadow: 0 3px 10px hsl(0 0% 0% / 0.12);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.desktop-lyrics-close:hover,
+.desktop-lyrics-mode:hover {
+  color: hsl(var(--accent-foreground));
+  background: hsl(var(--accent));
+}
+
+.desktop-lyrics-mode[aria-pressed="true"] {
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.12);
+}
+
+.desktop-lyrics-mode[aria-pressed="true"]:hover {
+  color: hsl(var(--accent-foreground));
+  background: hsl(var(--accent));
+}
+
+.desktop-lyrics-close:disabled,
+.desktop-lyrics-mode:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.desktop-lyrics-close:active,
+.desktop-lyrics-mode:active {
+  transform: scale(0.96);
+}
+
+.desktop-lyrics-close:focus-visible,
+.desktop-lyrics-mode:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.desktop-lyrics-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.desktop-lyrics-stage {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.desktop-lyrics-heading-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  /* Inline styles scale this whitespace with the lyric font size. */
+  padding: 10px 14px 8px;
+  background: transparent;
+  box-shadow: 0 0 0 transparent;
+  transition:
+    background-color 160ms cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.desktop-lyrics-window[data-capsule-visible="true"]
+  .desktop-lyrics-heading-shell {
+  background: hsl(var(--background) / 0.7);
+  box-shadow: 0 4px 12px hsl(0 0% 0% / 0.08);
+  backdrop-filter: blur(30px) saturate(1.3);
+  -webkit-backdrop-filter: blur(30px) saturate(1.3);
+}
+
+.desktop-lyrics-heading {
+  position: relative;
+  display: grid;
+  width: max-content;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  color: hsl(var(--primary) / 0.48);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  transform: translateY(-0.04em);
+  transform-origin: center;
+  white-space: nowrap;
+  text-wrap: nowrap;
+  user-select: none;
+  text-shadow:
+    0 1px 2px hsl(0 0% 0% / 0.28),
+    0 0 18px hsl(var(--primary) / 0.14);
+}
+
+.lyric-karaoke-words {
+  display: inline;
+  white-space: normal;
+}
+
+.lyric-karaoke-word {
+  position: relative;
+  display: inline-block;
+  white-space: pre;
+}
+
+.lyric-karaoke-word-text,
+.lyric-karaoke-word-sung {
+  display: block;
+  white-space: pre;
+}
+
+.lyric-karaoke-word-text {
+  opacity: 0.48;
+}
+
+.lyric-karaoke-word-sung {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  color: hsl(var(--primary));
+  text-shadow:
+    0 1px 2px hsl(0 0% 0% / 0.3),
+    0 0 18px hsl(var(--primary) / 0.2);
+}
+
+.top-bar-lyrics-text .lyric-karaoke-words {
+  white-space: nowrap;
+}
+
+.lyrics-edge-blur {
+  position: absolute;
+  z-index: 10;
+  inset-inline: 0;
+  height: 18%;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 24%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 24%,
+    transparent 100%
+  );
+}
+
+.lyrics-edge-blur--top {
+  top: 0;
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--background) / 0.18),
+    transparent 76%
+  );
+}
+
+.lyrics-edge-blur--bottom {
+  bottom: 0;
+  transform: rotate(180deg);
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--background) / 0.18),
+    transparent 76%
+  );
+}
+
+.desktop-lyrics-heading .lyric-karaoke-word-text {
+  opacity: 1;
+}
+
+.lyric-transition {
+  position: relative;
+  display: grid;
+  isolation: isolate;
+}
+
+.lyric-transition--animate-size {
+  transition: width 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: width;
+}
+
+.lyric-transition__current,
+.lyric-transition__outgoing {
+  grid-area: 1 / 1;
+  /* Opacity + transform only — animated filter:blur has blanked macOS WKWebView
+     when stacked with karaoke clip-path updates. */
+  transition:
+    opacity 240ms cubic-bezier(0.2, 0, 0, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center;
+  will-change: opacity, transform;
+}
+
+.lyric-transition__current {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lyric-transition__current > *,
+.lyric-transition__outgoing > * {
+  flex: 0 0 auto;
+}
+
+.lyric-transition__current[data-lyric-transition-state="entering"] {
+  opacity: 0;
+  transform: translate3d(0, 0.08em, 0) scale(0.999);
+}
+
+.lyric-transition__outgoing {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.lyric-transition--animate-size .lyric-transition__outgoing {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.lyric-transition__outgoing[data-lyric-transition-state="exiting"] {
+  opacity: 0;
+  transform: translate3d(0, -0.08em, 0) scale(0.999);
+}
+
+.desktop-lyrics-window:not([data-interaction-mode="locked"])
+  .desktop-lyrics-heading-group[data-lyrics-active="true"]
+  .desktop-lyrics-heading-shell {
+  cursor: grab;
+}
+
+.desktop-lyrics-window:not([data-interaction-mode="locked"])
+  .desktop-lyrics-heading-group[data-lyrics-dragging="true"]
+  .desktop-lyrics-heading-shell {
+  cursor: grab;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lyric-karaoke-word-sung {
+    transition: none;
+  }
+
+  .lyric-transition__current,
+  .lyric-transition__outgoing {
+    transition: opacity 140ms ease;
+    transform: none;
+  }
+
+  .lyric-transition__current[data-lyric-transition-state="entering"],
+  .lyric-transition__outgoing[data-lyric-transition-state="exiting"] {
+    transform: none;
+  }
+
+  .lyric-transition--animate-size {
+    transition: none;
+  }
+}
+
+.desktop-lyrics-message {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
+  text-align: center;
+}
+html[data-os="other"] .app-shell,
+html:not([data-os]) .app-shell {
+  --window-radius: 12px;
+  border-radius: var(--window-radius);
+  clip-path: inset(0 round var(--window-radius));
+  box-shadow: inset 0 0 0 1px hsl(30 12% 10% / 0.1);
+}
+html[data-os="other"].dark .app-shell,
+html:not([data-os]).dark .app-shell {
+  box-shadow: inset 0 0 0 1px hsl(40 12% 100% / 0.12);
+}
+html[data-maximized="true"] .app-shell {
+  border-radius: 0;
+  clip-path: none;
+  box-shadow: none;
+}
+
+/* Mini player: same CSS radius on Win + Mac (Mac normally uses system radius). */
+html[data-mini="true"] .app-shell {
+  --window-radius: 12px;
+  border-radius: var(--window-radius);
+  clip-path: inset(0 round var(--window-radius));
+  box-shadow: inset 0 0 0 1px hsl(30 12% 10% / 0.1);
+}
+html[data-mini="true"].dark .app-shell {
+  box-shadow: inset 0 0 0 1px hsl(40 12% 100% / 0.12);
+}
+
+/* Dock hint: theme-color ring on the rounded shell (bar only — never on vinyl peek).
+   Inset-only so clip-path doesn't eat the stroke at the corners. */
+html[data-mini="true"][data-mini-dock]:not([data-mini-peek]) .app-shell {
+  box-shadow:
+    inset 0 0 0 1.5px hsl(var(--primary) / 0.88),
+    inset 0 0 12px -2px hsl(var(--primary) / 0.22);
+  transition: box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Mini ↔ main / peek morph veil.
+   Full morph: hide WebView content (opacity 0) so resize doesn't reflow/paint
+   the whole app each frame — only the shell silhouette moves.
+   Soft (peek): light dim, keep the vinyl disc visible for continuity. */
+.mini-morph-veil {
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  transition: opacity 140ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+html[data-mini-morph-soft="true"] .mini-morph-veil {
+  opacity: 0.72;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mini-morph-veil {
+    transition: opacity 60ms linear;
+    will-change: auto;
+  }
+}
+
+/* Mini peek (cover-only at screen edge): fully clear chrome — only the disc paints. */
+html[data-mini-peek="true"] .app-shell {
+  background: transparent !important;
+  box-shadow: none !important;
+  clip-path: none;
+  border-radius: 0;
+  overflow: visible;
+}
+html[data-mini-peek="true"] .app-shell::before {
+  display: none;
+}
+html[data-mini-peek="true"] .app-shell > * {
+  background: transparent !important;
+  overflow: visible;
+  box-shadow: none;
+}
+
+/* Vinyl disc peek — fixed 64px circle so bar→peek morph never ovalizes the disc. */
+.mini-vinyl {
+  width: 64px;
+  height: 64px;
+  background: radial-gradient(
+    circle at 35% 28%,
+    hsl(0 0% 28%),
+    hsl(0 0% 7%) 55%,
+    hsl(0 0% 4%)
+  );
+  /* Edge definition stays on the disc — avoid outer shadows (veil in transparent corners). */
+  box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.08);
+}
+.mini-vinyl-grooves {
+  background:
+    radial-gradient(circle at 32% 26%, hsl(0 0% 100% / 0.14), transparent 42%),
+    radial-gradient(
+      circle at center,
+      transparent 29%,
+      hsl(0 0% 6% / 0.7) 30%,
+      hsl(0 0% 16%) 31%,
+      hsl(0 0% 9%) 100%
+    ),
+    repeating-radial-gradient(
+      circle at center,
+      hsl(0 0% 20% / 0.9) 0 0.7px,
+      hsl(0 0% 8%) 0.7px 2.4px
+    );
+  box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.06);
+}
+.mini-vinyl-label {
+  box-shadow:
+    inset 0 0 0 1px hsl(0 0% 100% / 0.14),
+    0 0 0 2px hsl(0 0% 0% / 0.35);
+}
+@keyframes mini-vinyl-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes mini-vinyl-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.mini-vinyl-spin {
+  animation: mini-vinyl-spin 7.2s linear infinite;
+  will-change: transform;
+}
+.mini-vinyl-enter {
+  animation: mini-vinyl-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mini-vinyl-spin,
+  .mini-vinyl-enter {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+/* Magnetic dock zone hint — accent strip on the near edge.
+   Outer ring lives on .app-shell (follows CSS corner radius). */
+.mini-dock-hint {
+  border-radius: inherit;
+}
+.mini-dock-hint-left::after,
+.mini-dock-hint-right::after,
+.mini-dock-hint-top::after,
+.mini-dock-hint-bottom::after {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  background: hsl(var(--primary));
+  border-radius: 999px;
+  opacity: 0.9;
+  box-shadow: 0 0 10px hsl(var(--primary) / 0.45);
+}
+.mini-dock-hint-left::after {
+  left: 3px;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+}
+.mini-dock-hint-right::after {
+  right: 3px;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+}
+.mini-dock-hint-top::after {
+  top: 3px;
+  left: 12px;
+  right: 12px;
+  height: 3px;
+}
+.mini-dock-hint-bottom::after {
+  bottom: 3px;
+  left: 12px;
+  right: 12px;
+  height: 3px;
+}
+
+/* Film grain — clipped inside the rounded shell */
+.app-shell::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 9998;
+  border-radius: inherit;
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+}
+.dark .app-shell::before {
+  opacity: 0.06;
+}
+
+/* Soft ambient wash behind main content */
+.app-ambient {
+  background:
+    radial-gradient(
+      ellipse 80% 50% at 10% -10%,
+      hsl(var(--primary) / 0.06),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 100% 0%,
+      hsl(var(--primary) / 0.04),
+      transparent 50%
+    ),
+    hsl(var(--background));
+}
+.dark .app-ambient {
+  background:
+    radial-gradient(
+      ellipse 70% 45% at 8% -8%,
+      hsl(var(--primary) / 0.08),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 50% 35% at 100% 0%,
+      hsl(34 50% 40% / 0.05),
+      transparent 50%
+    ),
+    hsl(var(--background));
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/25 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/45;
+}
+
+.no-select {
+  user-select: none;
+}
+
+/* Lyrics-page cover: slow float while playing (glow rides along) */
+@keyframes lyricCoverFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-7px) scale(1.008);
+  }
+}
+.lyric-cover-float {
+  animation: lyricCoverFloat 6s ease-in-out infinite;
+}
+
+/* Nav active indicator: expand from center */
+@keyframes navIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scaleY(1);
+  }
+}
+.nav-active-bar {
+  transform-origin: center;
+  animation: navIn 180ms ease-out;
+}
+
+/* Hot-search cloud: staggered entrance (transform only — opacity comes from tiers) */
+@keyframes hotCloudIn {
+  from {
+    transform: translateY(8px) scale(0.96);
+    filter: blur(2px);
+  }
+  to {
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+.hot-cloud-word {
+  animation: hotCloudIn 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* ── Icon micro-animations ─────────────────────────────────────────
+   Hover: one-shot fun on the SVG. State change: pop-in / heart burst.
+   Respect reduced-motion; keep transforms interruptible where possible. */
+
+.icon-swap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity 300ms cubic-bezier(0.2, 0, 0, 1),
+    filter 300ms cubic-bezier(0.2, 0, 0, 1),
+    transform 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes iconPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.25);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+.icon-pop-in {
+  display: inline-flex;
+  animation: iconPopIn 300ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes iconHeartBurst {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.35);
+  }
+  55% {
+    transform: scale(0.88);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.icon-heart-burst {
+  animation: iconHeartBurst 420ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes iconSearch {
+  0%,
+  100% {
+    transform: rotate(0deg) translate(0, 0);
+  }
+  30% {
+    transform: rotate(-14deg) translate(1px, -1px);
+  }
+  55% {
+    transform: rotate(8deg) translate(-0.5px, 0.5px);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+}
+@keyframes iconList {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-2px);
+  }
+  70% {
+    transform: translateY(1px);
+  }
+}
+@keyframes iconTrend {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  45% {
+    transform: translate(1.5px, -2.5px);
+  }
+}
+@keyframes iconHeartBeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.22);
+  }
+  45% {
+    transform: scale(0.94);
+  }
+  65% {
+    transform: scale(1.1);
+  }
+}
+@keyframes iconDownload {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  35% {
+    transform: translateY(2.5px);
+  }
+  55% {
+    transform: translateY(-1px);
+  }
+}
+@keyframes iconSpinNudge {
+  0% {
+    transform: rotate(0deg);
+  }
+  60% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes iconSkipPrev {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(-3px);
+  }
+}
+@keyframes iconSkipNext {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+}
+@keyframes iconShuffle {
+  0%,
+  100% {
+    transform: rotate(0deg) translateX(0);
+  }
+  25% {
+    transform: rotate(-8deg) translateX(-1px);
+  }
+  50% {
+    transform: rotate(8deg) translateX(1px);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+}
+@keyframes iconRepeat {
+  0% {
+    transform: rotate(0deg);
+  }
+  65% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes iconMic {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-2px) scale(1.08);
+  }
+}
+@keyframes iconPlus {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  45% {
+    transform: rotate(90deg) scale(1.12);
+  }
+}
+@keyframes iconPlayPop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes iconSun {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(45deg) scale(1.1);
+  }
+}
+@keyframes iconMoon {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-18deg);
+  }
+}
+@keyframes iconPanel {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(-2px);
+  }
+  70% {
+    transform: translateX(1px);
+  }
+}
+@keyframes iconArrowLeft {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(-3px);
+  }
+}
+@keyframes iconArrowRight {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(3px);
+  }
+}
+@keyframes iconMaximize {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.15);
+  }
+}
+@keyframes iconPip {
+  0%,
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+  35% {
+    transform: scale(0.88) translate(1.5px, 1.5px);
+  }
+  65% {
+    transform: scale(1.08) translate(-0.5px, -0.5px);
+  }
+}
+@keyframes iconCaptions {
+  0%,
+  100% {
+    transform: scale(1) translateY(0);
+  }
+  35% {
+    transform: scale(1.1) translateY(-1px);
+  }
+  65% {
+    transform: scale(0.96) translateY(0);
+  }
+}
+@keyframes iconFontIncrease {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  45% {
+    transform: translateY(-2px) scale(1.08);
+  }
+  70% {
+    transform: translateY(0) scale(0.98);
+  }
+}
+@keyframes iconFontDecrease {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  45% {
+    transform: translateY(2px) scale(1.08);
+  }
+  70% {
+    transform: translateY(0) scale(0.98);
+  }
+}
+@keyframes queueEqualizerBar {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.queue-equalizer {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.queue-equalizer__bar {
+  display: block;
+  width: 2px;
+  height: 12px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: scaleY(0.3);
+  transform-origin: center;
+}
+
+/* Brand mark equalizer — mirrors docs landing `.eq` / `.eqbar` motion */
+@keyframes brandEqBar {
+  0%,
+  100% {
+    transform: scaleY(0.32);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.brand-mark {
+  display: block;
+  line-height: 0;
+}
+.brand-mark > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* In-app mark follows the active theme palette (OS/favicon stay black). */
+.brand-mark:not(.bars-only) .mark-bg {
+  fill: hsl(var(--primary));
+}
+.brand-mark:not(.bars-only) .eq {
+  fill: hsl(var(--primary-foreground));
+}
+.brand-mark .eq rect {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.brand-mark.live .eq rect,
+.brand-mark-hot:hover .brand-mark .eq rect {
+  animation: brandEqBar 1.05s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+.brand-mark.live .eq rect:nth-of-type(1),
+.brand-mark-hot:hover .brand-mark .eq rect:nth-of-type(1) {
+  animation-delay: -0.9s;
+}
+.brand-mark.live .eq rect:nth-of-type(2),
+.brand-mark-hot:hover .brand-mark .eq rect:nth-of-type(2) {
+  animation-delay: -0.2s;
+}
+.brand-mark.live .eq rect:nth-of-type(3),
+.brand-mark-hot:hover .brand-mark .eq rect:nth-of-type(3) {
+  animation-delay: -0.55s;
+}
+.brand-mark.live .eq rect:nth-of-type(4),
+.brand-mark-hot:hover .brand-mark .eq rect:nth-of-type(4) {
+  animation-delay: -0.75s;
+}
+.brand-mark.live .eq rect:nth-of-type(5),
+.brand-mark-hot:hover .brand-mark .eq rect:nth-of-type(5) {
+  animation-delay: -0.35s;
+}
+.brand-mark.live .eq rect:nth-of-type(6),
+.brand-mark-hot:hover .brand-mark .eq rect:nth-of-type(6) {
+  animation-delay: -0.65s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-mark.live .eq rect,
+  .brand-mark-hot:hover .brand-mark .eq rect {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .icon-hover-search:hover svg {
+    animation: iconSearch 480ms ease;
+  }
+  .icon-hover-list:hover svg {
+    animation: iconList 420ms ease;
+  }
+  .icon-hover-trend:hover svg {
+    animation: iconTrend 420ms ease;
+  }
+  .icon-hover-heart:hover svg {
+    animation: iconHeartBeat 480ms ease;
+  }
+  .icon-hover-download:hover svg {
+    animation: iconDownload 420ms ease;
+  }
+  .icon-hover-settings:hover svg {
+    animation: iconSpinNudge 480ms ease;
+    transform-origin: center;
+  }
+  .icon-hover-skip-prev:hover svg {
+    animation: iconSkipPrev 320ms ease;
+  }
+  .icon-hover-skip-next:hover svg {
+    animation: iconSkipNext 320ms ease;
+  }
+  .icon-hover-shuffle:hover svg {
+    animation: iconShuffle 450ms ease;
+  }
+  .icon-hover-repeat:hover svg {
+    animation: iconRepeat 420ms ease;
+  }
+  .icon-hover-mic:hover svg {
+    animation: iconMic 400ms ease;
+  }
+  .icon-hover-plus:hover svg {
+    animation: iconPlus 400ms ease;
+  }
+  .icon-hover-sun:hover svg {
+    animation: iconSun 500ms ease;
+    transform-origin: center;
+  }
+  .icon-hover-moon:hover svg {
+    animation: iconMoon 500ms ease;
+    transform-origin: 60% 40%;
+  }
+  .icon-hover-panel:hover svg {
+    animation: iconPanel 380ms ease;
+  }
+  .icon-hover-arrow-left:hover svg {
+    animation: iconArrowLeft 320ms ease;
+  }
+  .icon-hover-arrow-right:hover svg {
+    animation: iconArrowRight 320ms ease;
+  }
+  .icon-hover-maximize:hover svg {
+    animation: iconMaximize 360ms ease;
+  }
+  .icon-hover-pip:hover svg {
+    animation: iconPip 420ms ease;
+  }
+  .icon-hover-captions:hover svg {
+    animation: iconCaptions 400ms ease;
+  }
+  .icon-hover-font-increase:hover svg {
+    animation: iconFontIncrease 360ms ease;
+  }
+  .icon-hover-font-decrease:hover svg {
+    animation: iconFontDecrease 360ms ease;
+  }
+
+  /* Nested icons (TrackRow / overlays) — animate the icon itself on parent hover */
+  .group\/row:hover .icon-play-pop,
+  .group:hover .icon-play-pop {
+    animation: iconPlayPop 280ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
+  .queue-equalizer__bar {
+    animation: queueEqualizerBar 760ms ease-in-out infinite;
+  }
+  .queue-equalizer__bar:nth-child(2) {
+    animation-delay: -240ms;
+    animation-duration: 680ms;
+  }
+  .queue-equalizer__bar:nth-child(3) {
+    animation-delay: -420ms;
+    animation-duration: 860ms;
+  }
+  .queue-equalizer--paused .queue-equalizer__bar {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-pop-in,
+  .icon-heart-burst,
+  .nav-active-bar,
+  .hot-cloud-word,
+  .lyric-cover-float {
+    animation: none !important;
+  }
+}

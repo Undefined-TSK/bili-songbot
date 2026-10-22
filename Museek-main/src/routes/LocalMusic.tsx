@@ -1,0 +1,728 @@
+import { useMemo, useState } from "react";
+import {
+  HardDrive,
+  FolderOpen,
+  FolderPlus,
+  FilePlus2,
+  Music,
+  Pencil,
+  Check,
+  CheckCheck,
+  Trash2,
+  Search,
+  Play,
+  Plus,
+  Loader2,
+  ChevronDown,
+  ArrowDownUp,
+  MoreHorizontal,
+  TriangleAlert,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { CoverImage } from "@/components/common/CoverImage";
+import { PlatformBadge, QualityBadge } from "@/components/common/MetaBadges";
+import { bestQuality } from "@/lib/quality";
+import { revealLocalFile } from "@/lib/localMusic";
+import { useLocalMusicStore } from "@/stores/localMusicStore";
+import { usePlayerStore } from "@/stores/playerStore";
+import { useSettingsStore, type LocalSort } from "@/stores/settingsStore";
+import { useUiStore } from "@/stores/uiStore";
+import { useT } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+import {
+  categoryNameMap,
+  filterByCategoryId,
+  findActiveCategory,
+  labelForCategoryFilter,
+  type CategoryFilter,
+} from "@/lib/songCategories";
+import { CategoryAssignItems } from "@/components/songCategories/CategoryAssignItems";
+import { CategoryAssignMenu } from "@/components/songCategories/CategoryAssignMenu";
+import { CategoryFilterMenu } from "@/components/songCategories/CategoryFilterMenu";
+import { CategoryNameDialog } from "@/components/songCategories/CategoryNameDialog";
+import { useCategoryDialog } from "@/components/songCategories/useCategoryDialog";
+
+const isTauri =
+  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const SORTS: LocalSort[] = ["added", "name"];
+
+export function LocalMusic() {
+  const tr = useT();
+  const tracks = useLocalMusicStore((s) => s.tracks);
+  const categories = useLocalMusicStore((s) => s.categories);
+  const importing = useLocalMusicStore((s) => s.importing);
+  const importProgress = useLocalMusicStore((s) => s.importProgress);
+  const importFiles = useLocalMusicStore((s) => s.importFiles);
+  const importFolder = useLocalMusicStore((s) => s.importFolder);
+  const remove = useLocalMusicStore((s) => s.remove);
+  const removeMany = useLocalMusicStore((s) => s.removeMany);
+  const setTrackNameMode = useLocalMusicStore((s) => s.setTrackNameMode);
+  const addCategory = useLocalMusicStore((s) => s.addCategory);
+  const renameCategory = useLocalMusicStore((s) => s.renameCategory);
+  const removeCategory = useLocalMusicStore((s) => s.removeCategory);
+  const setTracksCategory = useLocalMusicStore((s) => s.setTracksCategory);
+  const play = usePlayerStore((s) => s.play);
+  const playAll = usePlayerStore((s) => s.playAll);
+  const addToQueue = usePlayerStore((s) => s.addToQueue);
+  const localSort = useSettingsStore((s) => s.localSort);
+  const setLocalSort = useSettingsStore((s) => s.setLocalSort);
+  const notify = useUiStore((s) => s.notify);
+
+  const [editing, setEditing] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const categoryDialog = useCategoryDialog({
+    addCategory,
+    renameCategory,
+    onExists: () =>
+      notify({ message: tr("local.categoryExists"), variant: "error" }),
+    onCreated: (cat, assignSelected) => {
+      if (assignSelected && selected.size > 0) {
+        setTracksCategory([...selected], cat.id);
+        exitEdit();
+      } else {
+        setCategoryFilter(cat.id);
+      }
+    },
+  });
+
+  const categoryNameById = useMemo(
+    () => categoryNameMap(categories),
+    [categories],
+  );
+
+  const displayed = useMemo(() => {
+    let list = filterByCategoryId(
+      tracks,
+      categoryFilter,
+      (track) => track.categoryId,
+    );
+    const q = query.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (track) =>
+          track.song.name.toLowerCase().includes(q) ||
+          track.song.singer.toLowerCase().includes(q) ||
+          track.song.albumName.toLowerCase().includes(q),
+      );
+    }
+    if (localSort === "name") {
+      list = [...list].sort((a, b) =>
+        a.song.name.localeCompare(b.song.name, "zh"),
+      );
+    } else {
+      list = [...list].sort((a, b) => b.addedAt - a.addedAt);
+    }
+    return list;
+  }, [tracks, query, categoryFilter, localSort]);
+
+  const currentKeys = displayed.map((track) => track.id);
+  const allSelected =
+    currentKeys.length > 0 && currentKeys.every((k) => selected.has(k));
+
+  const toggleOne = (key: string) =>
+    setSelected((s) => {
+      const n = new Set(s);
+      if (n.has(key)) n.delete(key);
+      else n.add(key);
+      return n;
+    });
+  const toggleAll = () =>
+    setSelected(allSelected ? new Set() : new Set(currentKeys));
+  const exitEdit = () => {
+    setEditing(false);
+    setSelected(new Set());
+  };
+  const batchDelete = async () => {
+    await removeMany([...selected]);
+    exitEdit();
+  };
+  const batchMove = (categoryId: string | null) => {
+    setTracksCategory([...selected], categoryId);
+    exitEdit();
+  };
+
+  const deleteCategory = (id: string) => {
+    removeCategory(id);
+    if (categoryFilter === id) setCategoryFilter("all");
+  };
+
+  const onImportFiles = async () => {
+    if (!isTauri) {
+      notify({ message: tr("local.desktopOnly"), variant: "error" });
+      return;
+    }
+    try {
+      const n = await importFiles();
+      if (n > 0)
+        notify({ message: tr("local.imported", { n }), variant: "success" });
+    } catch (e) {
+      notify({
+        message: tr("local.importFailed", { msg: String(e) }),
+        variant: "error",
+      });
+    }
+  };
+
+  const onImportFolder = async () => {
+    if (!isTauri) {
+      notify({ message: tr("local.desktopOnly"), variant: "error" });
+      return;
+    }
+    try {
+      const n = await importFolder();
+      if (n > 0)
+        notify({ message: tr("local.imported", { n }), variant: "success" });
+    } catch (e) {
+      notify({
+        message: tr("local.importFailed", { msg: String(e) }),
+        variant: "error",
+      });
+    }
+  };
+
+  const openInFolder = async (filePath: string) => {
+    try {
+      await revealLocalFile(filePath);
+    } catch (e) {
+      notify({
+        message: tr("local.revealFailed", { msg: String(e) }),
+        variant: "error",
+      });
+    }
+  };
+
+  const categoryFilterLabel = labelForCategoryFilter(
+    categoryFilter,
+    categoryNameById,
+    {
+      all: tr("local.categoryAll"),
+      none: tr("local.categoryNone"),
+    },
+  );
+  const activeCategory = findActiveCategory(categories, categoryFilter);
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="p-4 border-b border-border flex items-center gap-3">
+        <HardDrive size={20} className="shrink-0" />
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold leading-tight">
+            {tr("local.title")}
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {importing && importProgress && importProgress.total > 0
+              ? tr("local.importProgress", {
+                  done: importProgress.done,
+                  total: importProgress.total,
+                })
+              : tracks.length === 0
+                ? tr("local.summaryEmpty")
+                : tr("local.summary", { n: tracks.length })}
+          </p>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          {importing && importProgress && importProgress.total > 0 && (
+            <div className="hidden sm:flex items-center gap-2 min-w-0 max-w-[200px]">
+              <Progress
+                value={Math.round(
+                  (importProgress.done / importProgress.total) * 100,
+                )}
+                className="h-1.5 w-24 shrink-0"
+              />
+              <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                {importProgress.done}/{importProgress.total}
+              </span>
+            </div>
+          )}
+          {tracks.length > 0 && !editing && (
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-8"
+              onClick={() => playAll(displayed.map((x) => x.song))}
+              disabled={importing || displayed.length === 0}
+            >
+              <Play
+                size={14}
+                className="mr-1.5"
+                fill="currentColor"
+                strokeWidth={0}
+              />
+              {tr("common.playAll")}
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5"
+                disabled={importing}
+              >
+                {importing ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <FilePlus2 size={14} />
+                )}
+                {tr("local.import")}
+                <ChevronDown size={14} className="opacity-60" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                disabled={importing}
+                onClick={() => void onImportFiles()}
+              >
+                <FilePlus2 size={14} className="mr-2" />
+                {tr("local.importFiles")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={importing}
+                onClick={() => void onImportFolder()}
+              >
+                <FolderPlus size={14} className="mr-2" />
+                {tr("local.importFolder")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {tracks.length > 0 && (
+        <div className="flex h-12 min-h-12 max-h-12 shrink-0 items-center gap-2 overflow-hidden border-b border-border px-4">
+          {!editing ? (
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 shrink-0 gap-1.5"
+                  >
+                    <ArrowDownUp size={14} />
+                    <span className="hidden sm:inline">
+                      {tr(`favorites.sort.${localSort}`)}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {SORTS.map((s) => (
+                    <DropdownMenuItem key={s} onClick={() => setLocalSort(s)}>
+                      <Check
+                        size={14}
+                        className={cn(
+                          "mr-2",
+                          localSort === s ? "opacity-100" : "opacity-0",
+                        )}
+                      />
+                      {tr(`favorites.sort.${s}`)}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <CategoryFilterMenu
+                categories={categories}
+                filter={categoryFilter}
+                filterLabel={categoryFilterLabel}
+                activeCategory={activeCategory}
+                onFilter={setCategoryFilter}
+                onCreate={categoryDialog.openCreate}
+                onRename={categoryDialog.openRename}
+                onDelete={deleteCategory}
+                labels={{
+                  all: tr("local.categoryAll"),
+                  none: tr("local.categoryNone"),
+                  add: tr("local.categoryAdd"),
+                  rename: tr("local.categoryRename"),
+                  delete: tr("local.categoryDelete"),
+                }}
+              />
+
+              <div className="relative min-w-0 flex-1">
+                <Search
+                  size={15}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  className="h-8 py-0 pl-9"
+                  placeholder={tr("local.searchPlaceholder")}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 shrink-0"
+                onClick={() => setEditing(true)}
+              >
+                <Pencil size={14} className="mr-1.5" />
+                {tr("local.batchEdit")}
+              </Button>
+            </>
+          ) : (
+            <>
+              <span className="truncate text-sm leading-8 text-muted-foreground">
+                {tr("local.selectedCount", { count: selected.size })}
+              </span>
+              <div className="ml-auto flex shrink-0 items-center gap-1.5">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8"
+                  onClick={toggleAll}
+                >
+                  <CheckCheck size={14} className="mr-1.5" />
+                  {allSelected
+                    ? tr("local.deselectAll")
+                    : tr("local.selectAll")}
+                </Button>
+                <CategoryAssignMenu
+                  categories={categories}
+                  disabled={selected.size === 0}
+                  onAssign={batchMove}
+                  onCreate={() => categoryDialog.openCreate(true)}
+                  labels={{
+                    move: tr("local.batchMove"),
+                    none: tr("local.categoryNone"),
+                    add: tr("local.categoryAdd"),
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8"
+                  disabled={selected.size === 0}
+                  onClick={() =>
+                    addToQueue(
+                      displayed
+                        .filter((x) => selected.has(x.id))
+                        .map((x) => x.song),
+                    )
+                  }
+                >
+                  <Plus size={14} className="mr-1.5" />
+                  {tr("common.addToQueue")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-destructive hover:text-destructive"
+                  disabled={selected.size === 0}
+                  onClick={() => void batchDelete()}
+                >
+                  <Trash2 size={14} className="mr-1.5" />
+                  {tr("local.batchDelete")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8"
+                  onClick={exitEdit}
+                >
+                  {tr("common.cancel")}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {tracks.length === 0 ? (
+        <div className="flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-5xl p-4">
+            <div className="flex min-h-[18rem] flex-col items-center justify-center px-4 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/70 text-muted-foreground">
+                {importing ? (
+                  <Loader2 size={28} className="animate-spin" />
+                ) : (
+                  <HardDrive size={28} strokeWidth={1.6} />
+                )}
+              </div>
+              {importing && importProgress && importProgress.total > 0 ? (
+                <>
+                  <p className="mt-4 text-sm font-medium">
+                    {tr("local.importProgress", {
+                      done: importProgress.done,
+                      total: importProgress.total,
+                    })}
+                  </p>
+                  <Progress
+                    value={Math.round(
+                      (importProgress.done / importProgress.total) * 100,
+                    )}
+                    className="mt-3 h-1.5 w-48"
+                  />
+                  {importProgress.current ? (
+                    <p className="mt-2 max-w-sm truncate text-xs text-muted-foreground">
+                      {importProgress.current}
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <p className="mt-4 text-sm font-medium">
+                    {tr("local.empty")}
+                  </p>
+                  <p className="mt-1 max-w-sm text-xs text-muted-foreground text-pretty">
+                    {tr("local.emptyHint")}
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <ScrollArea className="flex-1">
+          <div className="px-3 py-2">
+            {displayed.length === 0 ? (
+              <p className="text-center text-sm text-muted-foreground py-12">
+                {tr("local.noMatch")}
+              </p>
+            ) : (
+              displayed.map((track) => {
+                const sel = selected.has(track.id);
+                const best = bestQuality(track.song);
+                const catName = track.categoryId
+                  ? categoryNameById.get(track.categoryId)
+                  : undefined;
+                const missing = !!track.unavailable;
+                return (
+                  <div
+                    key={track.id}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-xl group cursor-pointer transition-[background-color] duration-200 hover:bg-accent/55",
+                      editing && sel && "bg-primary/10",
+                      missing && "opacity-80",
+                    )}
+                    onClick={() => {
+                      if (editing) toggleOne(track.id);
+                      else void play(track.song);
+                    }}
+                    onDoubleClick={() => {
+                      if (!editing) void play(track.song);
+                    }}
+                  >
+                    {editing && (
+                      <span
+                        className={cn(
+                          "h-5 w-5 rounded-full border flex items-center justify-center shrink-0 transition-colors",
+                          sel
+                            ? "bg-primary border-primary text-primary-foreground"
+                            : "border-muted-foreground/40",
+                        )}
+                      >
+                        {sel && <Check size={13} />}
+                      </span>
+                    )}
+
+                    <div className="relative h-10 w-10 shrink-0 rounded-xl overflow-hidden bg-muted shadow-[var(--shadow-border)]">
+                      {track.song.meta.picUrl ? (
+                        <CoverImage src={track.song.meta.picUrl} />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                          <Music size={16} />
+                        </div>
+                      )}
+                      {missing && (
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/50">
+                          <TriangleAlert size={16} className="text-amber-300" />
+                        </span>
+                      )}
+                      {!editing && !missing && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void play(track.song);
+                          }}
+                          className="absolute inset-0 flex items-center justify-center bg-black/45 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                        >
+                          <Play
+                            size={16}
+                            className="ml-0.5 text-white icon-play-pop"
+                            fill="currentColor"
+                            strokeWidth={0}
+                          />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <p
+                          className={cn(
+                            "text-sm truncate font-medium",
+                            missing && "text-muted-foreground",
+                          )}
+                        >
+                          {track.song.name}
+                        </p>
+                        <PlatformBadge source="local" />
+                      </div>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <p className="text-xs text-muted-foreground truncate min-w-0">
+                          {track.song.singer}
+                        </p>
+                        {!missing && best && <QualityBadge quality={best} />}
+                      </div>
+                    </div>
+
+                    {missing && (
+                      <span
+                        className="inline-flex shrink-0 items-center gap-1 rounded px-1.5 h-4 text-[10px] font-medium leading-none border border-amber-500/40 text-amber-700 dark:text-amber-400"
+                        title={tr("local.fileMissing")}
+                      >
+                        <TriangleAlert size={11} />
+                        {tr("local.fileMissingBadge")}
+                      </span>
+                    )}
+
+                    {catName && (
+                      <span className="inline-flex max-w-24 shrink-0 items-center truncate rounded px-1.5 h-4 text-[10px] font-medium leading-none bg-muted/80 text-muted-foreground">
+                        {catName}
+                      </span>
+                    )}
+
+                    <span className="text-xs text-muted-foreground w-12 text-right shrink-0 tabular-nums">
+                      {track.song.interval}
+                    </span>
+
+                    {!editing && (
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        {!missing && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100 icon-hover-plus"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToQueue([track.song]);
+                            }}
+                            title={tr("common.addToQueue")}
+                          >
+                            <Plus size={14} />
+                          </Button>
+                        )}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 opacity-0 group-hover:opacity-100"
+                              onClick={(e) => e.stopPropagation()}
+                              title={tr("local.trackOptions")}
+                            >
+                              <MoreHorizontal size={14} />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="max-h-72 overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <DropdownMenuLabel>
+                              {tr("local.trackNameMode")}
+                            </DropdownMenuLabel>
+                            <DropdownMenuCheckboxItem
+                              checked={track.nameMode === "filename"}
+                              showUncheckedIndicator
+                              disabled={importing}
+                              onCheckedChange={(checked) =>
+                                void setTrackNameMode(
+                                  track.id,
+                                  checked ? "filename" : "smart",
+                                )
+                              }
+                            >
+                              {tr("local.keepFilename")}
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel>
+                              {tr("local.categoryLabel")}
+                            </DropdownMenuLabel>
+                            <CategoryAssignItems
+                              categories={categories}
+                              onAssign={(categoryId) =>
+                                setTracksCategory([track.id], categoryId)
+                              }
+                              onCreate={() => {
+                                setSelected(new Set([track.id]));
+                                categoryDialog.openCreate(true);
+                              }}
+                              labels={{
+                                none: tr("local.categoryNone"),
+                                add: tr("local.categoryAdd"),
+                              }}
+                            />
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        {isTauri && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void openInFolder(track.filePath);
+                            }}
+                            title={tr("local.reveal")}
+                          >
+                            <FolderOpen size={14} />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void remove(track.id);
+                          }}
+                          title={tr("local.remove")}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </ScrollArea>
+      )}
+
+      <CategoryNameDialog
+        dialog={categoryDialog.catDialog}
+        name={categoryDialog.catName}
+        onNameChange={categoryDialog.setCatName}
+        inputRef={categoryDialog.catInputRef}
+        onClose={categoryDialog.close}
+        onSubmit={categoryDialog.submit}
+        labels={{
+          add: tr("local.categoryAdd"),
+          rename: tr("local.categoryRename"),
+          placeholder: tr("local.categoryNamePlaceholder"),
+          cancel: tr("common.cancel"),
+          confirm: tr("common.confirm"),
+        }}
+      />
+    </div>
+  );
+}
