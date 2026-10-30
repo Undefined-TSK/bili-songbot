@@ -1,2 +1,6 @@
 aiohttp>=3.9.0
 websockets>=12.0
+# 无分隔中文查询拆词（split_play_query）；缺失时自动降级为整句匹配
+jieba>=0.42.1
+# 弹幕层适配器（bot/danmaku_biliapi.py）及其测试所需
+bilibili-api-python>=17.0.0

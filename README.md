@@ -46,8 +46,8 @@
 # 1. 克隆并安装依赖
 git clone https://github.com/Undefined-TSK/bili-songbot.git
 cd bili-songbot
-pip install aiohttp            # 必需
-pip install rapidfuzz pypinyin # 可选：更准的模糊评分 / 拼音匹配（缺失自动降级）
+pip install -r requirements.txt # 必需（aiohttp/websockets/jieba/bilibili-api-python）
+pip install rapidfuzz pypinyin  # 可选：更准的模糊评分 / 拼音匹配（缺失自动降级）
 
 # 2. 生成配置
 cp config.example.json config.json
@@ -89,7 +89,8 @@ python main.py
 ## 🧪 测试
 
 ```bash
-python3 -m pytest tests/ -q    # 164 个单元测试（当前 164/164 全过）
+pip install pytest             # 测试依赖（requirements.txt 不含）
+python3 -m pytest tests/ -q    # 164 个单元测试：156 通过 / 8 跳过（无 libmpv 时 mpv 用例跳过）
 python3 tests/e2e_test.py      # 端到端（含真实网络搜索 → 取链 → 播放回退链路）
 ```
 
