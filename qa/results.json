@@ -1,0 +1,284 @@
+[
+  {
+    "id": "TC-LINK-002",
+    "status": "PASS",
+    "note": "404 链接被跳过，目标缓存文件未产生",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-LINK-003",
+    "status": "PASS",
+    "note": "HTML 页面被内容校验拒绝，不落盘",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SEC-003",
+    "status": "PASS",
+    "note": "（同 TC-LINK-003 注入面已封堵）",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-LINK-004",
+    "status": "PASS",
+    "note": "无 lx 关键字内容被拒绝",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-LINK-005",
+    "status": "PASS",
+    "note": "首选镜像 404 → 第二镜像成功并落盘",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-LINK-006",
+    "status": "PASS",
+    "note": "候选 5 条: ['cdn.jsdelivr.net', 'fastly.jsdelivr.net', 'ghproxy.net', 'mirror.ghproxy.com', 'raw.githubusercontent.com']",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-PLUG-001",
+    "status": "PASS",
+    "note": "@name='QA验收-最小标准源' 进程就绪=True（文件 lx_dup_same_name.js）",
+    "elapsed_s": 45.0
+  },
+  {
+    "id": "TC-PLUG-002",
+    "status": "PASS",
+    "note": "平台=['kg', 'kw', 'mg', 'tx', 'wy']",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-PLUG-003",
+    "status": "PASS",
+    "note": "payload.type→info.type 音质透传: https://example.invalid/qa-multi-flac.mp3",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-PLUG-004",
+    "status": "PASS",
+    "note": "垃圾文件被隔离且合法源不受影响",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-PLUG-005",
+    "status": "PASS",
+    "note": "空文件被隔离",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-PLUG-006",
+    "status": "PASS",
+    "note": "非LX脚本被隔离",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-PLUG-007",
+    "status": "PASS",
+    "note": "初始化抛错被隔离",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-PLUG-008",
+    "status": "PASS",
+    "note": "惰性脚本超时隔离，总启动 45.0s",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-PLUG-009",
+    "status": "PASS",
+    "note": "中文+空格文件名正常加载",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-KRN-009",
+    "status": "PASS",
+    "note": "@name=A 进程数=1",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-KRN-005",
+    "status": "PASS",
+    "note": "慢响应源挂起 30s，get_url 8.0s 内返回（url=True，网络受限时允许 None）",
+    "elapsed_s": 8.0
+  },
+  {
+    "id": "TC-KRN-006",
+    "status": "PASS",
+    "note": "2万行 stderr 洪水后进程存活且可路由",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SELF-006",
+    "status": "PASS",
+    "note": "后台任务=['source-self-update', 'source-watchdog']",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-KRN-007",
+    "status": "PASS",
+    "note": "全部进程回收 procs=0 builtin=None",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-KRN-001",
+    "status": "PASS",
+    "note": "内置引擎就绪=True, 脚本进程=0",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-LINK-001",
+    "status": "PASS",
+    "note": "在线源已下载并加载 script_name=QA验收-热更新源",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-LINK-007",
+    "status": "PASS",
+    "note": "@name=热更新源 进程数=1（在线版优先）[2599b64d5f26.js(sn=QA验收-热更新源)]",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SELF-001",
+    "status": "PASS",
+    "note": "内容已更新=True, 进程已替换=True",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SELF-002",
+    "status": "PASS",
+    "note": "内容无变化时进程对象不变",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-KRN-002",
+    "status": "PASS",
+    "note": "不支持平台优雅返回: https://example.invalid/hot-v2.mp3",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-KRN-003",
+    "status": "PASS",
+    "note": "拒绝 ['', 'javascript:alert(1)', 'ftp://x/y.mp3', 'file:///etc/passwd'] -> [False, False, False, False]",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SEC-001",
+    "status": "PASS",
+    "note": "非 http(s) 协议白名单拒绝",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-KRN-004",
+    "status": "PASS",
+    "note": "audio/mpeg+ID3 判定可播",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-E2E-006",
+    "status": "PASS",
+    "note": "落盘 2055/2055 字节",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SELF-003",
+    "status": "PASS",
+    "note": "下载失败后进程保留 7/7",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SELF-005",
+    "status": "PASS",
+    "note": "文件修复后看门狗自愈上线",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SELF-008",
+    "status": "PASS",
+    "note": "无双 @name 进程（共 8 个，重复: []）",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-LINK-008",
+    "status": "PASS",
+    "note": "服务器不可达时离线缓存可用于启动",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-KRN-008",
+    "status": "PASS",
+    "note": "SOURCE_INIT_TIMEOUT 经环境变量传入内核守卫",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-E2E-002",
+    "status": "PASS",
+    "note": "搜索返回 5 条（耗时 49s）",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-KRN-010",
+    "status": "PASS",
+    "note": "字段保真: id字段=True, url=http://mcp.nianxinxz.com/share/ceshi/wy.php?id=1357375695&le",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-E2E-003",
+    "status": "PASS",
+    "note": "kw 取链: http://kw-er.kuwo.cn/4179d1f17aec712579f4c46aca1e8fc2/6ae3e363/resourc",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SEC-002",
+    "status": "PASS",
+    "note": "shell=True/os.system 命中 0 处",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SEC-006",
+    "status": "PASS",
+    "note": "download() 路径仅由调用方控制，远程头不参与拼接",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SEC-007",
+    "status": "PASS",
+    "note": "config.example.json 无真实密钥",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-SEC-008",
+    "status": "PASS",
+    "note": "脚本经受控 require 沙箱执行（网络请求能力与落雪桌面一致，接受）",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-E2E-007",
+    "status": "PASS",
+    "note": "config.json 合法，source_urls=7 条",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-E2E-008",
+    "status": "PASS",
+    "note": "OK",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-E2E-009",
+    "status": "PASS",
+    "note": "README 提及实测加载数 44",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-E2E-011",
+    "status": "PASS",
+    "note": "sources/pdone-huibq.js 加载 OK",
+    "elapsed_s": null
+  },
+  {
+    "id": "TC-E2E-012",
+    "status": "PASS",
+    "note": "覆盖 ['git', 'kg', 'kw', 'local', 'mg', 'qs', 'qsvip', 'tx', 'wy']，缺 []",
+    "elapsed_s": null
+  }
+]

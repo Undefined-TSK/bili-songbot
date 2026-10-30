@@ -1,0 +1,796 @@
+{
+  "generated_at": "2026-10-30T00:29:08.141Z",
+  "total": 45,
+  "loaded": 44,
+  "failed": 1,
+  "note": "LX 标准音源清单；official_pdone=true 的音源同时在 config.json 的 source_urls 写入官方 GitHub 链接，开机自动更新。",
+  "sources": [
+    {
+      "file": "HUIBQ音源.js",
+      "lx_name": "Huibq_lxmusic源",
+      "display_name": "Huibq_lxmusic源",
+      "description": "Github搜索“洛雪音乐音源”，禁止批量下载！",
+      "version": "v1.2.0",
+      "author": "Huibq",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg"
+      ]
+    },
+    {
+      "file": "HYWmusic-XG.js",
+      "lx_name": "HYWmusic-XG音源",
+      "display_name": "HYWmusic-XG音源",
+      "description": "西瓜聚合中的 HYWmusic 源（XG 版）。由项目原始已验证逻辑重建为 LX 标准脚本，内核零改动加载。",
+      "version": "v1.0.0",
+      "author": "HYWmusic / 点歌机重建",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg"
+      ]
+    },
+    {
+      "file": "Hei Music 源V1.0.0.js",
+      "lx_name": "Hei Music源",
+      "display_name": "Hei Music源",
+      "description": "聚合自网上公开接口及音源，倡导保护知识产权，请低调使用",
+      "version": "1.0.0",
+      "author": "Compile by CatXiaolan",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg"
+      ]
+    },
+    {
+      "file": "NEW_changqing.js",
+      "lx_name": "长青SVIP音源",
+      "display_name": "长青SVIP音源",
+      "description": "音源更新，关注微信公众号: 元力菌",
+      "version": "1.3.0",
+      "author": "SVIP",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kg",
+        "tx",
+        "wy",
+        "kw",
+        "mg"
+      ]
+    },
+    {
+      "file": "NEW_huanyin.js",
+      "lx_name": "幻音音源",
+      "display_name": "幻音音源",
+      "description": "",
+      "version": "v3",
+      "author": "竹佀",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "tx",
+        "kw",
+        "wy",
+        "mg"
+      ]
+    },
+    {
+      "file": "NEW_nya.js",
+      "lx_name": "示例音源",
+      "display_name": "示例音源",
+      "description": "Nya~",
+      "version": "0.0.1",
+      "author": "* @repository https://github.com/lxmusics/lx-music-api-s",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg"
+      ]
+    },
+    {
+      "file": "NEW_qdy.js",
+      "lx_name": "全豆要[聚合音源]",
+      "display_name": "全豆要[聚合音源]",
+      "description": "迭代9.3版本，聚合 星海/溯音/念心/长青/歌一刀专属汽水音乐，多链路自动回退",
+      "version": "9.3 93特供版 DeepSeek优化",
+      "author": "全豆要 and Gemini优化 Toskysun去混淆 TZB679兼容性处理",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg",
+        "qsvip"
+      ]
+    },
+    {
+      "file": "NEW_sixyin.js",
+      "lx_name": "六音音源",
+      "display_name": "六音音源",
+      "description": "v1.2.1 如失效请前往 www.sixyin.com 下载最新版本",
+      "version": "v1.2.1",
+      "author": "六音",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg"
+      ]
+    },
+    {
+      "file": "NEW_zhizun.js",
+      "lx_name": "至尊源",
+      "display_name": "至尊源",
+      "description": "孙悟空自定义",
+      "version": "v0.8.4_beta5",
+      "author": "zhizun",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg",
+        "local"
+      ]
+    },
+    {
+      "file": "NEW_云端音源(免费版)v2.1.0.js",
+      "lx_name": "云端音源(免费版)",
+      "display_name": "云端音源(免费版)",
+      "description": "仅支持 128k/320k 音质, 每日2000次数, 2025/11/18",
+      "version": "v2.1.0",
+      "author": "BJ",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "mg",
+        "kg",
+        "tx",
+        "wy",
+        "git"
+      ]
+    },
+    {
+      "file": "NEW_小熊猫音源v1.1.4.js",
+      "lx_name": "小熊猫音源",
+      "display_name": "小熊猫音源",
+      "description": "小熊猫音源，如果失效请在公众号【大学资源社】中反馈",
+      "version": "v1.1.4",
+      "author": "社长小熊猫",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg",
+        "local"
+      ]
+    },
+    {
+      "file": "NEW_新澜音源(公益版)v4.0.0.js",
+      "lx_name": "新澜音源(公益版)",
+      "display_name": "新澜音源(公益版)",
+      "description": "支持所有平台320k音质",
+      "version": "v4.0.0",
+      "author": "时迁酱",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "mg",
+        "kg",
+        "tx",
+        "wy"
+      ]
+    },
+    {
+      "file": "NEW_星海音乐源v2.2.4.js",
+      "lx_name": "星海音乐源",
+      "display_name": "星海音乐源",
+      "description": "基于GD Studio API的聚合音乐播放源，支持网易云、QQ、酷狗、酷我、咪咕五大平台，含自动更新功能",
+      "version": "v2.2.4",
+      "author": "万去了了（725375650@qq.com）",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg"
+      ]
+    },
+    {
+      "file": "NEW_梓澄公益音源二代v1.2.3.4.5.js",
+      "lx_name": "梓澄公益音源二代",
+      "display_name": "梓澄公益音源二代",
+      "description": "摆烂了，随便你们吧，反正这个没有账号",
+      "version": "1.2.3.4.5",
+      "author": "helloplhm-qwq & Folltoshe",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg"
+      ]
+    },
+    {
+      "file": "NEW_無名v0.0.3.js",
+      "lx_name": "無名",
+      "display_name": "無名",
+      "description": "不惊扰别人的宁静，就是慈悲；不伤害别人的自尊，就是善良 无云控，纯本地",
+      "version": "v0.0.3",
+      "author": "helloplhm-qwq",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg"
+      ]
+    },
+    {
+      "file": "fish-music音源.js",
+      "lx_name": "fish_music",
+      "display_name": "fish_music",
+      "description": "交流群组:https://t.me/yus_share",
+      "version": "1.0.1",
+      "author": "大鱼吃小鱼",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg",
+        "local"
+      ]
+    },
+    {
+      "file": "hywV1.0.0.js",
+      "lx_name": "HYW×Koneko-API-Charity",
+      "display_name": "HYW×Koneko-API-Charity",
+      "description": "Koneko API LX Music 音源脚本 - 支持kw、kg、tx、wy、mg",
+      "version": "1.0.0",
+      "author": "Miao-moe@MistAperio Studio×Macrohard Studio",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg"
+      ]
+    },
+    {
+      "file": "lx-玉宁熙.js",
+      "lx_name": "lx-玉宁熙",
+      "display_name": "lx-玉宁熙",
+      "description": "qq/wy/kw/mg音源 交流群822317725",
+      "version": "v1.1.0",
+      "author": "ynx(2363768762)",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "tx",
+        "wy",
+        "kw",
+        "mg"
+      ]
+    },
+    {
+      "file": "pdone-flower.js",
+      "lx_name": "野花🌷",
+      "display_name": "野花🌷",
+      "description": "",
+      "version": "1",
+      "author": "",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "wy",
+        "mg",
+        "tx",
+        "kg"
+      ]
+    },
+    {
+      "file": "pdone-grass.js",
+      "lx_name": "野草🌾",
+      "display_name": "野草🌾",
+      "description": "",
+      "version": "1",
+      "author": "",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw"
+      ]
+    },
+    {
+      "file": "pdone-huibq.js",
+      "lx_name": "Huibq_lxmusic源",
+      "display_name": "Huibq_lxmusic源",
+      "description": "Github搜索“洛雪音乐音源”，禁止批量下载！",
+      "version": "v1.2.0",
+      "author": "Huibq",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg"
+      ]
+    },
+    {
+      "file": "pdone-ikun.js",
+      "lx_name": "ikun音源",
+      "display_name": "ikun音源",
+      "description": "* @version v22",
+      "version": "v22",
+      "author": "ikunshare",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "wy",
+        "git"
+      ]
+    },
+    {
+      "file": "pdone-juhe.js",
+      "lx_name": "聚合API接口 (by lerd)",
+      "display_name": "聚合API接口 (by lerd)",
+      "description": "理论可听全平台无损",
+      "version": "v2.0.0",
+      "author": "lerd",
+      "official_pdone": true,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "tx",
+        "wy",
+        "kg",
+        "kw",
+        "mg"
+      ]
+    },
+    {
+      "file": "pdone-lx.js",
+      "lx_name": "独家音源",
+      "display_name": "独家音源",
+      "description": "后续更新，请关注微信公众号: 洛雪科技",
+      "version": "6",
+      "author": "w",
+      "official_pdone": true,
+      "status": "fail",
+      "error": "no json",
+      "platforms": []
+    },
+    {
+      "file": "xinghai-music-sourcev2.3.7.js",
+      "lx_name": "星海音乐源",
+      "display_name": "星海音乐源",
+      "description": "GDAPI | 聚合 | ChKSz API |",
+      "version": "v3.2.7   1.优化mg",
+      "author": "万去了了",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kg",
+        "kw",
+        "mg"
+      ]
+    },
+    {
+      "file": "全豆要-聚合音源-V4.1.js",
+      "lx_name": "全豆要[聚合音源]",
+      "display_name": "全豆要[聚合音源]",
+      "description": "迭代4.1版本，聚合 星海/溯音/念心/长青/歌一刀专属汽水音乐，多链路自动回退",
+      "version": "v4.1",
+      "author": "全豆要 and Gemini优化 Toskysun去混淆 TZB679兼容性处理，修复部分平台播放无法获取链接语",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg",
+        "qsvip"
+      ]
+    },
+    {
+      "file": "全豆要-聚合音源_v9.7_97特供版_DeepSeek优化并修复版本.js",
+      "lx_name": "全豆要[聚合音源]",
+      "display_name": "全豆要[聚合音源]",
+      "description": "迭代9.7版本，聚合 星海/溯音/念心/长青/歌一刀专属汽水音乐，多链路自动回退",
+      "version": "9.7 修复优化版",
+      "author": "全豆要 & Gemini & Toskysun & TZB679 & DeepSeek优化",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg",
+        "qsvip"
+      ]
+    },
+    {
+      "file": "听音音源.js",
+      "lx_name": "听音音源",
+      "display_name": "听音音源",
+      "description": "听音音源 v2。由项目原始已验证逻辑重建为 LX 标准脚本（按歌名+歌手取链），内核零改动加载。",
+      "version": "v2.0.0",
+      "author": "听音 / 点歌机重建",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "mg"
+      ]
+    },
+    {
+      "file": "忆音音源_v1.js",
+      "lx_name": "忆音音源",
+      "display_name": "忆音音源",
+      "description": "支持Q音网易320k",
+      "version": "v1",
+      "author": "竹佀＆玥然OvO",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "tx",
+        "wy"
+      ]
+    },
+    {
+      "file": "念心音源-V1.0.1.js",
+      "lx_name": "念心音源",
+      "display_name": "念心音源",
+      "description": "音源更新，关注微信公众号: 念心小站",
+      "version": "1.0.1",
+      "author": "念心小站",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kg",
+        "tx",
+        "wy",
+        "kw",
+        "mg"
+      ]
+    },
+    {
+      "file": "收集の聚合接口.js",
+      "lx_name": "收集の聚合接口(LX版)",
+      "display_name": "收集の聚合接口(LX版)",
+      "description": "聚合接口-来源于网络 整理:QZ",
+      "version": "1.0.0-beta",
+      "author": "QZ",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "tx",
+        "wy",
+        "kw"
+      ]
+    },
+    {
+      "file": "星海2.3.8测试.js",
+      "lx_name": "星海音乐源",
+      "display_name": "星海音乐源",
+      "description": "GDAPI | 聚合 | ChKSz API |",
+      "version": "v3.2.8 #1，优化kw，tx；2，优化kg，提高响应速度，请求音质提升（也许有母带）",
+      "author": "万去了了",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy"
+      ]
+    },
+    {
+      "file": "汽水VIP.js",
+      "lx_name": "汽水VIP音源",
+      "display_name": "汽水VIP音源",
+      "description": "汽水音乐 VIP 源。由项目原始已验证逻辑重建为 LX 标准脚本，内核零改动加载。",
+      "version": "v1.0.0",
+      "author": "Qishui / 点歌机重建",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg"
+      ]
+    },
+    {
+      "file": "洛雪科技v4.js",
+      "lx_name": "洛雪科技v4音源",
+      "display_name": "洛雪科技v4音源",
+      "description": "洛雪科技[独家音源]_v4。由项目原始已验证逻辑重建为 LX 标准脚本（星海 XINGHAI 后端），内核零改动",
+      "version": "v4.0.0",
+      "author": "洛雪科技 / 点歌机重建",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg"
+      ]
+    },
+    {
+      "file": "洛雪科技独家音源v4-官方原版.js",
+      "lx_name": "[独家音源]",
+      "display_name": "[独家音源]",
+      "description": "音源更新，关注微信公众号：洛雪科技",
+      "version": "4",
+      "author": "洛雪科技",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "kg",
+        "tx",
+        "wy",
+        "mg",
+        "local"
+      ]
+    },
+    {
+      "file": "溯音音源_v1.js",
+      "lx_name": "溯音音源",
+      "display_name": "溯音音源",
+      "description": "集成QQ、网易、酷我、咪咕音乐平台 ，QQ群1078955749",
+      "version": "v1",
+      "author": "竹佀",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "tx",
+        "wy",
+        "kw",
+        "mg"
+      ]
+    },
+    {
+      "file": "统一音乐源.js",
+      "lx_name": "统一音乐源",
+      "display_name": "统一音乐源",
+      "description": "基于GD音乐台（music.gdstudio.xyz）的通用音乐源",
+      "version": "1.0.0",
+      "author": "脚本作者：7878gyc API提供者：GDSTUDIO",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "wy"
+      ]
+    },
+    {
+      "file": "聚合API.js",
+      "lx_name": "聚合API接口 (by lerd)",
+      "display_name": "聚合API接口 (by lerd)",
+      "description": "理论可听全平台无损",
+      "version": "v2.0.0",
+      "author": "lerd",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "tx",
+        "wy",
+        "kg",
+        "kw",
+        "mg"
+      ]
+    },
+    {
+      "file": "西瓜聚合.js",
+      "lx_name": "西瓜聚合源",
+      "display_name": "西瓜聚合源",
+      "description": "聚合星海/溯音/CHKSZ/长青/念心/Huibq等10+API后端，多源自动回退",
+      "version": "v1.40",
+      "author": "整合自多个音源",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg"
+      ]
+    },
+    {
+      "file": "野花音源.js",
+      "lx_name": "野花🌷",
+      "display_name": "野花🌷",
+      "description": "",
+      "version": "1.0.0",
+      "author": "",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw",
+        "wy",
+        "mg",
+        "tx",
+        "kg"
+      ]
+    },
+    {
+      "file": "野草音源.js",
+      "lx_name": "野草🌾",
+      "display_name": "野草🌾",
+      "description": "",
+      "version": "1.0.0",
+      "author": "",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kw"
+      ]
+    },
+    {
+      "file": "长青SVIP音源v1.2.0（全平台支持无损）.js",
+      "lx_name": "长青SVIP音源(二改修复版)",
+      "display_name": "长青SVIP音源(二改修复版)",
+      "description": "二改版",
+      "version": "v1.2.0",
+      "author": "作者不愿透露姓名",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "kg",
+        "tx",
+        "wy",
+        "kw"
+      ]
+    },
+    {
+      "file": "非常刀 v5.js",
+      "lx_name": "非常刀",
+      "display_name": "非常刀",
+      "description": "聚合音源，进群链接 https://t.me/gydjlfk",
+      "version": "v5",
+      "author": "群主要进去",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg",
+        "qs"
+      ]
+    },
+    {
+      "file": "非常刀260424【kw-flac_;_wy-320k最高flac24但是不稳定_;__mg-320k】.js",
+      "lx_name": "非常刀",
+      "display_name": "非常刀",
+      "description": "聚合音源，进群链接 https://t.me/gydjlfk",
+      "version": "v4",
+      "author": "群主要进去",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg"
+      ]
+    },
+    {
+      "file": "音乐下载器_v6.js",
+      "lx_name": "音乐下载器",
+      "display_name": "音乐下载器",
+      "description": "使用全豆要接口的LX Music音源",
+      "version": "6",
+      "author": "unknown",
+      "official_pdone": false,
+      "status": "ok",
+      "error": "",
+      "platforms": [
+        "wy",
+        "tx",
+        "kw",
+        "kg",
+        "mg",
+        "qsvip"
+      ]
+    }
+  ]
+}

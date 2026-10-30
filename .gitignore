@@ -1,35 +1,17 @@
-# ---- 密钥与凭据（绝不入库）----
-config.json
-.env
-.env.*
-*.pem
-*.key
-credentials*
+# 运行时产物与个人数据
+config.json          # 含个人 Cookie/房间号，仓库提供 config.example.json
+bot/tmp/
+logs/
+*.log
 
-# ---- Python ----
-venv/
-.venv/
+# Python
 __pycache__/
-*.py[cod]
+*.pyc
 .pytest_cache/
 
-# ---- 第三方源码副本（参考资料，运行时不依赖，但随仓库上传）----
-# Museek-main/ 与 lx-music-desktop-master/ 已改为随仓库上传（2026-10-22）
+# Node
+node_modules/
 
-# ---- 音频素材与运行产物 ----
-logs/
-tmp/
-outputs/
-
-# ---- 含硬编码密钥的音源文件（本地保留，禁止入库）----
-音源/文件形式/听音音源 v2*已配置key*.js
-
-# ---- 系统 / IDE ----
-.DS_Store
-Thumbs.db
-*.log
-*.bak
-.workbuddy/
-.idea/
-.vscode/
-*.swp
+# 构建工作区（产物 musicSdk_bundle.cjs 提交，中间物不提交）
+tools/build_music_sdk/src_fetched/
+tools/build_music_sdk/work/
