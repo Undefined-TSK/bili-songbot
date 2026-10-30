@@ -1,4 +1,6 @@
-"""数据模型：歌曲信息、点歌请求项、播放队列。"""
+"""数据模型：歌曲信息、点歌请求项、播放队列（可选 json 持久化，重启恢复队列）。"""
+import json
+import os
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Any, Optional
@@ -34,18 +36,98 @@ class QueueItem:
     requester_uid: int = 0  # 点歌人 uid（公共台边界判定用：重名用户也能正确识别归属）
 
 
+def _song_to_dict(song: SongInfo) -> dict:
+    return {
+        "name": song.name, "singer": song.singer, "album": song.album,
+        "song_id": song.song_id, "platform": song.platform, "interval": song.interval,
+        "alternates": [_song_to_dict(a) for a in (song.alternates or [])],
+        "score": song.score,
+    }
+
+
+def _song_from_dict(raw: dict) -> SongInfo:
+    return SongInfo(
+        name=str(raw.get("name", "")),
+        singer=str(raw.get("singer", "")),
+        album=str(raw.get("album", "")),
+        song_id=str(raw.get("song_id", "")),
+        platform=str(raw.get("platform", "")),
+        interval=str(raw.get("interval", "")),
+        alternates=[_song_from_dict(a) for a in raw.get("alternates") or [] if isinstance(a, dict)],
+        score=raw.get("score", 0) or 0,
+    )
+
+
+def _item_to_dict(item: QueueItem) -> dict:
+    # 不持久化 url：CDN 链接有效期极短，重启后必然失效，恢复时一律重新取链
+    return {
+        "song": _song_to_dict(item.song),
+        "requester": item.requester,
+        "requester_uid": item.requester_uid,
+    }
+
+
+def _item_from_dict(raw: dict) -> Optional[QueueItem]:
+    song_raw = raw.get("song")
+    if not isinstance(song_raw, dict) or not song_raw.get("name"):
+        return None
+    return QueueItem(
+        song=_song_from_dict(song_raw),
+        requester=str(raw.get("requester", "")),
+        requester_uid=int(raw.get("requester_uid", 0) or 0),
+    )
+
+
 class PlayQueue:
-    """FIFO 播放队列。"""
-    def __init__(self):
+    """FIFO 播放队列（可选 json 持久化：进程重启后恢复未播完的队列）。
+
+    persist_path 为 None 时为纯内存队列（行为与旧版完全一致）；
+    持久化失败一律静默降级，绝不影响点歌主链路。
+    """
+    def __init__(self, persist_path: Optional[str] = None):
         self._items: deque = deque()
+        self.persist_path = persist_path
+        if persist_path:
+            self._load()
+
+    def _load(self):
+        try:
+            if not os.path.exists(self.persist_path):
+                return
+            with open(self.persist_path, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+            if not isinstance(raw, list):
+                return
+            for entry in raw:
+                if isinstance(entry, dict):
+                    item = _item_from_dict(entry)
+                    if item:
+                        self._items.append(item)
+        except Exception:
+            self._items = deque()  # 损坏文件静默重置，不让启动失败
+
+    def _save(self):
+        if not self.persist_path:
+            return
+        try:
+            data = [_item_to_dict(it) for it in self._items]
+            tmp = self.persist_path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False)
+            os.replace(tmp, self.persist_path)  # 原子替换，防写坏
+        except Exception:
+            pass
 
     def add(self, item: QueueItem):
         self._items.append(item)
+        self._save()
         return len(self._items)
 
     def next(self) -> Optional[QueueItem]:
         if self._items:
-            return self._items.popleft()
+            item = self._items.popleft()
+            self._save()
+            return item
         return None
 
     def peek(self) -> Optional[QueueItem]:
@@ -57,12 +139,14 @@ class PlayQueue:
         """移除当前播放的歌曲（队首）。"""
         if self._items:
             self._items.popleft()
+            self._save()
 
     def remove_at(self, index: int) -> Optional[QueueItem]:
         """按位置（0 起）移除队列中的项并返回；越界返回 None（/remove 撤回用）。"""
         if 0 <= index < len(self._items):
             item = self._items[index]
             del self._items[index]
+            self._save()
             return item
         return None
 

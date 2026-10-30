@@ -9,5 +9,10 @@
   "ffplay_path": "ffplay",
   "ffplay_args": ["-nodisp", "-autoexit", "-loglevel", "quiet"],
   "mpv_options": {},
-  "source_urls": []
+  "source_urls": [],
+  "search_cache_ttl": 60,
+  "url_cache_ttl": 240,
+  "cache_max_entries": 256,
+  "queue_file": "queue.json",
+  "stats_file": "song_stats.json"
 }

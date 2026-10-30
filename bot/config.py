@@ -194,6 +194,17 @@ ENABLE_LYRICS_SEARCH = CFG.get("enable_lyrics_search", True)
 # 歌词/片段搜索 HTTP 超时（秒）：慢源不拖累整体
 LYRICS_TIMEOUT = CFG.get("lyrics_timeout", 6)
 
+# 搜索结果缓存（秒）：同一查询短时内重复点歌不再打满 5 个音源；0 = 关闭。
+# 60 秒兼顾「新鲜度」与「连点/复读弹幕」的重复请求。
+SEARCH_CACHE_TTL = CFG.get("search_cache_ttl", 60)
+
+# 播放 URL 缓存（秒）：同一首歌再次播放时直接复用已取链接，省一次多音质并发取链；
+# 音乐平台 CDN 链接通常有分钟级有效期，过长会拿到失效链接，默认 4 分钟。
+URL_CACHE_TTL = CFG.get("url_cache_ttl", 240)
+
+# 缓存条目上限（每个缓存独立），防长时间运行内存无界增长
+CACHE_MAX_ENTRIES = CFG.get("cache_max_entries", 256)
+
 # 音质下限（强化"音质最好"）：低于此音质的链接直接跳过，不下载。
 # 默认 flac24bit = 不限制下限（沿用原有"逐级试到最低音质"行为）；用户可调高下限，
 # 例如设为 320k 即只取 320k/flac/flac24bit，跳过 192k/128k，确保不播低音质。
@@ -205,6 +216,9 @@ MPV_OPTIONS = CFG.get("mpv_options", {})
 
 # 点歌统计文件（/top 点歌排行数据源；置空字符串可关闭统计）
 STATS_FILE = CFG.get("stats_file", "song_stats.json")
+
+# 队列持久化文件：进程重启后恢复未播完的队列（置空字符串可关闭，退回纯内存队列）
+QUEUE_FILE = CFG.get("queue_file", "queue.json")
 
 # ===== 自定义回复模板（高度自定义）=====
 # config.json 的 "replies" 可按键覆盖；缺失用默认值（= 内置文案，零行为变化）。

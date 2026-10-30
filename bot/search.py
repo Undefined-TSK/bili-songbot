@@ -9,7 +9,9 @@ import aiohttp
 
 from .artist_alias import artist_alias_match as _alias_match, canonical_singer as _canon_singer
 from .bridge import get_bridge
-from .config import ENABLE_PINYIN_FUZZY, log
+from .cache import TTLCache
+from .config import (CACHE_MAX_ENTRIES, ENABLE_PINYIN_FUZZY, SEARCH_CACHE_TTL,
+                     URL_CACHE_TTL, log)
 from .fuzzy import PINYIN_AVAILABLE, pinyin_match
 from .models import SongInfo
 
@@ -50,6 +52,53 @@ PLATFORM_NAMES = {
 
 
 QUALITY_LADDER = ["flac24bit", "flac", "320k", "192k", "128k"]
+
+
+# ===== 进程内缓存（S 级特性）=====
+# 搜索缓存：同一 (歌名,歌手,排除源) 短时内复用结果，连点/复读弹幕不再打满 5 个音源。
+# URL 缓存：同一 (平台,歌曲ID,音质) 的取链结果复用，重复播放省一次多音质并发取链。
+# 两者均带 TTL 与容量上限，可由 config.json 的 search_cache_ttl / url_cache_ttl / cache_max_entries 调整。
+_search_cache = TTLCache(SEARCH_CACHE_TTL, CACHE_MAX_ENTRIES)
+_url_cache = TTLCache(URL_CACHE_TTL, CACHE_MAX_ENTRIES)
+
+
+def _search_cache_key(keyword: str, singer: str, exclude_source: Optional[list]) -> tuple:
+    return (keyword, singer or "", tuple(sorted(exclude_source or ())))
+
+
+def _music_url_key(song: SongInfo, quality: str) -> tuple:
+    ident = song.song_id or f"{song.name}|{song.singer}"
+    return (song.platform or "", ident, quality)
+
+
+def cached_music_url(song: SongInfo, quality: str) -> Optional[str]:
+    """取已缓存的播放 URL（未命中/过期返回 None）。"""
+    return _url_cache.get(_music_url_key(song, quality))
+
+
+def cache_music_url(song: SongInfo, quality: str, url: str):
+    """记录已取到的播放 URL（仅 http 链接）。"""
+    if url and url.startswith("http"):
+        _url_cache.set(_music_url_key(song, quality), url)
+
+
+def invalidate_music_url(song: SongInfo, quality: str):
+    """作废某个音质的 URL 缓存（链接失效/下载失败时调用，下次重新取链）。"""
+    _url_cache.invalidate(_music_url_key(song, quality))
+
+
+def clear_caches():
+    """清空全部缓存（配置热更新/测试隔离用）。"""
+    _search_cache.clear()
+    _url_cache.clear()
+
+
+def cache_stats() -> dict:
+    """缓存命中统计（命中率观测；日志/排障用）。"""
+    return {
+        "search": {"hits": _search_cache.hits, "misses": _search_cache.misses, "size": len(_search_cache)},
+        "url": {"hits": _url_cache.hits, "misses": _url_cache.misses, "size": len(_url_cache)},
+    }
 
 
 def _normalize_text(text: str) -> str:
@@ -255,6 +304,11 @@ async def search_song(session: aiohttp.ClientSession, keyword: str, singer: str 
     """
     search_kw = f"{keyword} {singer}" if singer else keyword
     query_version = _detect_query_version(search_kw)  # 显式版本词例外
+    cache_key = _search_cache_key(keyword, singer, exclude_source)
+    cached = _search_cache.get(cache_key)
+    if cached is not None:
+        log.debug(f"搜索缓存命中: {search_kw}")
+        return cached
     sources = ["kw", "wy", "tx", "kg", "mg"]
     if exclude_source:
         sources = [s for s in sources if s not in exclude_source]
@@ -334,13 +388,15 @@ async def search_song(session: aiohttp.ClientSession, keyword: str, singer: str 
                         if song_id.startswith("MUSIC_"):
                             song_id = song_id[6:]
                         log.info(f"搜索成功: {name} - {result_singer} [{PLATFORM_NAMES.get(source, source)}] ID={song_id} (完美匹配)")
-                        return SongInfo(
+                        song = SongInfo(
                             name=name, singer=result_singer,
                             album=r.get("albumName", r.get("album", "")),
                             song_id=song_id, platform=source,
                             interval=r.get("interval", ""),
                             score=score,
                         )
+                        _search_cache.set(cache_key, song)
+                        return song
                     # 记录最佳候选 与 各音源最佳（用于跨平台共识）
                     if best_result is None or score > best_result[0]:
                         best_result = (score, source, r)
@@ -390,7 +446,7 @@ async def search_song(session: aiohttp.ClientSession, keyword: str, singer: str 
                 ))
             log.info(f"搜索成功: {name} - {result_singer} [{PLATFORM_NAMES.get(source, source)}] ID={song_id} "
                      f"(评分={score}, 共识候选={len(top_by_source)}源, 跨源回退候选={len(alternates)})")
-            return SongInfo(
+            song = SongInfo(
                 name=name, singer=result_singer,
                 album=r.get("albumName", r.get("album", "")),
                 song_id=song_id, platform=source,
@@ -398,6 +454,8 @@ async def search_song(session: aiohttp.ClientSession, keyword: str, singer: str 
                 alternates=alternates,
                 score=score,
             )
+            _search_cache.set(cache_key, song)
+            return song
         log.info(f"搜索失败: {search_kw}")
         return None
     finally:
@@ -476,10 +534,15 @@ async def get_music_url(session: aiohttp.ClientSession, song: SongInfo) -> Optio
         "interval": song.interval,
     }
     for quality in QUALITY_LADDER:
+        hit = cached_music_url(song, quality)
+        if hit:
+            log.debug(f"URL 缓存命中 ({quality}): {hit[:80]}...")
+            return hit
         log.info(f"尝试音质: {quality}")
         url = await get_bridge().get_url(song.platform, song_info, quality)
         if url and url.startswith("http"):
             log.info(f"获取成功 ({quality}): {url[:80]}...")
+            cache_music_url(song, quality, url)
             return url
     return None
 

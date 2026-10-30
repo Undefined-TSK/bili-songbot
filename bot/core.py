@@ -9,15 +9,16 @@ from . import protocol
 from .artist_alias import canonical_display, canonical_singer as _canon_singer
 from .batch import MAX_BATCH_SONGS, batch_plans, cap_batch_queries
 from .bridge import get_bridge
-from .config import (BILI_BUVID3_CFG, ENABLE_LYRICS_SEARCH, MIN_QUALITY, ROOM_CHECK_INTERVAL,
-                     ROOM_ID, STATS_FILE, URL_FETCH_TIMEOUT, log, reply)
+from .config import (BILI_BUVID3_CFG, ENABLE_LYRICS_SEARCH, MIN_QUALITY, QUEUE_FILE,
+                     ROOM_CHECK_INTERVAL, ROOM_ID, STATS_FILE, URL_FETCH_TIMEOUT, log, reply)
 from .danmaku import BiliDanmaku, BiliSender
 from .lyrics import looks_like_lyric
 from .models import PlayQueue, QueueItem, SongInfo
 from .player import PlaybackManager, validate_audio_url
 from .protocol import BILI_ROOM_INFO, CookieManager, fetch_buvid3, update_buvid3
 from .search import (PLATFORM_NAMES, QUALITY_LADDER, VERSION_NOISE, _alias_match,
-                     _fuzzy_match, _normalize_text, get_music_url, search_song, suggest_song)
+                     _fuzzy_match, _normalize_text, cache_music_url, cached_music_url,
+                     get_music_url, invalidate_music_url, search_song, suggest_song)
 from .stats import SongStats
 
 _VERSION_WORDS_LOWER = {v.lower() for v in VERSION_NOISE}
@@ -131,7 +132,7 @@ class BiliMusicBot:
         self.sender: Optional[BiliSender] = None
         self.danmaku: Optional[BiliDanmaku] = None
         self.playback = PlaybackManager(self.session if self.session else None)
-        self.queue = PlayQueue()
+        self.queue = PlayQueue(QUEUE_FILE or None)  # 队列持久化：重启恢复未播完的歌
         self.stats = SongStats(STATS_FILE or None)  # 点歌统计（/top 数据源，静默降级）
         self._current_item: Optional[QueueItem] = None  # 正在播放的队列项（公共台归属判定）
         self.cookie_mgr = CookieManager()
@@ -576,34 +577,44 @@ class BiliMusicBot:
         # 并行获取各音质的URL（而非逐个降级，大幅缩短等待时间）；
         # URL 获取限时（响应提速，源自 LXMusic「按音源可靠性动态调度」）：
         # 慢源/挂死源不拖累整体，超时后用已到手的结果继续（可能触发跨源回退）
-        log.info(f"并行获取音质: {', '.join(ladder)} [{PLATFORM_NAMES.get(song.platform, song.platform)}]")
+        # 先查 URL 缓存：命中音质不再并发取链（重复播放同一首歌可省一轮多音质请求）
+        cached_urls = {}
         tasks = {}
         for quality in ladder:
-            tasks[quality] = asyncio.create_task(
-                get_bridge().get_url(song.platform, song_info, quality)
-            )
+            hit = cached_music_url(song, quality)
+            if hit:
+                cached_urls[quality] = hit
+            else:
+                tasks[quality] = asyncio.create_task(
+                    get_bridge().get_url(song.platform, song_info, quality)
+                )
+        log.info(f"并行获取音质: {', '.join(ladder)} "
+                 f"[{PLATFORM_NAMES.get(song.platform, song.platform)}]"
+                 f"（缓存命中 {len(cached_urls)}/{len(ladder)}）")
 
-        done, pending = await asyncio.wait(tasks.values(), timeout=URL_FETCH_TIMEOUT)
-        for t in pending:
-            t.cancel()
-        # task -> 音质映射（asyncio.wait 的 done 集合无序，需按映射取结果）
-        task_quality = {t: q for q, t in tasks.items()}
         quality_results = {}  # quality -> result 或 None
-        for t in done:
-            try:
-                quality_results[task_quality[t]] = t.result()
-            except Exception:
-                quality_results[task_quality[t]] = None
+        if tasks:
+            done, pending = await asyncio.wait(tasks.values(), timeout=URL_FETCH_TIMEOUT)
+            for t in pending:
+                t.cancel()
+            # task -> 音质映射（asyncio.wait 的 done 集合无序，需按映射取结果）
+            task_quality = {t: q for q, t in tasks.items()}
+            for t in done:
+                try:
+                    quality_results[task_quality[t]] = t.result()
+                except Exception:
+                    quality_results[task_quality[t]] = None
         results = [quality_results.get(q) for q in ladder]
 
-        # 按音质优先级整理有效URL
-        url_map = {}
+        # 按音质优先级整理有效URL（缓存命中的直接纳入）
+        url_map = {q: u for q, u in cached_urls.items()}
         for quality, result in zip(ladder, results):
             if isinstance(result, Exception):
                 log.debug(f"获取链接异常 ({quality}): {result}")
                 continue
             if result and isinstance(result, str) and result.startswith("http"):
                 url_map[quality] = result
+                cache_music_url(song, quality, result)
                 log.info(f"获取成功 ({quality}): {result[:80]}...")
 
         if not url_map:
@@ -628,6 +639,8 @@ class BiliMusicBot:
             else:
                 validated[quality] = result
             if not validated[quality]:
+                # 失效链接作废缓存，下次重新取链（避免 TTL 内反复拿到同一死链）
+                invalidate_music_url(song, quality)
                 log.info(f"URL 预验证失败 ({quality})，跳过该音质")
 
         # 按音质优先级依次尝试下载播放（跳过预验证失败的URL）
@@ -700,6 +713,8 @@ class BiliMusicBot:
             played = await self.playback.play(url, song, on_finish=self._on_song_finish, on_start=on_start)
             if played:
                 return True
+            # 下载失败：该音质链接可能已失效，作废缓存以便下次重新取链
+            invalidate_music_url(song, quality)
             log.warning(warn_msg.format(quality=quality))
         return False
 

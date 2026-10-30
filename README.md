@@ -20,6 +20,8 @@
 - **永远播原版** — 翻唱/Remix/Live/DJ 版强降权 + 跨平台共识加权（≥2 平台同返即锁定原唱）+ 置信度门禁拒绝无关结果 + 同歌跨源回退
 - **音源即插即用** — 兼容 lx 标准与魔改 JS 音源脚本、支持 `source_urls` 链接音源；自更新（默认 6h）、看门狗自愈（默认 5min）、多镜像回退，用户放进去就能用，**不需要改任何脚本**
 - **公共台秩序** — 同歌防重复入队、点歌人署名、自己点的歌直接切、别人的歌 Y/N 投票、点歌排行持久化
+- **重启不丢队列** — 队列实时落盘（`queue_file`），机器人重启后未播完的歌自动恢复并继续排队（同类项目多为纯内存队列）
+- **连点不重复打源** — 搜索与播放链接进程内 TTL 缓存（`search_cache_ttl` / `url_cache_ttl`），复读弹幕、重复播放直接复用；失效链接与下载失败的音质自动作废重取
 - **开箱可定制** — 全部弹幕文案模板可覆盖，音质下限/批量上限即改即用；Cookie 热更新免重启
 
 <details>
@@ -83,18 +85,22 @@ python main.py
 | `source_watchdog_interval` | `300` | 看门狗自愈巡检间隔（秒） |
 | `source_init_timeout` | `30` | 音源初始化超时（秒），慢源不再被误杀 |
 | `enable_lyrics_search` | `true` | 歌词点歌/兜底开关 |
+| `search_cache_ttl` | `60` | 搜索结果缓存时长（秒），`0` 关闭 |
+| `url_cache_ttl` | `240` | 播放链接缓存时长（秒），`0` 关闭 |
+| `cache_max_entries` | `256` | 每个缓存的条目上限（LRU 淘汰） |
+| `queue_file` | `queue.json` | 队列持久化文件（重启恢复；置空关闭） |
 | `replies` | 内置文案 | 自定义弹幕模板（键值覆盖） |
 | `stats_file` | `song_stats.json` | 点歌统计文件（置空关闭） |
 
 ## 🧪 测试
 
 ```bash
-pip install pytest             # 测试依赖（requirements.txt 不含）
-python3 -m pytest tests/ -q    # 164 个单元测试：156 通过 / 8 跳过（无 libmpv 时 mpv 用例跳过）
-python3 tests/e2e_test.py      # 端到端（含真实网络搜索 → 取链 → 播放回退链路）
+pip install -r requirements.txt pytest   # 运行依赖 + 测试框架
+python3 -m pytest tests/ -q              # 单元测试（可选依赖缺失时自动跳过对应用例）
+python3 tests/e2e_flow.py                # 端到端（含真实网络搜索 → 取链 → 播放回退链路）
 ```
 
-正式版验收（Horizon QA）：6 类 **56 条用例全 PASS**、0 开放缺陷，覆盖即插即用、链接/JS 双形态音源、自更新、自检测自愈、内核健壮性与安全。执行器见 `qa/tests/e2e/run_acceptance.py`，追踪数据见 `qa/tests/docs/`（CSV）。
+正式版验收（Horizon QA）：**47 条用例全 PASS**、0 开放缺陷，覆盖即插即用、链接/JS 双形态音源、自更新、自检测自愈、内核健壮性与安全。执行器见 `qa/tests/e2e/run_acceptance.py`，追踪数据见 `qa/results.json`。
 
 <details>
 <summary>🏗 技术栈与文件树（给交接者/贡献者）</summary>
@@ -116,14 +122,15 @@ bili-songbot/
 │   ├── danmaku.py           # 弹幕 WS + 发送（S1 可切换 danmaku_biliapi）
 │   ├── protocol.py          # B 站 HTTP/WBI 协议
 │   ├── search.py            # 双通道搜索与共识排序
+│   ├── cache.py             # 进程内 TTL 缓存（搜索/播放链接复用）
 │   ├── lyrics.py            # 歌词点歌
 │   ├── artist_alias.py      # 艺名别名互认
 │   └── config.py            # 配置热加载
 ├── source_bridge.js         # Node 侧 lx 音源运行时（lx API 实现）
 ├── musicSdk_bundle.cjs      # lx 内置搜索引擎打包产物（Apache-2.0，见构建说明）
 ├── sources/                 # 44 个预置音源（46 个文件）
-├── qa/                      # 正式版验收套件（56 用例执行器 + 追踪 CSV）
-├── tests/                   # 164 个单元测试 + e2e
+├── qa/                      # 正式版验收套件（47 用例执行器 + results.json）
+├── tests/                   # 238 个单元测试（29 条可选依赖缺失时自动跳过）+ e2e_flow.py 端到端脚本
 └── tools/
     ├── build_music_sdk/     # musicSdk 可复现构建（见其 README）
     └── verify_deadcode.py   # 死代码零引用证明（AST 级）
@@ -133,7 +140,7 @@ bili-songbot/
 
 ## 🤖 交接指南（AI / 新维护者必读）
 
-**当前状态：v1.0.0 正式版已发布**（tag `v1.0.0`，含完整源码 zip 资产）。单元测试 164/164，验收 56/56，0 开放缺陷。以下是从零接手所需的全部上下文。
+**当前状态：v1.0.0 正式版已发布**（tag `v1.0.0`，含完整源码 zip 资产）。单元测试 238 条（209 通过 + 29 条可选依赖缺失时自动跳过），验收 47/47，0 开放缺陷。以下是从零接手所需的全部上下文。
 
 ### 必须知道的关键实现细节
 

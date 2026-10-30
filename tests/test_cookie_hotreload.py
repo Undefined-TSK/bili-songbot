@@ -6,6 +6,7 @@
 用法: python3 tests/test_cookie_hotreload.py
 """
 import json
+import atexit
 import os
 import shutil
 import sys
@@ -16,9 +17,13 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(HERE)
 
-# 隔离副本：把 bot/ 包 + source_bridge.js + config.json 复制到临时目录再 import
+# 隔离副本：把 bot/ 包 + source_bridge.js + config.json 复制到临时目录再 import。
+# 包名改成 isolated_bot（而不是 bot）：pytest 同进程里真实 bot 包已被其它用例导入，
+# 继续 import bot.config 会拿到真实包 -> CONFIG_PATH 指向仓库根 config.json，
+# 测试写配置就会污染真实文件。换包名后 config.CONFIG_PATH 恒为 TMP/config.json。
 TMP = tempfile.mkdtemp(prefix='bili_cookie_test_')
-shutil.copytree(os.path.join(PROJECT_ROOT, 'bot'), os.path.join(TMP, 'bot'),
+atexit.register(shutil.rmtree, TMP, ignore_errors=True)  # pytest 同进程导入时也保证清理
+shutil.copytree(os.path.join(PROJECT_ROOT, 'bot'), os.path.join(TMP, 'isolated_bot'),
                 dirs_exist_ok=True, ignore=shutil.ignore_patterns('__pycache__'))
 shutil.copy(os.path.join(PROJECT_ROOT, 'source_bridge.js'), os.path.join(TMP, 'source_bridge.js'))
 
@@ -35,9 +40,9 @@ with open(os.path.join(TMP, 'config.json'), 'w', encoding='utf-8') as f:
     json.dump(CFG, f)
 
 sys.path.insert(0, TMP)
-import bot.config as config            # noqa: E402
-import bot.protocol as protocol        # noqa: E402
-from bot.protocol import CookieManager  # noqa: E402
+import isolated_bot.config as config            # noqa: E402
+import isolated_bot.protocol as protocol        # noqa: E402
+from isolated_bot.protocol import CookieManager  # noqa: E402
 
 OLD = ('old_sessdata_value', 'old_jct', 'old_buvid3', 'old_buvid4')
 
