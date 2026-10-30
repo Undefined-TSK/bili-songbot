@@ -1,177 +1,185 @@
-# bili-songbot
+<div align="center">
 
-> B 站直播间点歌机器人：观众发弹幕 `/play 歌名 歌手`，机器人搜索 → 队列 → 播放。
+# 🎵 bili-songbot
 
-兼容 lx（落雪）音源生态，支持切歌投票、Cookie 热更新、多音质降级；`play` 命令高度自由（顺序/分隔符随意、中英文等多语言模糊），并始终优先返回**原版**、响应迅速。
+![version](https://img.shields.io/badge/version-v1.0.0-blue?style=for-the-badge)
+![license](https://img.shields.io/badge/license-GPL--3.0-green?style=for-the-badge)
+![python](https://img.shields.io/badge/python-3.10%2B-informational?style=for-the-badge)
 
-## 功能 / Features
+**B 站直播间弹幕点歌机器人：观众发一条弹幕就能点歌，机器人搜索 → 排队 → 播放，全程无人值守。**
 
-- 🎵 **弹幕点歌**：`/play 歌名 歌手` 入队播放，`/switch` 切歌——**自己点的歌自己做主**直接切，别人的歌走 Y/N 投票
-- 🏛 **公共点歌台场景**：同一首歌不重复入队（防热门歌插队）；正在播放附点歌人署名；谁点的歌一目了然
-- 💬 **完整交互层**：`/queue` 查看队列、`/now` 正在播放、`/remove` 撤回自己点的歌、`/top` 点歌排行（json 持久化跨重启）、`/help` 指令帮助
-- 🧠 **智能建议（did-you-mean）**：没搜到时自动提示"你是不是想点《xxx》-歌手"，只建议不播放、绝不瞎猜
-- 🎛 **高度自定义**：`replies` 自定义全部弹幕文案模板；`min_quality` 音质下限；全部 config 即改即用（搜索准确性等内部调优不暴露给用户，开箱即用）
-- 🔍 **双通道搜索**：音源脚本 `search` 优先，失败自动回退 **lx 官方内置搜索引擎**（与落雪播放器搜到同样的歌）
-- 📦 **lx 音源兼容**：导入 lx 社区 JS 音源（标准/魔改）或 `source_urls` 链接；`lx.utils` 八方法 + `formData` 全覆盖
-- 🔎 **play 自由模糊匹配（多语言）**：歌手/歌名顺序可颠倒、分隔符随意甚至无分隔；中/英/日等模糊（缺字/乱序/大小写/无空格不敏感）
-- 🗣 **拼音/谐音/错别字/繁体匹配**：`周杰轮→周杰伦`、全拼 `zhoujielun→周杰伦`、`告白氣球→告白气球`（繁体）都能命中——拼音层仅在拼音相等或极高相似时放行，不误放无关结果（可选依赖 pypinyin，缺失自动降级）
-- 📝 **歌词点歌**：`/lyric 天青色等烟雨` 由歌词片段反查歌曲（内置网易云片段搜索），普通 `/play` 搜不到时也会自动歌词兜底；只取歌名交内核解析，原唱由跨平台共识锁定
-- 🌐 **艺名别名互认**：中文名 / 英文名 / 中英混写 / 昵称等价匹配（内置通用对照表，可扩展），纯中文艺名也能搜到英文写法的歌手，且参与跨语言共识归一
-- ✅ **原版优先（三重保障）**：① 翻唱 / remix / live / lofi / DJ / 伴奏 / 现场等衍生版本强降权；② **跨平台共识加权**——同一首歌被 ≥2 平台共同返回即视为规范原版，盖过单源误排；③ **置信度门禁**拒绝无关结果，不勉强匹配错误歌曲。点名版本词（如"翻唱"）时精准筛该版本、不降权
-- 🔄 **跨源回退**：主源 URL 不可用（如全为代理链接）时自动回退到**同一首歌**的其他平台候选或在线重搜同歌——只在同歌时换源，绝不播错歌
-- ⚡ **响应迅速**：搜索最小收集窗口 + 高质量候选提前返回（典型 <1s）；URL 获取限时，慢源/坏源不拖累整体
-- ⏭ **多音质降级**：flac24bit → flac → 320k → 192k → 128k 逐级尝试，URL 预验证 + Node 桥下载兜底
-- 🎚 **音质下限**：`min_quality` 拒绝低于下限的音源（默认 128k = 不限制，取达到下限的最高可用音质）
-- 🔄 **Cookie 热更新**：改 config.json 保存，10 秒内免重启生效
-- 🎚 **播放引擎可选**：内置 ffplay 子进程版，或 python-mpv 常驻版
+</div>
 
-## 快速开始 / Quick Start
+---
+
+> 直播主想要一个"公共点歌台"：观众点歌、大家排队听，还要保证播的永远是**原版**、点歌体验**零门槛**。市面上现成点歌器要么解析死板（必须 `歌名 歌手` 严格顺序），要么单音源一挂全挂。本项目兼容 **lx（落雪）音源生态**——社区 44 个音源即插即用，双通道搜索 + 跨平台共识，把"搜不准、播不对、源易挂"三个痛点一次解决。
+
+## ✨ Features
+
+- **点歌零门槛** — `/play 周杰伦 告白气球`、`/play 告白气球周杰伦`、全拼 `zhoujielun`、错别字 `周杰轮`、繁体 `告白氣球`、甚至歌词片段 `/lyric 天青色等烟雨` 都能命中；只记得旋律也能点
+- **永远播原版** — 翻唱/Remix/Live/DJ 版强降权 + 跨平台共识加权（≥2 平台同返即锁定原唱）+ 置信度门禁拒绝无关结果 + 同歌跨源回退
+- **音源即插即用** — 兼容 lx 标准与魔改 JS 音源脚本、支持 `source_urls` 链接音源；自更新（默认 6h）、看门狗自愈（默认 5min）、多镜像回退，用户放进去就能用，**不需要改任何脚本**
+- **公共台秩序** — 同歌防重复入队、点歌人署名、自己点的歌直接切、别人的歌 Y/N 投票、点歌排行持久化
+- **开箱可定制** — 全部弹幕文案模板可覆盖，音质下限/批量上限即改即用；Cookie 热更新免重启
+
+<details>
+<summary>📖 全部弹幕指令</summary>
+
+| 指令 | 说明 |
+|---|---|
+| `/play 歌名 歌手` | 点歌（顺序可颠倒、分隔可省略；分号 `；` 分隔可批量点歌） |
+| `/lyric 歌词片段` | 歌词反查点歌（`/play` 失败时也自动兜底） |
+| `/queue` `/队列` | 查看队列（含点歌人） |
+| `/now` `/当前` | 正在播放（附署名） |
+| `/switch` | 切歌：自己的直接切，别人的发起 Y/N 投票 |
+| `/remove 序号` | 撤回**自己**点的歌 |
+| `/top` | 点歌排行 TOP5（跨重启持久化） |
+| `/help` | 帮助 |
+
+</details>
+
+## 🚀 Quick Start
+
+前置依赖：**Python ≥ 3.10**、**Node.js ≥ 16**、**ffmpeg**（需要其中的 `ffplay`）。
 
 ```bash
-# 依赖：Python 3.10+、Node.js 16+、ffmpeg(ffplay)
+# 1. 克隆并安装依赖
+git clone https://github.com/Undefined-TSK/bili-songbot.git
+cd bili-songbot
 pip install aiohttp            # 必需
-pip install rapidfuzz          # 可选：更准的模糊评分器
+pip install rapidfuzz pypinyin # 可选：更准的模糊评分 / 拼音匹配（缺失自动降级）
 
+# 2. 生成配置
 cp config.example.json config.json
-# 编辑 config.json：填入 bili_room_id 与 B 站 Cookie（SESSDATA/bili_jct/buvid3/buvid4）
-# 音源：把 lx 音源 .js 放进 source_dir，或配置 "source_urls": ["https://.../your-source.js"]
+# 编辑 config.json，至少填写：
+#   bili_room_id: 你的直播间号
+#   bili_sessdata / bili_jct / bili_buvid3 / bili_buvid4: B 站 Cookie（用于收发弹幕）
+# 音源不用管：sources/ 已预置 44 个音源，config.json 的 source_urls 还挂了 7 个官方在线源
 
+# 3. 启动
 python main.py
 ```
 
-## 使用 / Usage
+启动成功后日志会出现弹幕连接与音源加载信息（形如 `音源进程就绪`），在直播间发一条 `/play 告白气球 周杰伦`，机器人搜索后回弹幕「已加入队列」并开始播放，即验证成功。
 
-在直播间发送弹幕即可点歌（自由度很高）：
+> [!NOTE]
+> Cookie 获取方式：浏览器登录 B 站 → F12 → Application → Cookies，取 `SESSDATA`、`bili_jct`、`buvid3`、`buvid4` 四项。改完 `config.json` 保存即可，**10 秒内热更新生效，无需重启**。
 
-```
-/play 告白气球 周杰伦        # 标准
-/play 周杰伦 告白气球        # 顺序颠倒
-/play 告白气球周杰伦         # 无分隔也能命中
-/play 告白气球               # 只给歌名
-/play 周杰伦                 # 只给歌手
-/play 告白气球 翻唱          # 点名版本：精准筛翻唱版而非降权
-```
+> [!WARNING]
+> 本项目仅供个人学习研究，不存储、不传播任何音频文件。禁止商业使用，详见文末[免责声明](#-免责声明)。
 
-机器人会搜索 → 入队 → 取链 → 多音质降级下载 → 播放，并回复「已点 / 正在播放」弹幕。
-> 同名不同歌手的歌曲，建议带上歌手名以精准锁定原版；同名歌会被**跨平台共识**自动导向原唱版本。
+## ⚙️ 配置（config.json）
 
-**歌词点歌**（只记得歌词也能点）：
-
-```
-/lyric 天青色等烟雨          # 歌词片段 → 青花瓷（原唱由共识锁定）
-/lyric are we out of the woods   # 英文歌词同样支持
-```
-
-普通 `/play` 搜索不到时也会自动尝试歌词兜底（可 `config.json` 的 `enable_lyrics_search` 关闭）。
-
-**队列与互动**：
-
-```
-/queue               # 查看点歌队列（含点歌人）
-/now                 # 正在播放（附点歌人署名）
-/remove 2            # 撤回自己点的第 2 首（不能撤别人的）
-/top                 # 点歌排行 TOP5（点播次数持久化统计）
-/switch              # 切歌：自己点的歌直接切；别人的歌发起 Y/N 投票
-/help                # 指令帮助（中文别名 /队列 /当前 /撤回 /排行 同样可用）
-```
-
-没搜到时机器人会提示"你是不是想点《xxx》"，回复 `/play xxx 歌手` 即可直接点播。
-同一首歌已在队列或正在播放时会提示"不用重复点哦~"，公共台人人有份。
-
-**批量点歌**（纯增量层：拆成多个独立单曲查询，逐个走完整单曲逻辑，按顺序入队）：
-
-```
-/play 告白气球 周杰伦；稻香 周杰伦；Lemon 米津玄師   # 分号分隔（最可靠，免验证）
-/play 李荣浩 模特 李白 老街                          # 歌手 + 多首单段歌名
-/play 周杰伦 稻香 林俊杰 江南                         # 歌 歌手 交替
-```
-
-- **零词典拆分（普适）**：不依赖任何歌手数据库——结构候选（首段歌手假设 /
-  两两一组）交由**搜索结果验证**（每组高分命中 + 歌手与组内片段一致 + 组间不同歌），
-  全部通过才成立，否则自动回退单曲；任何歌手写法（收录与否）一视同仁
-- **显式分号最可靠**：`；` 分隔的每段独立走完整单曲解析（全部特性继承），免验证
-- **歌手别名数据库只做本职**：仅当用户输入的歌手是别名（如 水果姐↔Katy Perry）时
-  做别名→真实歌手互认，不参与解析/拆分/结构判定
-- 数量上限：`config.json` 的 `max_batch_songs`（默认 10），超限截断并弹幕提示
-- 多词歌名 + 歌手混写（如 `少女时代 gee a妹 u will nev know` 无分隔）歧义不可靠，
-  验证不通过会回退单曲——此类场景请用分号：`gee 少女时代；u will nev know a妹`
-
-## 配置（config.json）
-
-| 字段 | 说明 |
-|---|---|
-| `bili_room_id` | 目标直播间号 |
-| `bili_sessdata` 等 | B 站 Cookie（SESSDATA/bili_jct/buvid3/buvid4），用于弹幕发送 |
-| `source_dir` | 本地 lx 音源 .js 脚本目录 |
-| `source_urls` | 可选，远程音源脚本链接列表 |
-| `node_path` | node 可执行文件路径（默认 `node`） |
-| `min_quality` | 音质下限（默认 `128k` 不限制；可设 `192k`/`320k`/`flac` 等） |
-| `max_batch_songs` | 批量点歌数量上限（默认 10） |
-| `url_fetch_timeout` | 取链限时秒数（默认 15） |
-| `enable_lyrics_search` | 歌词点歌/兜底开关（默认开） |
-| `replies` | 自定义弹幕文案模板（键值覆盖，缺省用内置文案） |
-| `stats_file` | 点歌统计文件（默认 `song_stats.json`，置空关闭） |
-
-## 与同类点歌器的差异
-
-对标市面上 B 站点歌器（神奇弹幕、bilibili-ordersong 等）的点歌链路，本项目差异化在**搜索解析层**：
-
-| 能力 | 常见点歌器 | 本项目 |
+| 参数 | 默认值 | 说明 |
 |---|---|---|
-| 输入自由度 | 固定 `歌名 歌手` 顺序/分隔 | 顺序颠倒、无分隔、中英日混写、拼音/错字/繁体均可命中 |
-| 原版保障 | 依赖单一音源排序 | 版本词强降权 + 跨平台共识 + 置信门禁 + 跨源同歌回退 |
-| 歌词点歌 | 少数支持，多限定单平台 | 片段反查后仍走内核全链路（原版优先/共识生效） |
-| 批量点歌 | 少数支持，常需严格格式 | 分号免验证 + 零词典结构候选搜索验证，任意歌手写法一视同仁 |
-| 音源生态 | 自带单一平台 | 兼容 lx 音源生态（**44 个源**全量预置 `sources/` + `source_urls` 官方链接双层持久化，内核跨源回退消化限频/慢源） |
-| 搜索失败 | 直接"没找到" | did-you-mean 智能建议 + 歌词兜底 |
-| 队列互动 | /queue /skip 基础款 | + /now /remove（只能撤自己的）/top 点歌排行持久化 |
-| 定制能力 | 少数可换前缀 | 弹幕文案模板全覆盖、音质/批量上限等可调项（内部搜索调优不暴露，开箱即用） |
+| `bili_room_id` | — | 目标直播间号（必填） |
+| `bili_sessdata` 等 4 项 | — | B 站 Cookie（必填，支持热更新） |
+| `source_dir` | `sources` | 本地 lx 音源脚本目录 |
+| `source_urls` | 7 个官方源 | 远程音源链接列表（自动下载 + 自更新） |
+| `min_quality` | `128k` | 音质下限（可设 `192k`/`320k`/`flac`） |
+| `max_batch_songs` | `10` | 批量点歌数量上限 |
+| `url_fetch_timeout` | `15` | 取链限时（秒），慢源不拖累整体 |
+| `source_refresh_interval` | `21600` | 在线源自更新间隔（秒） |
+| `source_watchdog_interval` | `300` | 看门狗自愈巡检间隔（秒） |
+| `source_init_timeout` | `30` | 音源初始化超时（秒），慢源不再被误杀 |
+| `enable_lyrics_search` | `true` | 歌词点歌/兜底开关 |
+| `replies` | 内置文案 | 自定义弹幕模板（键值覆盖） |
+| `stats_file` | `song_stats.json` | 点歌统计文件（置空关闭） |
 
-## 兼容性与实测
-
-基于 lx-music-desktop v2.12.6 协议对齐，用户音源 + 多方渠道新音源自选导入共 **44 个**实跑（详见 `lx兼容性对齐报告.md`）：
-
-> **音源溯源与"42"真相（最终定版）**：原始项目 `Undefined-TSK/bili-songbot` 的权威注册表 `ALL_SOURCES` = **6 个 GitHub 链接源 + 25 个本地源（31 个）**，`音源/文件形式/` 目录 23 个 JS。本重写版把全部原始源转为 LX 标准脚本并扩充社区源，当前 `sources/` 共 **45 个文件（44 个可用源 + 1 个官方原版归档）**，是"42"的**真超集，一个不丢**。
-> **逐文件比对原始仓库的结论**：20 个文件与原版逐字节一致；`野花音源_.js`/`野草音源.js` 在**原始仓库本身是错命名的 Word 文档（docx）**（`PK` ZIP 头实锤），已从官方源 `wzh15802/lxmusic` 下载真 JS 版恢复（野花 5 平台、野草 kw）；`lx-玉宁熙` 用 `shaoxianbilly/USEFUL-LX-MUSIC-SOURCES` 官方最新可用版 v1.1.0（4 平台）；`洛雪科技v4` 官方 114KB 原版已归档保留并**加载成功**（6 平台含 local）。
-> **"42 音源全部复活"实测：44/45 加载成功**。唯一未加载的 `pdone-lx`（独家音源 v6）依赖 **systemd** 安装本地服务——本沙箱/Windows 无法满足，落雪桌面同样受限，属极端环境限制（已隔离保留，永不删除）。
-> **关键内核修复（协议级，官方 lx API）**：比对 lx-music-desktop 官方 `preload.js` 源码发现，验证器此前 `lx.utils` 为空对象，导致依赖官方 `utils.crypto.md5/aesEncrypt/rsaEncrypt/randomBytes`、`utils.buffer.from/bufToString`、`utils.zlib` 的源（六音、野花、野草、独家音源 v4 等）被误判失败。已按**官方实现**补齐（生产内核本就完整），并新增 `source_init_timeout`（默认 30s）可配置初始化超时、`READY_TIMEOUT` 自适应——从此"慢源"不再被误杀。
-> **持久化（7 官方源全登记）**：pdone 官方全部 **7** 个源（sixyin/huibq/flower/lx/ikun/grass/juhe）写入 `config.json` 的 `source_urls`，开机自动下载并与本地 `sources/` 合并加载（**链接形式 + JS 脚本双层**），下载链路**多镜像回退**（ghproxy.net → 直连 raw → mirror.ghproxy → jsdelivr）；另有自更新（`source_refresh_interval`，默认 6h）与看门狗自愈（`source_watchdog_interval`，默认 5min）——崩溃进程自动重启、初始化失败自动重试（后端恢复即自愈）。
-> 所谓"大量源搜不到"是并行探测误报——慢源/限频源在真实内核（并行取链 + `url_fetch_timeout` 限时 + 跨源回退）下只是暂时不贡献 URL，绝不报错。详见 `音源健康诊断报告.md`。
-
-| 维度 | 结果 |
-|---|---|
-| 音源加载 | 验证器 **44/45**（唯一失败 pdone-lx 为 systemd 环境限制）；真实内核 52 候选脚本 → **35 个唯一音源进程全就绪**（在线官方版优先 + `@name` 去重 14 个重复副本，原始 31 源全部存活，零删除） |
-| 平台可播 | **5/5**（kw / wy / tx / kg / mg） |
-| 歌曲搜到 / 可播 | **14/14**（中/英/日/粤语/影视/新歌/纯歌手） |
-| 音频字节验证 | **6/6**（MP3/OGG/M4A 魔数确认） |
-| 单元测试 | **164/164 全过**（本轮回归 145/145 逻辑测试通过，零回归） |
-| 模拟弹幕全链路 | **5/5**（搜索 → 入队 → 跨源回退 → 下载 → ffplay 播放完成，含同名歌共识锁定原唱） |
-
-匹配自由度 **26/26 = 100%**（用户样例 + 扩展正样本）；准确率 **86%** 拒绝无关歌曲/歌手（剩余为通用英文短语子串包含，真实场景被消解）。
-
-## 测试
+## 🧪 测试
 
 ```bash
-python3 -m pytest tests/ -q      # 164 单测（含公共台边界/防重复/智能建议/点歌统计、拼音/歌词点歌、批量点歌、共识、跨源回退）
-python3 tests/e2e_test.py       # 端到端（含真实网络搜索回退）
+python3 -m pytest tests/ -q    # 164 个单元测试（当前 164/164 全过）
+python3 tests/e2e_test.py      # 端到端（含真实网络搜索 → 取链 → 播放回退链路）
 ```
 
-> 拼音层可选依赖：`pip install pypinyin`（缺失时自动降级为原有匹配，不影响其余功能）
+正式版验收（Horizon QA）：6 类 **56 条用例全 PASS**、0 开放缺陷，覆盖即插即用、链接/JS 双形态音源、自更新、自检测自愈、内核健壮性与安全。执行器见 `qa/tests/e2e/run_acceptance.py`，追踪数据见 `qa/tests/docs/`（CSV）。
 
-## 可选切换
+<details>
+<summary>🏗 技术栈与文件树（给交接者/贡献者）</summary>
 
-| 能力 | 操作 |
+| 层 | 技术 |
 |---|---|
-| S1 弹幕层换 bilibili-api-python | `pip install bilibili-api-python`，改 import 为 `danmaku_biliapi`；按 `S1清理预案.md` 清理（零引用证明：`python3 tools/verify_deadcode.py`） |
-| S2 播放层换 python-mpv | `pip install python-mpv` + 系统 libmpv；core.py 改 import 为 `player_mpv` |
-| S3 评分器换 rapidfuzz | `pip install rapidfuzz`；main.py 加 `from bot import search_rapidfuzz; search_rapidfuzz.enable()` |
+| 弹幕接入 | aiohttp WebSocket（B 站弹幕协议，手写实现） |
+| 音源内核 | Node.js 子进程池（每源一进程，lx 协议对齐 lx-music-desktop v2.12.6） |
+| 播放引擎 | ffplay 子进程（默认）/ python-mpv（可选切换） |
+| 模糊匹配 | difflib 默认 / rapidfuzz 可选 + pypinyin 拼音层 |
+| 持久化 | JSON 文件（队列、统计、在线源缓存） |
 
-## 许可证与第三方
+```text
+bili-songbot/
+├── main.py                  # 入口
+├── bot/                     # 核心 Python 包
+│   ├── core.py              # 主编排：搜索→入队→取链→播放
+│   ├── bridge.py            # 音源内核（Node 子进程管理/去重/自更新/自愈）
+│   ├── danmaku.py           # 弹幕 WS + 发送（S1 可切换 danmaku_biliapi）
+│   ├── protocol.py          # B 站 HTTP/WBI 协议
+│   ├── search.py            # 双通道搜索与共识排序
+│   ├── lyrics.py            # 歌词点歌
+│   ├── artist_alias.py      # 艺名别名互认
+│   └── config.py            # 配置热加载
+├── source_bridge.js         # Node 侧 lx 音源运行时（lx API 实现）
+├── musicSdk_bundle.cjs      # lx 内置搜索引擎打包产物（Apache-2.0，见构建说明）
+├── sources/                 # 44 个预置音源（46 个文件）
+├── qa/                      # 正式版验收套件（56 用例执行器 + 追踪 CSV）
+├── tests/                   # 164 个单元测试 + e2e
+└── tools/
+    ├── build_music_sdk/     # musicSdk 可复现构建（见其 README）
+    └── verify_deadcode.py   # 死代码零引用证明（AST 级）
+```
 
-- 本项目代码：**GPL-3.0**（见 LICENSE）
+</details>
+
+## 🤖 交接指南（AI / 新维护者必读）
+
+**当前状态：v1.0.0 正式版已发布**（tag `v1.0.0`，含完整源码 zip 资产）。单元测试 164/164，验收 56/56，0 开放缺陷。以下是从零接手所需的全部上下文。
+
+### 必须知道的关键实现细节
+
+1. **lx 音源协议**：脚本元数据用 `/*! ... */` 块注释（`@name/@version` 等，**不是** `//` 行注释，否则去重会把多文件误并为一个）；`lx.on(request, handler)` 的 handler 返回 `Promise<url字符串>`；初始化完成必须 `lx.send(inited, {status, sources})`；音质要求走 payload 的 `type` 字段（内核转成 handler 收到的 `info.type`）。
+2. **lx.utils 必须按官方 preload.js 实现**：`crypto.md5/aesEncrypt/rsaEncrypt/randomBytes`、`buffer.from/bufToString`、`zlib` 全套。验证器曾因 utils 为空对象误杀六音/野花/野草等依赖官方 utils 的源——`source_bridge.js` 已按官方实现补齐，改动时勿回退。
+3. **音源去重**：按 `@name` 去重、在线官方版优先；本地重复副本保留作离线兜底。在线源缓存名 = `md5(原始 URL)`（不是回退后的镜像 URL），缓存在 `bot/tmp/online_sources/`。
+4. **镜像回退**：每个在线源派生 5 路候选（ghproxy.net → raw 直连 → mirror.ghproxy → fastly.jsdelivr → cdn.jsdelivr）。断网时若缓存非空则回退缓存服役（BUG-001 修复）。
+5. **平台声明路由**：`bridge.py` 的 `supports()` 用 `sources.get(platform)` 判定，不能用 `in` 键检查（BUG-003，`{'actions': [...]}` 形态会恒 False 导致全走全集兜底）。
+6. **已知环境限制**：`pdone-lx`（独家音源 v6）依赖 systemd 安装本地服务，容器/Windows 跑不起来，落雪桌面端同样受限——已隔离保留，不要删除；如需支持可做 systemd 沙箱方案。
+7. **QA 测试注意**：测试夹具会写 `bot/tmp/online_sources/`，跑完必须清理含「QA验收」标记的缓存，否则污染后续运行；测试中 `supports()` 断言要允许"None 或 http 候选"两种优雅回退形态。
+8. **内核终态参考**：真实内核 53 候选脚本 → 37 个唯一音源进程就绪 + 内置引擎；7 个在线官方源实时服役；14 个重复副本去重；2 个待自愈属正常态。
+
+### 待办路线（按优先级）
+
+| 事项 | 说明 |
+|---|---|
+| S1 弹幕层切换 | 改用 `bilibili-api-python`：`pip install bilibili-api-python`，`bot/core.py` 与 `bot/__init__.py` 的 import 换成 `danmaku_biliapi`；切换后按死代码清理预案删除手写协议（约 283 行，零引用证明：`python3 tools/verify_deadcode.py`；预案全文见 git 历史 `git show 62e1d90:S1清理预案.md`） |
+| S2 播放层切换 | `pip install python-mpv` + 系统 libmpv，core.py 改 import `player_mpv` |
+| S3 评分器切换 | `pip install rapidfuzz`，main.py 加 `from bot import search_rapidfuzz; search_rapidfuzz.enable()` |
+| 覆盖率量化 | 接入 `pytest-cov`，当前仅有用例数无行覆盖率 |
+| pdone-lx 适配 | systemd 沙箱方案（见上文第 6 条） |
+
+### 历史文档（git 历史找回）
+
+下列文档已按「文档只留 README」原则收敛，需要时从 git 历史取回：
+
+```bash
+git show 62e1d90:S0交付说明.md        # S0 交付说明
+git show 62e1d90:S1清理预案.md        # 弹幕层切换与死代码清理预案
+git show 62e1d90:lx兼容性对齐报告.md   # 45 音源逐文件溯源与协议对齐
+git show 62e1d90:音源健康诊断报告.md   # 音源健康分析
+git show 62e1d90:合规审查报告.md       # 合规审查
+git show 62e1d90:竞品分析报告.md       # 竞品分析
+git show 62e1d90:qa/QA-ACCEPTANCE-REPORT.md   # 正式版验收报告（56/56 签字版）
+```
+
+## 🤝 Contributing
+
+1. Fork 本仓库，创建 `feature/xxx` 分支
+2. 提交前确保 `python3 -m pytest tests/ -q` 全过
+3. 发起 PR 并描述改动动机与验证方式
+
+## 📄 License
+
+- 本项目代码：**GPL-3.0**（见 [LICENSE](LICENSE)）
 - `musicSdk_bundle.cjs` 来自 [lx-music-desktop](https://github.com/lyswhut/lx-music-desktop)（Apache-2.0 + 补充条款），可复现构建见 `tools/build_music_sdk/`，许可明细见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
-- **仅供个人学习研究，禁止商业使用**
 
-## 免责声明
+## ⚠️ 免责声明
 
 本项目不存储、不传播任何音频文件，仅作个人学习目的的技术验证。所有音乐数据来自第三方公开接口，版权归原作者与音乐平台。请使用后 24 小时内清除产生的版权数据，支持正版；使用本项目产生的任何问题由使用者自行承担。

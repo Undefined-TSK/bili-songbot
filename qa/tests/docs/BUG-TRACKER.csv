@@ -1,4 +1,0 @@
-﻿缺陷ID,严重级别,状态,标题,复现步骤,影响,修复与验证
-BUG-001,P2,已修复,全部在线音源下载失败时离线缓存未被利用（链接源持久化缺口）,1.断网/源站全挂 2.启动内核 3.观察在线源进程,"链接形式音源在极端断网下失联，违背""永不失效""",bot/bridge.py _fetch_online_sources：ok==0 且缓存非空时回退缓存服役；TC-LINK-008 复测 PASS
-BUG-002,P3,已修复,ghproxy 形式链接未派生 jsdelivr 镜像候选（仅 3 条候选）,1.调用 _mirror_candidates(ghproxy链接) 2.观察候选列表,单一反代失效时少一层持久化保障,bot/bridge.py _mirror_candidates：对 raw 形态候选再派生 jsdelivr×2；TC-LINK-006 复测 5 条 PASS
-BUG-003,P2,已修复,supports() 平台判断恒为 False（对 {actions:[...]} 做键检查），平台声明路由失效,"1.加载声明 wy 的源 2.调用 supports(""musicUrl"",""wy"")",全部请求走全集兜底，慢源拖累取链、浪费竞速窗口,bot/bridge.py supports：改为 sources.get(source) 判定；TC-KRN-006 复测 PASS，真实内核 37 进程就绪
