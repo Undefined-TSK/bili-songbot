@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """拼音 / 谐音 / 错别字 / 简繁 鲁棒模糊匹配单元测试。
 
-pypinyin 为可选依赖：缺失时整层禁用，相关断言跳过（不影响 CI / 无网环境）。
+pypinyin 为项目依赖（requirements.txt）：缺失时整层禁用、相关断言跳过（离线/精简环境仍可跑）。
 """
 import os
 import sys

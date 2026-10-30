@@ -183,7 +183,7 @@ FFPLAY_ARGS = CFG.get("ffplay_args", ["-nodisp", "-autoexit", "-loglevel", "quie
 # 取链限时（秒）：并行获取各音质 URL 的最长等待，超时用已到手结果继续（跨源回退尽快介入）
 URL_FETCH_TIMEOUT = CFG.get("url_fetch_timeout", 15)
 
-# 拼音/谐音/错别字/简繁 鲁棒模糊匹配（需可选依赖 pypinyin；缺失时自动禁用，优雅降级）
+# 拼音/谐音/错别字/简繁 鲁棒模糊匹配（pypinyin 为项目依赖；缺失时自动禁用，优雅降级）
 # 让 "周杰轮→周杰伦"、"zhoujielun→周杰伦"、"繁体→简体" 也能命中，把自由输入推进到"语音容错"
 ENABLE_PINYIN_FUZZY = CFG.get("enable_pinyin_fuzzy", True)
 

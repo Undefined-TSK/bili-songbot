@@ -8,7 +8,7 @@
 3. 择优稳定性：同一候选列表下 best 选择一致；存在干净匹配时干净匹配胜过乱序候选。
 
 用法: python3 tests/test_search_rapidfuzz.py
-前置: pip install rapidfuzz
+前置: rapidfuzz（项目依赖，见 requirements.txt）
 """
 import os
 import sys

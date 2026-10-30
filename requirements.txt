@@ -1,6 +1,12 @@
 aiohttp>=3.9.0
 websockets>=12.0
-# 无分隔中文查询拆词（split_play_query）；缺失时自动降级为整句匹配
+# 无分隔中文查询拆词（split_play_query）
 jieba>=0.42.1
-# 弹幕层适配器（bot/danmaku_biliapi.py）及其测试所需
+# 弹幕层适配器（bot/danmaku_biliapi.py）
 bilibili-api-python>=17.0.0
+# 模糊评分加速器：search._fuzzy_match 直接用 rapidfuzz（缺失时退化为字符重叠率）
+rapidfuzz>=3.0,<4
+# 拼音/谐音/错别字/简繁容错（周杰轮→周杰伦、zhoujielun→周杰伦）
+pypinyin>=0.51,<1
+# S2 mpv 播放后端（python-mpv 1.x 需系统 libmpv：apt install libmpv2）
+python-mpv>=1.0,<2

@@ -48,8 +48,9 @@
 # 1. 克隆并安装依赖
 git clone https://github.com/Undefined-TSK/bili-songbot.git
 cd bili-songbot
-pip install -r requirements.txt # 必需（aiohttp/websockets/jieba/bilibili-api-python）
-pip install rapidfuzz pypinyin  # 可选：更准的模糊评分 / 拼音匹配（缺失自动降级）
+pip install -r requirements.txt # 全部依赖（含 rapidfuzz 模糊评分 / pypinyin 拼音容错 / python-mpv）
+# python-mpv 另需系统 libmpv（Ubuntu: apt install libmpv2；仅 mpv 播放后端与相关测试需要，
+# 默认 ffplay 后端不受影响）
 
 # 2. 生成配置
 cp config.example.json config.json
@@ -96,7 +97,7 @@ python main.py
 
 ```bash
 pip install -r requirements.txt pytest   # 运行依赖 + 测试框架
-python3 -m pytest tests/ -q              # 单元测试（可选依赖缺失时自动跳过对应用例）
+python3 -m pytest tests/ -q              # 单元测试（依赖齐全时 238 条全通过）
 python3 tests/e2e_flow.py                # 端到端（含真实网络搜索 → 取链 → 播放回退链路）
 ```
 
@@ -130,7 +131,7 @@ bili-songbot/
 ├── musicSdk_bundle.cjs      # lx 内置搜索引擎打包产物（Apache-2.0，见构建说明）
 ├── sources/                 # 44 个预置音源（46 个文件）
 ├── qa/                      # 正式版验收套件（47 用例执行器 + results.json）
-├── tests/                   # 238 个单元测试（29 条可选依赖缺失时自动跳过）+ e2e_flow.py 端到端脚本
+├── tests/                   # 238 个单元测试（依赖齐全时全通过）+ e2e_flow.py 端到端脚本
 └── tools/
     ├── build_music_sdk/     # musicSdk 可复现构建（见其 README）
     └── verify_deadcode.py   # 死代码零引用证明（AST 级）
@@ -140,7 +141,7 @@ bili-songbot/
 
 ## 🤖 交接指南（AI / 新维护者必读）
 
-**当前状态：v1.0.0 正式版已发布**（tag `v1.0.0`，含完整源码 zip 资产）。单元测试 238 条（209 通过 + 29 条可选依赖缺失时自动跳过），验收 47/47，0 开放缺陷。以下是从零接手所需的全部上下文。
+**当前状态：v1.0.0 正式版已发布**（tag `v1.0.0`，含完整源码 zip 资产）。单元测试 238 条全部通过，验收 47/47，0 开放缺陷。以下是从零接手所需的全部上下文。
 
 ### 必须知道的关键实现细节
 
@@ -158,8 +159,8 @@ bili-songbot/
 | 事项 | 说明 |
 |---|---|
 | S1 弹幕层切换 | 改用 `bilibili-api-python`：`pip install bilibili-api-python`，`bot/core.py` 与 `bot/__init__.py` 的 import 换成 `danmaku_biliapi`；切换后按死代码清理预案删除手写协议（约 283 行，零引用证明：`python3 tools/verify_deadcode.py`；预案全文见 git 历史 `git show 62e1d90:S1清理预案.md`） |
-| S2 播放层切换 | `pip install python-mpv` + 系统 libmpv，core.py 改 import `player_mpv` |
-| S3 评分器切换 | `pip install rapidfuzz`，main.py 加 `from bot import search_rapidfuzz; search_rapidfuzz.enable()` |
+| S2 播放层切换 | python-mpv 已在 requirements 中安装；需系统 libmpv（`apt install libmpv2`），core.py 改 import `player_mpv` 即完成切换 |
+| S3 评分器切换 | ~~已完成~~：`rapidfuzz` 已为项目依赖，`search._fuzzy_match` 直接使用它（`search_rapidfuzz.enable()` 仅保留兼容，默认即健壮实现） |
 | 覆盖率量化 | 接入 `pytest-cov`，当前仅有用例数无行覆盖率 |
 | pdone-lx 适配 | systemd 沙箱方案（见上文第 6 条） |
 
