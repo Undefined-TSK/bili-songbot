@@ -6,9 +6,9 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Optional
 
-from .config import VOTE_BROADCAST_INTERVAL, VOTE_DURATION, log
+from .config import VOTE_BROADCAST_INTERVAL, VOTE_DURATION
 
 if TYPE_CHECKING:
     from .danmaku import BiliSender

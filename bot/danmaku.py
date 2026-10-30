@@ -1,11 +1,10 @@
 """弹幕交互层：直播间 WebSocket 弹幕监听（BiliDanmaku）与弹幕发送（BiliSender，含 10030 退避对抗）。"""
 import asyncio
 import json
-import re
 import struct
 import time
 import zlib
-from typing import Callable, Optional
+from typing import Optional
 
 import aiohttp
 import websockets

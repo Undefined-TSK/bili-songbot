@@ -10,7 +10,7 @@ import aiohttp
 from .bridge import get_bridge
 from .config import FFPLAY_ARGS, FFPLAY_PATH, log
 from .models import SongInfo
-from .protocol import BILI_HEADERS, FULL_UA
+from .protocol import FULL_UA
 
 
 def _new_tmp_path() -> str:
@@ -144,7 +144,7 @@ async def download_audio_via_bridge(url: str) -> Optional[str]:
             log.info(f"桥接器下载完成: {size // 1024} KB")
             return tmp_path
         else:
-            log.warning(f"桥接器下载失败: 无数据")
+            log.warning("桥接器下载失败: 无数据")
             _safe_unlink(tmp_path)
             return None
     except Exception as e:
@@ -181,7 +181,7 @@ class PlaybackManager:
                 tmp_path = await download_audio(self.session, url, song.platform)
                 if not tmp_path:
                     # aiohttp 下载失败，尝试通过 Node.js 桥接器下载（解决代理 URL 0 字节问题）
-                    log.info(f"aiohttp 下载失败，尝试桥接器下载...")
+                    log.info("aiohttp 下载失败，尝试桥接器下载...")
                     tmp_path = await download_audio_via_bridge(url)
                 if not tmp_path:
                     log.error(f"音频下载失败: {song.name} - {song.singer}")

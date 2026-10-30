@@ -8,8 +8,6 @@ import logging
 import os
 import sys
 import time
-from logging.handlers import RotatingFileHandler
-from typing import Any, Dict
 
 
 _console_handler = logging.StreamHandler()

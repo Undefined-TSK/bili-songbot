@@ -18,7 +18,7 @@ from .player import PlaybackManager, validate_audio_url
 from .protocol import BILI_ROOM_INFO, CookieManager, fetch_buvid3, update_buvid3
 from .search import (PLATFORM_NAMES, QUALITY_LADDER, VERSION_NOISE, _alias_match,
                      _fuzzy_match, _normalize_text, cache_music_url, cached_music_url,
-                     get_music_url, invalidate_music_url, search_song, suggest_song)
+                     invalidate_music_url, search_song, suggest_song)
 from .stats import SongStats
 
 _VERSION_WORDS_LOWER = {v.lower() for v in VERSION_NOISE}
@@ -138,7 +138,6 @@ class BiliMusicBot:
         self.cookie_mgr = CookieManager()
         self.vote = VoteManager(self.sender)  # 会被更新
         self._playing = False
-        self._room_live = True
 
     async def run(self):
         self.session = aiohttp.ClientSession()
@@ -425,7 +424,6 @@ class BiliMusicBot:
             songs = await self._verify_batch_groups(groups)
             if songs:
                 log.info(f"批量点歌(验证通过): {[(s.name, s.singer, s.platform) for s in songs]}")
-                seen = set()
                 added = 0
                 for song in songs:
                     item = QueueItem(song=song, requester=requester, requester_uid=uid)
@@ -653,7 +651,7 @@ class BiliMusicBot:
         # 回退：如果所有预验证都失败，直接尝试下载最高音质（不经验证）
         # 某些代理 URL 可能无法通过 GET Range 验证但实际可正常下载
         if not any(validated.values()):
-            log.info(f"所有URL预验证均失败，尝试直接下载（跳过验证）...")
+            log.info("所有URL预验证均失败，尝试直接下载（跳过验证）...")
             no_filter = {q: True for q in ladder}
             if await self._try_play_by_quality(
                 song, url_map, no_filter, on_start,
@@ -744,7 +742,6 @@ class BiliMusicBot:
                         live_status = data["data"].get("live_status", 0)
                         if live_status == 0:
                             log.warning("直播间已关闭，程序退出")
-                            self._room_live = False
                             # 停止所有任务
                             if self.danmaku:
                                 await self.danmaku.stop()

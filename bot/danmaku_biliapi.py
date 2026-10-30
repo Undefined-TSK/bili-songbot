@@ -17,7 +17,6 @@ S1 切片产物：用 bilibili-api-python 的 LiveDanmaku 替换手写 WebSocket
 
 依赖：pip install bilibili-api-python（含 aiohttp/brotli/pure-protobuf）
 """
-import asyncio
 from typing import Callable, Optional
 
 import aiohttp

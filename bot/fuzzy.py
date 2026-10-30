@@ -1,4 +1,4 @@
-"""智能模糊匹配增强：拼音 / 谐音 / 错别字 / 简繁 鲁棒比对（可选依赖 pypinyin）。
+"""智能模糊匹配增强：拼音 / 谐音 / 错别字 / 简繁 鲁棒比对（pypinyin 项目依赖）。
 
 设计定位（与既有架构正交）：
 - 仅服务于 search 评分层的「歌名 / 歌手」比对，让 "周杰轮→周杰伦"、"zhoujielun→周杰伦"、
@@ -6,12 +6,11 @@
   从"字面容错"推进到"语音容错"。
 - **绝不触碰**：艺名别名数据库（artist_alias 本职：别名↔真实歌手互认）、批量零词典拆分
   （batch.py）、单曲点歌逻辑（core._handle_play）。本模块只给 search 的模糊比对多一层信号。
-- **可选依赖**：pypinyin 缺失时本层自动禁用（优雅降级为既有字面匹配），不影响部署与旧行为。
+- **优雅降级**：pypinyin 缺失（精简环境）时本层自动禁用，退回既有字面匹配，不影响部署与旧行为。
 - **保守放行**：仅在「拼音键完全相等」或「拼音相似度≥90% 且长度差≤3」时命中，且仅对
   **含中日韩字符**的比对生效，避免对纯英文/无关串产生新的误配（准确率优先）。
 """
 import re
-from typing import Tuple
 
 try:
     from pypinyin import lazy_pinyin
@@ -110,19 +109,3 @@ def pinyin_match(keyword: str, target: str) -> bool:
         if _pinyin_ratio(pk, pt) >= 90.0:
             return True
     return False
-
-
-def pinyin_similarity(a: str, b: str) -> Tuple[float, bool]:
-    """拼音相似度（0~1）与是否达到"可采信"阈值。供评分层做加权参考。"""
-    if not PINYIN_AVAILABLE:
-        return 0.0, False
-    if not _CJK_RE.search(a + b):
-        return 0.0, False
-    pk, pt = pinyin_key(a), pinyin_key(b)
-    if not pk or not pt:
-        return 0.0, False
-    if pk == pt:
-        return 1.0, True
-    sim = _pinyin_ratio(pk, pt) / 100.0
-    return sim, (len(pk) >= 4 and len(pt) >= 4
-                 and abs(len(pk) - len(pt)) <= 3 and sim >= 0.9)

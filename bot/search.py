@@ -12,7 +12,7 @@ from .bridge import get_bridge
 from .cache import TTLCache
 from .config import (CACHE_MAX_ENTRIES, ENABLE_PINYIN_FUZZY, SEARCH_CACHE_TTL,
                      URL_CACHE_TTL, log)
-from .fuzzy import PINYIN_AVAILABLE, pinyin_match
+from .fuzzy import pinyin_match
 from .models import SongInfo
 
 try:
@@ -181,14 +181,6 @@ VERSION_NOISE = [
     "抖音", "快手", "车载", "怀旧", "慢四", "重制", "重新", "新版", "改编", "串烧", "VIP",
     "母带", "臻品", "慢摇", "伤感", "对唱", "合唱", "国风", "彩铃",
 ]
-
-
-def _strip_version_noise(text: str) -> str:
-    """去掉衍生版本标记，得到「核心歌名」，用于原版加权与歧义消解。"""
-    t = text
-    for p in VERSION_NOISE:
-        t = t.replace(p, "")
-    return t
 
 
 def _detect_query_version(query: str) -> Optional[str]:

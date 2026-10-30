@@ -11,6 +11,10 @@ from bot import protocol
 
 
 async def main():
+    # 文件日志：按 config.json 的 log_file/log_level 落盘（日志轮转 + 过期清理）
+    from bot.config import CFG, cleanup_old_logs, setup_file_logging
+    setup_file_logging(CFG)
+    cleanup_old_logs(CFG)
     log.info("=" * 50)
     log.info("B站直播间点歌机器人 启动")
     from bot.config import ROOM_ID

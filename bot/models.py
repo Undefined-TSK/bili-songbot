@@ -3,7 +3,7 @@ import json
 import os
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Optional
 
 
 # ======================== 歌曲信息 ========================

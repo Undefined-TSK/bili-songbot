@@ -7,7 +7,6 @@ import asyncio
 import hashlib
 import json
 import os
-import re
 import time
 from typing import Optional, Tuple
 from urllib.parse import urlencode
@@ -16,7 +15,7 @@ import aiohttp
 
 from . import config
 from .config import (
-    API_RATE_INTERVAL, BILI_BUVID3_CFG, BILI_BUVID4_CFG, BILI_JCT, CONFIG_PATH, ROOM_ID, SESSDATA, log,
+    API_RATE_INTERVAL, BILI_BUVID4_CFG, BILI_JCT, CONFIG_PATH, ROOM_ID, SESSDATA, log,
 )
 
 
@@ -37,9 +36,6 @@ class ApiRateLimiter:
                 log.debug(f"API限速: 等待{wait:.1f}秒")
                 await asyncio.sleep(wait)
             self._last_request = time.time()
-
-    def set_interval(self, interval: float):
-        self._min_interval = interval
 
 
 _api_limiter = ApiRateLimiter(API_RATE_INTERVAL)
@@ -80,6 +76,11 @@ REAL_ROOM_ID = ROOM_ID  # 真实房间号，启动时通过 room_init 获取
 
 
 USER_UID = 0  # 用户 UID，启动时从 nav API 获取
+
+
+# buvid3 配置初值（Cookie 热更新时由 reload_config 覆盖）。
+# 其他模块必须以 protocol.BILI_BUVID3_CFG 动态读取，禁止 from-import 快照。
+BILI_BUVID3_CFG = config.BILI_BUVID3_CFG
 
 
 BILI_COOKIE_PARTS = [f"SESSDATA={SESSDATA}", f"bili_jct={BILI_JCT}"]
@@ -291,7 +292,6 @@ class CookieManager:
         """检查过期时间，返回提示信息。"""
         if not self.expiry_ts:
             return "无法解析 SESSDATA 过期时间"
-        import datetime
         now = time.time()
         remaining = self.expiry_ts - now
         if remaining <= 0:
@@ -331,7 +331,7 @@ class CookieManager:
 
     def reload_config(self) -> bool:
         """重新加载 config.json 中的 Cookie 配置（同步写回 config 模块）。"""
-        global SESSDATA, BILI_JCT, BILI_COOKIE, BILI_HEADERS, BILI_BUVID3_CFG, BILI_BUVID4_CFG
+        global SESSDATA, BILI_JCT, BILI_COOKIE, BILI_BUVID3_CFG, BILI_BUVID4_CFG
         try:
             new_cfg = json.load(open(CONFIG_PATH, "r", encoding="utf-8"))
             new_sessdata = new_cfg.get("bili_sessdata", "")
