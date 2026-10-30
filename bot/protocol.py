@@ -4,12 +4,10 @@
 其他模块必须 `from . import protocol` 后以 `protocol.X` 动态访问，禁止 from-import 快照。
 """
 import asyncio
-import hashlib
 import json
 import os
 import time
 from typing import Optional, Tuple
-from urllib.parse import urlencode
 
 import aiohttp
 
@@ -50,9 +48,6 @@ BILI_NAV_URL = "https://api.bilibili.com/x/web-interface/nav"
 BILI_FINGER_URL = "https://api.bilibili.com/x/frontend/finger"
 
 
-BILI_DANMAKU_CONF_OLD = f"{BILI_API_BASE}/room/v1/Danmu/getConf?room_id={ROOM_ID}"
-
-
 BILI_ROOM_INIT = f"{BILI_API_BASE}/room/v1/Room/room_init?id={ROOM_ID}"
 
 
@@ -73,9 +68,6 @@ BUVID3 = ""
 
 
 REAL_ROOM_ID = ROOM_ID  # 真实房间号，启动时通过 room_init 获取
-
-
-USER_UID = 0  # 用户 UID，启动时从 nav API 获取
 
 
 # buvid3 配置初值（Cookie 热更新时由 reload_config 覆盖）。
@@ -114,71 +106,6 @@ async def get_real_room_id(session: aiohttp.ClientSession) -> int:
     except Exception as e:
         log.warning(f"获取真实房间号失败: {e}")
     return ROOM_ID
-
-
-MIXIN_KEY_ENC_TAB = [
-    46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35,
-    27, 43, 5, 49, 33, 9, 42, 19, 29, 28, 14, 39, 12, 38, 41, 13,
-    37, 48, 7, 16, 24, 55, 40, 61, 26, 17, 0, 1, 60, 51, 30, 4,
-    22, 25, 54, 21, 56, 59, 6, 63, 57, 62, 11, 36, 20, 34, 44, 52,
-]
-
-
-_wbi_cache = {"img_key": "", "sub_key": "", "ts": 0}
-
-
-def _get_mixin_key(orig: str) -> str:
-    """对 imgKey+subKey 进行字符顺序打乱编码，取前32位。"""
-    return "".join(orig[i] for i in MIXIN_KEY_ENC_TAB)[:32]
-
-
-def enc_wbi(params: dict, img_key: str, sub_key: str) -> dict:
-    """为请求参数进行 WBI 签名，返回添加了 w_rid 和 wts 的参数。"""
-    mixin_key = _get_mixin_key(img_key + sub_key)
-    params = dict(params)
-    params["wts"] = round(time.time())
-    params = dict(sorted(params.items()))
-    # 过滤 value 中的特殊字符
-    params = {
-        k: "".join(filter(lambda c: c not in "!'()*", str(v)))
-        for k, v in params.items()
-    }
-    query = urlencode(params)
-    w_rid = hashlib.md5((query + mixin_key).encode()).hexdigest()
-    params["w_rid"] = w_rid
-    return params
-
-
-async def get_wbi_keys(session: aiohttp.ClientSession) -> tuple:
-    """从 nav 接口获取 img_key 和 sub_key（缓存1小时）。同时捕获用户 UID。"""
-    global USER_UID
-    now = time.time()
-    if _wbi_cache["img_key"] and now - _wbi_cache["ts"] < 3600:
-        return _wbi_cache["img_key"], _wbi_cache["sub_key"]
-    try:
-        await _api_limiter.acquire()
-        async with session.get(BILI_NAV_URL, headers=BILI_HEADERS, timeout=10) as resp:
-            data = await resp.json()
-            if data.get("code") == 0:
-                # 捕获用户 UID
-                mid = data.get("data", {}).get("mid", 0)
-                if mid:
-                    USER_UID = mid
-                    log.info(f"获取到用户 UID: {USER_UID}")
-                wbi_img = data.get("data", {}).get("wbi_img", {})
-                img_url = wbi_img.get("img_url", "")
-                sub_url = wbi_img.get("sub_url", "")
-                img_key = img_url.rsplit("/", 1)[-1].split(".")[0] if img_url else ""
-                sub_key = sub_url.rsplit("/", 1)[-1].split(".")[0] if sub_url else ""
-                if img_key and sub_key:
-                    _wbi_cache["img_key"] = img_key
-                    _wbi_cache["sub_key"] = sub_key
-                    _wbi_cache["ts"] = now
-                    log.debug(f"WBI keys 已获取: img={img_key[:8]}... sub={sub_key[:8]}...")
-                    return img_key, sub_key
-    except Exception as e:
-        log.warning(f"获取 WBI keys 失败: {e}")
-    return "", ""
 
 
 def update_buvid3(buvid3: str):

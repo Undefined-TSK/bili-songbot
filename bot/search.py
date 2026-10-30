@@ -253,7 +253,6 @@ def _score_search_result(name: str, result_singer: str, keyword: str, singer: st
 # ===== 评分器实现钩子（S3 切换点；已默认启用健壮实现）=====
 # search_song 通过这两个钩子调用评分实现。默认即健壮实现（rapidfuzz 多策略评分，
 # 见上方 _fuzzy_match/_score_search_result）；rapidfuzz 为项目依赖，缺失时退化为字符重叠率。
-# 兼容钩子：search_rapidfuzz.enable()/disable() 均指向同一实现，历史调用方式不受影响。
 FUZZY_MATCH = _fuzzy_match
 SCORE_RESULT = _score_search_result
 

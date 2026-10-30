@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-"""手写弹幕层（bot/danmaku.py）单元测试：数据包编解码、三级 connect 回退、发送端频控/退避。
+"""弹幕发送层（bot/danmaku.py）单元测试：字数截断、频控、10030 退避、Cookie 失效。
 
-全程无真实网络：HTTP 与 WebSocket 均以假对象替代。
+弹幕监听已切换到 bilibili-api-python（见 tests/test_danmaku_biliapi.py 与
+tests/test_danmaku_e2e_local.py），本文件只覆盖发送侧 BiliSender。
 用法: python3 tests/test_danmaku_core.py
 """
 import asyncio
-import json
 import os
-import struct
 import sys
 import time
 import unittest
-import zlib
 from collections import deque
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, patch
@@ -20,7 +18,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import bot.danmaku as danmaku
 from bot import protocol
-from bot.danmaku import BiliDanmaku, BiliSender, _truncate_danmaku
+from bot.danmaku import BiliSender, _truncate_danmaku
 
 
 class _FakeResp:
@@ -86,17 +84,6 @@ class _FakeCookie:
         self.marked.append(reason)
 
 
-def _danmu_msg(text, uid=1001, uname="观众甲"):
-    return {
-        "cmd": "DANMU_MSG",
-        "info": [[0, 1, 25], text, [uid, uname, 0, 0, 0, 0, 1, ""]],
-    }
-
-
-def _pack(body: bytes, op: int, protover: int = 1) -> bytes:
-    return BiliDanmaku._make_packet(body, op, protover)
-
-
 class TestTruncateDanmaku(unittest.TestCase):
 
     def test_ascii_counts_one_unit(self):
@@ -116,232 +103,6 @@ class TestTruncateDanmaku(unittest.TestCase):
 
     def test_no_truncation_needed(self):
         self.assertEqual(_truncate_danmaku("短", 40), "短")
-
-
-class TestMakePacket(unittest.TestCase):
-
-    def test_header_layout(self):
-        pkt = BiliDanmaku._make_packet(b"", 2)
-        self.assertEqual(struct.unpack(">I", pkt[0:4])[0], 16, "空包总长应为 16")
-        self.assertEqual(struct.unpack(">H", pkt[4:6])[0], 16, "header 固定 16")
-        self.assertEqual(struct.unpack(">H", pkt[6:8])[0], 1, "默认 protover=1")
-        self.assertEqual(struct.unpack(">I", pkt[8:12])[0], 2)
-        self.assertEqual(struct.unpack(">I", pkt[12:16])[0], 1, "序列号固定 1")
-
-    def test_protover_override_and_body(self):
-        body = b"hello"
-        pkt = BiliDanmaku._make_packet(body, 7, protover=2)
-        self.assertEqual(struct.unpack(">I", pkt[0:4])[0], 16 + len(body))
-        self.assertEqual(struct.unpack(">H", pkt[6:8])[0], 2)
-        self.assertEqual(pkt[16:], body)
-
-
-class TestHandlePacket(IsolatedAsyncioTestCase):
-
-    async def test_short_packet_ignored(self):
-        got = []
-
-        async def on_message(text, uid, uname):
-            got.append((text, uid, uname))
-
-        dm = BiliDanmaku(1, on_message=on_message)
-        await dm._handle_packet(None, b"\x00" * 10)
-        self.assertEqual(got, [])
-
-    async def test_auth_reply_code_zero_and_error(self):
-        dm = BiliDanmaku(1)
-        await dm._handle_packet(None, _pack(json.dumps({"code": 0}).encode(), 8))
-        # 认证失败分支只记录日志，不应抛异常
-        await dm._handle_packet(None, _pack(json.dumps({"code": -1}).encode(), 8))
-
-    async def test_viewer_count_callback(self):
-        seen = []
-
-        async def on_viewer(n):
-            seen.append(n)
-
-        dm = BiliDanmaku(1, on_viewer_count=on_viewer)
-        await dm._handle_packet(None, _pack(struct.pack(">I", 8888), 3))
-        self.assertEqual(seen, [8888])
-
-    async def test_viewer_count_empty_body_is_zero(self):
-        seen = []
-
-        async def on_viewer(n):
-            seen.append(n)
-
-        dm = BiliDanmaku(1, on_viewer_count=on_viewer)
-        await dm._handle_packet(None, _pack(b"", 3))
-        self.assertEqual(seen, [0])
-
-    async def test_viewer_count_without_callback(self):
-        dm = BiliDanmaku(1)
-        await dm._handle_packet(None, _pack(struct.pack(">I", 1), 3))  # 不炸
-
-    async def test_plain_danmu_msg_protover1(self):
-        got = []
-
-        async def on_message(text, uid, uname):
-            got.append((text, uid, uname))
-
-        dm = BiliDanmaku(1, on_message=on_message)
-        await dm._handle_packet(None, _pack(json.dumps(_danmu_msg("点歌 稻香")).encode(), 5, protover=1))
-        self.assertEqual(got, [("点歌 稻香", 1001, "观众甲")])
-
-    async def test_compressed_multi_packet(self):
-        got = []
-
-        async def on_message(text, uid, uname):
-            got.append(text)
-
-        dm = BiliDanmaku(1, on_message=on_message)
-        inner = (_pack(json.dumps(_danmu_msg("第一首")).encode(), 5, protover=0)
-                 + _pack(json.dumps(_danmu_msg("第二首")).encode(), 5, protover=0))
-        await dm._handle_packet(None, _pack(zlib.compress(inner), 5, protover=2))
-        self.assertEqual(got, ["第一首", "第二首"])
-
-    async def test_corrupt_compressed_payload_no_raise(self):
-        dm = BiliDanmaku(1)
-        await dm._handle_packet(None, _pack(b"not-zlib-data", 5, protover=2))
-
-    async def test_heartbeat_op_ignored(self):
-        dm = BiliDanmaku(1, on_message=AsyncMock())
-        await dm._handle_packet(None, _pack(b"", 2))
-        dm.on_message.assert_not_called()
-
-
-class TestProcessMessage(IsolatedAsyncioTestCase):
-
-    async def test_danmu_msg(self):
-        got = []
-
-        async def on_message(text, uid, uname):
-            got.append((text, uid, uname))
-
-        dm = BiliDanmaku(1, on_message=on_message)
-        await dm._process_message(json.dumps(_danmu_msg("hello", 42, "张三")).encode())
-        self.assertEqual(got, [("hello", 42, "张三")])
-
-    async def test_danmu_msg_too_short_info_ignored(self):
-        dm = BiliDanmaku(1, on_message=AsyncMock())
-        await dm._process_message(json.dumps({"cmd": "DANMU_MSG", "info": ["只", "两"]}).encode())
-        dm.on_message.assert_not_called()
-
-    async def test_super_chat_message(self):
-        got = []
-
-        async def on_message(text, uid, uname):
-            got.append((text, uid, uname))
-
-        dm = BiliDanmaku(1, on_message=on_message)
-        msg = {"cmd": "SUPER_CHAT_MESSAGE",
-               "data": {"message": "上舰", "user_info": {"uid": 7, "uname": "舰长"}}}
-        await dm._process_message(json.dumps(msg).encode())
-        self.assertEqual(got, [("上舰", 7, "舰长")])
-
-    async def test_super_chat_empty_text_ignored(self):
-        dm = BiliDanmaku(1, on_message=AsyncMock())
-        msg = {"cmd": "SUPER_CHAT_MESSAGE", "data": {"message": "", "user_info": {"uid": 7}}}
-        await dm._process_message(json.dumps(msg).encode())
-        dm.on_message.assert_not_called()
-
-    async def test_unknown_cmd_and_bad_json_ignored(self):
-        dm = BiliDanmaku(1, on_message=AsyncMock())
-        await dm._process_message(json.dumps({"cmd": "SEND_GIFT"}).encode())
-        await dm._process_message(b"{not json")
-        dm.on_message.assert_not_called()
-
-    async def test_without_callback_does_not_raise(self):
-        dm = BiliDanmaku(1)
-        await dm._process_message(json.dumps(_danmu_msg("x")).encode())
-
-
-class TestConnect(IsolatedAsyncioTestCase):
-
-    def _patch_wbi(self, keys=("i" * 32, "s" * 32)):
-        # WBI 混入表按 64 字符密钥索引，真实 img/sub key 各 32 位
-        async def fake_keys(session):
-            return keys
-
-        return patch.object(danmaku, "get_wbi_keys", fake_keys)
-
-    async def test_tier1_wbi_prefers_443_host(self):
-        payload = {"code": 0, "data": {"token": "tok",
-                   "host_list": [{"host": "a.example", "wss_port": 80},
-                                 {"host": "b.example", "wss_port": 443}]}}
-        session = _FakeSession(get_payloads=[payload])
-        dm = BiliDanmaku(1, session=session)
-        with self._patch_wbi():
-            url, token = await dm.connect()
-        self.assertEqual(url, "wss://b.example:443/sub")
-        self.assertEqual(token, "tok")
-
-    async def test_tier1_forces_port_443_when_no_443_host(self):
-        payload = {"code": 0, "data": {"token": "t",
-                   "host_list": [{"host": "only.example", "wss_port": 8080}]}}
-        session = _FakeSession(get_payloads=[payload])
-        dm = BiliDanmaku(1, session=session)
-        with self._patch_wbi():
-            url, token = await dm.connect()
-        self.assertEqual(url, "wss://only.example:443/sub")
-
-    async def test_tier1_failure_falls_back_to_old_conf(self):
-        old = {"code": 0, "data": {"token": "t2", "host": "legacy.example"}}
-        session = _FakeSession(get_payloads=[{"code": -352}, old])
-        dm = BiliDanmaku(1, session=session)
-        with self._patch_wbi(), patch.object(protocol._api_limiter, "acquire", AsyncMock()):
-            url, token = await dm.connect()
-        self.assertEqual(url, "wss://legacy.example:443/sub")
-        self.assertEqual(token, "t2")
-
-    async def test_missing_wbi_keys_goes_to_tier2(self):
-        old = {"code": 0, "data": {"token": "t2", "host": "legacy.example"}}
-        session = _FakeSession(get_payloads=[old])
-        dm = BiliDanmaku(1, session=session)
-        with self._patch_wbi(keys=(None, None)), patch.object(protocol._api_limiter, "acquire", AsyncMock()):
-            url, token = await dm.connect()
-        self.assertEqual(url, "wss://legacy.example:443/sub")
-
-    async def test_all_tiers_fail_uses_hardcoded_fallback(self):
-        session = _FakeSession(get_payloads=[{"code": -1}, {"code": -2}])
-        dm = BiliDanmaku(1, session=session)
-        with self._patch_wbi(), patch.object(protocol._api_limiter, "acquire", AsyncMock()):
-            url, token = await dm.connect()
-        self.assertEqual(url, "wss://hw-bj-live-chat.bilibili.com:443/sub")
-        self.assertEqual(token, "")
-
-    async def test_exceptions_in_http_total_fallback(self):
-        session = _FakeSession(get_payloads=[RuntimeError("boom"), RuntimeError("boom2")])
-        dm = BiliDanmaku(1, session=session)
-        with self._patch_wbi():
-            url, token = await dm.connect()
-        self.assertEqual(token, "")
-        self.assertTrue(url.startswith("wss://"), "异常时必须回退到硬编码地址而非抛出")
-
-
-class TestStop(IsolatedAsyncioTestCase):
-
-    async def test_stop_cancels_heartbeat_and_closes_ws(self):
-        closed = []
-
-        class _Ws:
-            async def close(self):
-                closed.append(True)
-
-        dm = BiliDanmaku(1)
-        dm.ws = _Ws()
-        task = asyncio.create_task(asyncio.sleep(3600))
-        dm._heartbeat_task = task
-        await dm.stop()
-        self.assertFalse(dm._running)
-        with self.assertRaises(asyncio.CancelledError):
-            await task
-        self.assertTrue(task.cancelled())
-        self.assertEqual(closed, [True])
-
-    async def test_stop_without_resources_is_safe(self):
-        dm = BiliDanmaku(1)
-        await dm.stop()
 
 
 class TestBiliSender(IsolatedAsyncioTestCase):

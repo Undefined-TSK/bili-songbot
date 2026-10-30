@@ -19,7 +19,8 @@ from .models import PlayQueue, QueueItem, SongInfo
 from .search import get_music_url, search_song
 from .player import PlaybackManager
 from .vote import VoteManager
-from .danmaku import BiliDanmaku, BiliSender
+from .danmaku import BiliSender
+from .danmaku_biliapi import BiliDanmaku
 from .core import BiliMusicBot
 
 __all__ = [

@@ -97,7 +97,7 @@ python main.py
 
 ```bash
 pip install -r requirements.txt pytest   # 运行依赖 + 测试框架
-python3 -m pytest tests/ -q              # 单元测试（依赖齐全时 238 条全通过）
+python3 -m pytest tests/ -q              # 单元测试（依赖齐全时 207 条全通过）
 python3 tests/e2e_flow.py                # 端到端（含真实网络搜索 → 取链 → 播放回退链路）
 ```
 
@@ -108,9 +108,9 @@ python3 tests/e2e_flow.py                # 端到端（含真实网络搜索 →
 
 | 层 | 技术 |
 |---|---|
-| 弹幕接入 | aiohttp WebSocket（B 站弹幕协议，手写实现） |
+| 弹幕接入 | bilibili-api-python LiveDanmaku（连接/认证/心跳/重连/WBI 由库处理） |
 | 音源内核 | Node.js 子进程池（每源一进程，lx 协议对齐 lx-music-desktop v2.12.6） |
-| 播放引擎 | ffplay 子进程（默认）/ python-mpv（可选切换） |
+| 播放引擎 | ffplay 子进程（默认）/ python-mpv（`player_backend=mpv` 可选） |
 | 模糊匹配 | difflib 默认 / rapidfuzz 可选 + pypinyin 拼音层 |
 | 持久化 | JSON 文件（队列、统计、在线源缓存） |
 
@@ -120,8 +120,9 @@ bili-songbot/
 ├── bot/                     # 核心 Python 包
 │   ├── core.py              # 主编排：搜索→入队→取链→播放
 │   ├── bridge.py            # 音源内核（Node 子进程管理/去重/自更新/自愈）
-│   ├── danmaku.py           # 弹幕 WS + 发送（S1 可切换 danmaku_biliapi）
-│   ├── protocol.py          # B 站 HTTP/WBI 协议
+│   ├── danmaku.py           # 弹幕发送（BiliSender：频控/10030 退避）
+│   ├── danmaku_biliapi.py   # 弹幕监听（bilibili-api-python LiveDanmaku 适配）
+│   ├── protocol.py          # B 站 HTTP 协议（限流 / buvid3 / Cookie 热重载）
 │   ├── search.py            # 双通道搜索与共识排序
 │   ├── cache.py             # 进程内 TTL 缓存（搜索/播放链接复用）
 │   ├── lyrics.py            # 歌词点歌
@@ -131,7 +132,7 @@ bili-songbot/
 ├── musicSdk_bundle.cjs      # lx 内置搜索引擎打包产物（Apache-2.0，见构建说明）
 ├── sources/                 # 44 个预置音源（46 个文件）
 ├── qa/                      # 正式版验收套件（47 用例执行器 + results.json）
-├── tests/                   # 238 个单元测试（依赖齐全时全通过）+ e2e_flow.py 端到端脚本
+├── tests/                   # 207 个单元测试（依赖齐全时全通过）+ e2e_flow.py 端到端脚本
 └── tools/
     ├── build_music_sdk/     # musicSdk 可复现构建（见其 README）
     └── verify_deadcode.py   # 死代码零引用证明（AST 级）
@@ -141,7 +142,7 @@ bili-songbot/
 
 ## 🤖 交接指南（AI / 新维护者必读）
 
-**当前状态：v1.0.0 正式版已发布**（tag `v1.0.0`，含完整源码 zip 资产）。单元测试 238 条全部通过，验收 47/47，0 开放缺陷。以下是从零接手所需的全部上下文。
+**当前状态：v1.0.0 正式版已发布**（tag `v1.0.0`，含完整源码 zip 资产）。单元测试 207 条全部通过，验收 47/47，0 开放缺陷。以下是从零接手所需的全部上下文。
 
 ### 必须知道的关键实现细节
 
@@ -158,9 +159,9 @@ bili-songbot/
 
 | 事项 | 说明 |
 |---|---|
-| S1 弹幕层切换 | 改用 `bilibili-api-python`：`pip install bilibili-api-python`，`bot/core.py` 与 `bot/__init__.py` 的 import 换成 `danmaku_biliapi`；切换后按死代码清理预案删除手写协议（约 283 行，零引用证明：`python3 tools/verify_deadcode.py`；预案全文见 git 历史 `git show 62e1d90:S1清理预案.md`） |
-| S2 播放层切换 | python-mpv 已在 requirements 中安装；需系统 libmpv（`apt install libmpv2`），core.py 改 import `player_mpv` 即完成切换 |
-| S3 评分器切换 | ~~已完成~~：`rapidfuzz` 已为项目依赖，`search._fuzzy_match` 直接使用它（`search_rapidfuzz.enable()` 仅保留兼容，默认即健壮实现） |
+| S1 弹幕层切换 | ~~已完成~~：弹幕监听改用 `bilibili-api-python` 的 `LiveDanmaku`（`bot/danmaku_biliapi.py`）；手写 WebSocket 协议栈与 WBI 签名已删除（零引用证明：`python3 tools/verify_deadcode.py`），`websockets` 仅测试用 |
+| S2 播放层切换 | ~~已完成~~：python-mpv 已在 requirements 中；config.json 设 `"player_backend": "mpv"` 即用常驻 mpv 实例播放（需系统 libmpv：`apt install libmpv2`），默认仍为 ffplay |
+| S3 评分器切换 | ~~已完成~~：`rapidfuzz` 已为项目依赖，`search._fuzzy_match` 直接使用它（默认即健壮实现，空转兼容壳 `search_rapidfuzz` 已删除） |
 | 覆盖率量化 | 接入 `pytest-cov`，当前仅有用例数无行覆盖率 |
 | pdone-lx 适配 | systemd 沙箱方案（见上文第 6 条） |
 

@@ -8,6 +8,7 @@
   "node_path": "node",
   "ffplay_path": "ffplay",
   "ffplay_args": ["-nodisp", "-autoexit", "-loglevel", "quiet"],
+  "player_backend": "ffplay",
   "mpv_options": {},
   "source_urls": [],
   "search_cache_ttl": 60,

@@ -208,6 +208,9 @@ CACHE_MAX_ENTRIES = CFG.get("cache_max_entries", 256)
 # 例如设为 320k 即只取 320k/flac/flac24bit，跳过 192k/128k，确保不播低音质。
 MIN_QUALITY = CFG.get("min_quality", "flac24bit")
 
+# 播放后端：ffplay（默认，每首歌一个子进程）或 mpv（常驻实例，需系统 libmpv）
+PLAYER_BACKEND = str(CFG.get("player_backend", "ffplay")).lower()
+
 # S2 播放层（python-mpv）可选参数，透传给 mpv.MPV（如 {"ao": "null", "vo": "null"}）；
 # 默认空 = mpv 使用系统默认音频输出
 MPV_OPTIONS = CFG.get("mpv_options", {})

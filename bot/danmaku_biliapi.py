@@ -1,19 +1,15 @@
-"""弹幕监听（bilibili-api-python 实现）：与 danmaku.BiliDanmaku 同接口的替代实现。
+"""弹幕监听（bilibili-api-python 实现）：bot 主路径使用的弹幕客户端。
 
-S1 切片产物：用 bilibili-api-python 的 LiveDanmaku 替换手写 WebSocket 协议栈
-（连接/认证/心跳/重连/WBI签名/buvid 获取，约 230 行）。
+S1 已完成：用 bilibili-api-python 的 LiveDanmaku 替换了原手写 WebSocket 协议栈
+（连接/认证/心跳/重连/WBI签名/buvid 获取，约 230 行），core.py 与 bot/__init__.py
+均已导入本模块的 BiliDanmaku；手写协议与 protocol.WBI 已删除。
 
-行为对齐（相对手写版）：
+行为对齐（相对原手写版）：
 - DANMU_MSG        -> on_message(弹幕内容, uid, 用户名)
 - SUPER_CHAT_MESSAGE -> on_message(留言内容, uid, 用户名)   # 手写版即支持 SC 点歌/投票，保留
 - VIEW             -> on_viewer_count(人气值)               # 手写版用心跳回复前4字节，同源
 - connect() 阻塞式重连循环 -> start() 内 await，语义与手写版 start() 一致
 - disconnect() 优雅关闭   -> stop()
-
-切换方式（用户实测 S1 后）：core.py 中
-    from .danmaku import BiliDanmaku
- 改为
-    from .danmaku_biliapi import BiliDanmaku
 
 依赖：pip install bilibili-api-python（含 aiohttp/brotli/pure-protobuf）
 """

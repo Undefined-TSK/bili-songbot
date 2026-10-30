@@ -39,9 +39,9 @@ async def main():
         assert hasattr(bot, sym), f'包导出缺失: {sym}'
     print('0. bot 包 12 个核心符号导出 OK（9 模块拆分无遗漏）')
 
-    # S1/S2/S3 适配器可导入性冒烟（均未接主路径，导入不应有任何副作用）
+    # S1/S2 适配器可导入性冒烟（danmaku_biliapi 已接主路径；player_mpv 由 player_backend 开关选用）
     # player_mpv 依赖系统 libmpv，缺失时跳过该项（默认 ffplay 后端不受影响）
-    from bot import danmaku_biliapi, search_rapidfuzz
+    from bot import danmaku_biliapi  # noqa: F401
     from bot.search import FUZZY_MATCH, SCORE_RESULT
     assert FUZZY_MATCH is bot.search._fuzzy_match, '评分器默认钩子应指向健壮实现'
     mpv_ok = True
@@ -49,7 +49,7 @@ async def main():
         from bot import player_mpv  # noqa: F401
     except Exception:
         mpv_ok = False
-    print('0b. S1/S2/S3 适配器导入冒烟 OK（danmaku_biliapi / player_mpv=%s / search_rapidfuzz）'
+    print('0b. 适配器导入冒烟 OK（danmaku_biliapi 已接主路径 / player_mpv=%s）'
           % ('可用' if mpv_ok else '缺 libmpv，跳过'))
 
     bridge = bot.SourceBridge()

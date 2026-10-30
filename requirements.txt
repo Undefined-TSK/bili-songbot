@@ -1,8 +1,9 @@
 aiohttp>=3.9.0
+# 仅测试用：本地假 WS 服务器（tests/test_danmaku_e2e_local.py）；运行时不依赖
 websockets>=12.0
 # 无分隔中文查询拆词（split_play_query）
 jieba>=0.42.1
-# 弹幕层适配器（bot/danmaku_biliapi.py）
+# 弹幕监听（bot/danmaku_biliapi.py 的 LiveDanmaku）
 bilibili-api-python>=17.0.0
 # 模糊评分加速器：search._fuzzy_match 直接用 rapidfuzz（缺失时退化为字符重叠率）
 rapidfuzz>=3.0,<4

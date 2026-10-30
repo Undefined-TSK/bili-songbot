@@ -14,6 +14,7 @@ import tempfile
 import unittest
 import wave
 from unittest import IsolatedAsyncioTestCase
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
@@ -191,6 +192,24 @@ class TestMpvPlayback(IsolatedAsyncioTestCase):
 
         await pm.play(self.wav1, song2, on_finish=rec.on_finish, on_start=rec.on_start)
         self.assertEqual(rec.finished, [(True, True), (True, False)], "新歌应自然播完结算")
+
+
+class TestBackendSelection(unittest.TestCase):
+    """core._make_playback_manager 按 config.player_backend 选择后端。"""
+
+    def test_default_ffplay(self):
+        from bot import core
+        from bot.player import PlaybackManager as Ffplay
+        with patch.object(core, "PLAYER_BACKEND", "ffplay"):
+            pm = core._make_playback_manager(None)
+        self.assertIsInstance(pm, Ffplay)
+
+    @unittest.skipUnless(MPV_AVAILABLE, "python-mpv/libmpv 不可用")
+    def test_mpv_selected_when_configured(self):
+        from bot import core
+        with patch.object(core, "PLAYER_BACKEND", "mpv"):
+            pm = core._make_playback_manager(None)
+        self.assertIsInstance(pm, PlaybackManager)
 
 
 if __name__ == '__main__':

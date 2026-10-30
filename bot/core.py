@@ -9,12 +9,14 @@ from . import protocol
 from .artist_alias import canonical_display, canonical_singer as _canon_singer
 from .batch import MAX_BATCH_SONGS, batch_plans, cap_batch_queries
 from .bridge import get_bridge
-from .config import (BILI_BUVID3_CFG, ENABLE_LYRICS_SEARCH, MIN_QUALITY, QUEUE_FILE,
-                     ROOM_CHECK_INTERVAL, ROOM_ID, STATS_FILE, URL_FETCH_TIMEOUT, log, reply)
-from .danmaku import BiliDanmaku, BiliSender
+from .config import (BILI_BUVID3_CFG, ENABLE_LYRICS_SEARCH, MIN_QUALITY, PLAYER_BACKEND,
+                     QUEUE_FILE, ROOM_CHECK_INTERVAL, ROOM_ID, STATS_FILE, URL_FETCH_TIMEOUT,
+                     log, reply)
+from .danmaku import BiliSender
+from .danmaku_biliapi import BiliDanmaku
 from .lyrics import looks_like_lyric
 from .models import PlayQueue, QueueItem, SongInfo
-from .player import PlaybackManager, validate_audio_url
+from .player import PlaybackManager as _FfplayPlayback, validate_audio_url
 from .protocol import BILI_ROOM_INFO, CookieManager, fetch_buvid3, update_buvid3
 from .search import (PLATFORM_NAMES, QUALITY_LADDER, VERSION_NOISE, _alias_match,
                      _fuzzy_match, _normalize_text, cache_music_url, cached_music_url,
@@ -124,6 +126,22 @@ def split_play_query(query: str) -> List[Tuple[str, str]]:
     return expanded
 
 
+def _make_playback_manager(session):
+    """按 config.player_backend 选择播放后端：默认 ffplay，可选常驻 mpv。
+
+    mpv 后端需要系统 libmpv（python-mpv 已在依赖中）；导入失败时回退 ffplay，
+    不因缺少可选后端而阻断启动。
+    """
+    if PLAYER_BACKEND == "mpv":
+        try:
+            from .player_mpv import PlaybackManager as _MpvPlayback
+            log.info("播放后端: mpv（常驻实例）")
+            return _MpvPlayback(session)
+        except Exception as e:
+            log.warning(f"mpv 后端不可用（回退 ffplay）: {e}")
+    return _FfplayPlayback(session)
+
+
 class BiliMusicBot:
     """B站直播间点歌机器人主控。"""
 
@@ -131,7 +149,7 @@ class BiliMusicBot:
         self.session: Optional[aiohttp.ClientSession] = None
         self.sender: Optional[BiliSender] = None
         self.danmaku: Optional[BiliDanmaku] = None
-        self.playback = PlaybackManager(self.session if self.session else None)
+        self.playback = _make_playback_manager(self.session if self.session else None)
         self.queue = PlayQueue(QUEUE_FILE or None)  # 队列持久化：重启恢复未播完的歌
         self.stats = SongStats(STATS_FILE or None)  # 点歌统计（/top 数据源，静默降级）
         self._current_item: Optional[QueueItem] = None  # 正在播放的队列项（公共台归属判定）
