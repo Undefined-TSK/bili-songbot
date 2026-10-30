@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SongBot · 直播间点歌台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- ================= icon sprite ================= -->
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.5 6.5 0 1 0 13.5 15.5l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 9.5 5a4.5 4.5 0 0 1 0 9z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2v-2H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 5v2h14V5H7z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></symbol>
+  <symbol id="i-disc" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M16 7V3h-2v4h-4V3H8v4a4 4 0 0 0 3 3.9V21h2v-10a4 4 0 0 0 3-3.9V7z"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.5.5 0 0 0-.59-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.5.5 0 0 0-.59.22L2.74 8.87a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.37 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.03-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><path d="M2 4h20v16H2V4zm2 2v4h16V6H4zm0 6v4h10v-4H4z"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 2-.9 2-2 0-.5-.2-1-.6-1.4-.4-.4-.6-1-.6-1.6 0-1.1.9-2 2-2h2.3A4.9 4.9 0 0 0 21 9.5C21 5.8 17.9 3 12 3z"/></symbol>
+  <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 0a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4zm8 0c-.29 0-.62.02-.97.05C16.19 13.89 17 15.15 17 17V20h6v-3c0-2.66-5.33-4-8-4z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4 10h-5V7h-2v7h7v-2z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 16l-4-4h3V4h2v8h3l-4 4zm-8 2h16v2H4v-2z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M17.65 6.35A8 8 0 1 0 19.73 14h-2.08A6 6 0 1 1 12 6a5.9 5.9 0 0 1 4.19 1.81L13 11h7V4l-2.35 2.35z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M12 22a2.2 2.2 0 0 0 2.2-2.2h-4.4A2.2 2.2 0 0 0 12 22zm7-5.5V10a7 7 0 0 0-5-6.7V3a2 2 0 0 0-4 0v.3A7 7 0 0 0 5 10v6.5L3 18.5v1h18v-1l-2-1.5z"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><path d="M6 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2zm7 12l1.1 3 3 1.1-3 1.1L19 22l-1.1-3-3-1.1 3-1.1L19 14z"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2 9l10 10 10-10a14 14 0 0 0-20 0z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 3v7c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V5l8-3zm-1 13l5-5-1.4-1.4L11 12.2 8.4 9.6 7 11l4 4z"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3H12z"/></symbol>
+  <symbol id="i-broadcast" viewBox="0 0 24 24"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-8.5-.5a10 10 0 0 1 0 5l-2 .5a12 12 0 0 1 0-6l2 .5zm17 0l2-.5a12 12 0 0 1 0 6l-2-.5a10 10 0 0 1 0-5z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18v2H3v-2zm2-3h3v-7H5v7zm6 0h3V6h-3v11zm6 0h3V9h-3v8z"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 5h16l-6 7v6l-4 2v-8L4 5z"/></symbol>
+</svg>
+
+<div class="app">
+  <!-- ================= titlebar ================= -->
+  <header class="titlebar">
+    <div class="brand">
+      <span class="logo"><i><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M3 20h2v-6H3v6zm4 0h2V4H7v16zm4 0h2v-9h-2v9zm4 0h2v-5h-2v5zm4 0h2V7h-2v13z"/></svg></i></span>
+      <div>
+        <div class="brand-name">Song<span>Bot</span></div>
+        <div class="brand-sub">Live Request Desk</div>
+      </div>
+    </div>
+    <div class="titlebar-spacer"></div>
+    <span class="tb-chip"><span class="dot"></span> 直播间 88250 · 已连接</span>
+    <div class="win-controls">
+      <button class="win-btn" data-win="minimize" aria-label="最小化"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h16v1.5H4z"/></svg></button>
+      <button class="win-btn" data-win="maximize" aria-label="最大化"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5h14v14H5z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></button>
+      <button class="win-btn close" data-win="close" aria-label="关闭"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
+    </div>
+  </header>
+
+  <!-- ================= sidebar ================= -->
+  <aside class="sidebar">
+    <div class="nav-label">工作台</div>
+    <nav class="nav" id="nav">
+      <span class="nav-pill" id="navPill"></span>
+      <button class="nav-item active" data-page="dashboard" data-eyebrow="今日概览" data-title="营业中">
+        <svg><use href="#i-home"/></svg><span>概览</span>
+      </button>
+      <button class="nav-item" data-page="request" data-eyebrow="搜索 · 多源聚合" data-title="点歌台">
+        <svg><use href="#i-search"/></svg><span>点歌台</span>
+      </button>
+      <button class="nav-item" data-page="queue" data-eyebrow="FIFO · 已持久化" data-title="播放队列">
+        <svg><use href="#i-list"/></svg><span>播放队列</span><span class="badge">6</span>
+      </button>
+      <button class="nav-item" data-page="player" data-eyebrow="Now Playing" data-title="播放中心">
+        <svg><use href="#i-play"/></svg><span>播放中心</span>
+      </button>
+      <button class="nav-item" data-page="live" data-eyebrow="实时弹幕流" data-title="弹幕互动">
+        <svg><use href="#i-chat"/></svg><span>弹幕互动</span><span class="badge">12</span>
+      </button>
+      <button class="nav-item" data-page="library" data-eyebrow="历史 · 榜单" data-title="曲库与统计">
+        <svg><use href="#i-disc"/></svg><span>曲库与统计</span>
+      </button>
+      <button class="nav-item" data-page="sources" data-eyebrow="lx 音源桥" data-title="音源管理">
+        <svg><use href="#i-plug"/></svg><span>音源管理</span><span class="badge">44</span>
+      </button>
+      <button class="nav-item" data-page="settings" data-eyebrow="账号 · 行为 · 外观" data-title="设置">
+        <svg><use href="#i-gear"/></svg><span>设置</span>
+      </button>
+      <button class="nav-item" data-page="logs" data-eyebrow="诊断与追踪" data-title="日志">
+        <svg><use href="#i-terminal"/></svg><span>日志</span>
+      </button>
+      <button class="nav-item" data-page="design" data-eyebrow="Design System" data-title="设计规范">
+        <svg><use href="#i-palette"/></svg><span>设计规范</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="conn-card">
+        <span class="pulse"></span>
+        <div>
+          <b>服务运行中</b>
+          <small>pid 4831 · 12ms</small>
+        </div>
+      </div>
+      <div class="foot-actions">
+        <button class="btn sm ghost" data-open-wizard><svg><use href="#i-sparkle"/></svg><span>启动引导</span></button>
+        <button class="btn sm ghost" data-toast="已复制连接信息"><svg><use href="#i-shield"/></svg><span>安全</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= main ================= -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-eyebrow" id="pageEyebrow">今日概览</div>
+        <h1 class="page-title" id="pageTitle">营业中</h1>
+      </div>
+      <div class="topbar-spacer"></div>
+      <span class="stat-chip"><svg><use href="#i-users"/></svg>在线 <b id="viewers">3,842</b></span>
+      <span class="stat-chip"><svg><use href="#i-music"/></svg>队列 <b>6</b></span>
+      <button class="btn primary sm" id="botToggle"><svg><use href="#i-pause"/></svg><span>暂停接单</span></button>
+      <button class="icon-btn" data-toast="暂无新通知"><svg><use href="#i-bell"/></svg></button>
+      <div class="avatar">主</div>
+    </div>
+
+    <div class="pages" id="pages">
+
+      <!-- ---------- 1. 概览 ---------- -->
+      <section class="page active" id="page-dashboard" data-stagger>
+        <div class="hero">
+          <div class="hero-main">
+            <span class="hero-kicker">Live · 88250</span>
+            <h2 class="hero-title">今晚的点歌<br /><span class="kinetic grad-text" data-kinetic="点歌台在营业"></span></h2>
+            <p class="hero-sub">弹幕点歌、跨源聚合搜索、队列持久化与 10030 退避对抗，全部在本地运行。</p>
+            <div class="hero-actions">
+              <button class="btn primary" data-toast="已开始接单"><svg><use href="#i-play"/></svg>开始接单</button>
+              <button class="btn" data-nav="request"><svg><use href="#i-search"/></svg>去点歌台</button>
+              <button class="btn ghost" data-toast="已跳过当前歌曲"><svg><use href="#i-skip"/></svg>跳过</button>
+            </div>
+          </div>
+          <div class="hero-side">
+            <div class="kpi-grid">
+              <div class="kpi">
+                <div class="k-label"><svg><use href="#i-users"/></svg>在线人气</div>
+                <div class="k-value"><span data-count="3842">0</span></div>
+                <div class="k-delta up">+12.4% 较上一时段</div>
+              </div>
+              <div class="kpi">
+                <div class="k-label"><svg><use href="#i-music"/></svg>今日点歌</div>
+                <div class="k-value"><span data-count="127">0</span><small>首</small></div>
+                <div class="k-delta up">+31 首</div>
+              </div>
+              <div class="kpi">
+                <div class="k-label"><svg><use href="#i-clock"/></svg>播放时长</div>
+                <div class="k-value"><span data-count="4">0</span><small>h 12m</small></div>
+                <div class="k-delta flat">连续 3 小时</div>
+              </div>
+              <div class="kpi">
+                <div class="k-label"><svg><use href="#i-broadcast"/></svg>弹幕速率</div>
+                <div class="k-value"><span data-count="46">0</span><small>/min</small></div>
+                <div class="k-delta down">-8% 波动</div>
+              </div>
+            </div>
+            <div class="now-card">
+              <div class="cover" style="background:linear-gradient(145deg,#2E8DFF,#8B7CFF)">晴</div>
+              <div class="np-meta">
+                <div class="np-title">晴天</div>
+                <div class="np-artist">周杰伦 · 网易云 · 无损</div>
+                <div class="np-progress"><div class="progress"><span class="buffered"></span><span class="bar" style="--p:38%"></span></div></div>
+              </div>
+              <div class="wave" id="heroWave">
+                <i style="--w:0"></i><i style="--w:1"></i><i style="--w:2"></i><i style="--w:3"></i><i style="--w:4"></i><i style="--w:5"></i><i style="--w:6"></i><i style="--w:7"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card pad">
+            <div class="section-head"><h2>实时态势</h2><span class="hint">弹幕 / 点歌 双轴</span><span class="spacer"></span><span class="tag blue">近 30 分钟</span></div>
+            <svg class="spark" viewBox="0 0 600 74" preserveAspectRatio="none">
+              <defs><linearGradient id="sp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E8DFF" stop-opacity=".55"/><stop offset="1" stop-color="#2E8DFF" stop-opacity="0"/></linearGradient></defs>
+              <path d="M0 58 L60 50 L120 54 L180 38 L240 44 L300 26 L360 32 L420 18 L480 24 L540 12 L600 20 L600 74 L0 74 Z" fill="url(#sp)"/>
+              <path d="M0 58 L60 50 L120 54 L180 38 L240 44 L300 26 L360 32 L420 18 L480 24 L540 12 L600 20" fill="none" stroke="#2E8DFF" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M0 66 L60 64 L120 62 L180 60 L240 58 L300 54 L360 52 L420 48 L480 46 L540 42 L600 40" fill="none" stroke="rgba(139,124,255,.7)" stroke-width="1.6" stroke-dasharray="5 4"/>
+            </svg>
+            <div style="display:flex;gap:16px;margin-top:10px;font-size:11.5px;color:var(--text-3)">
+              <span><span style="color:#2E8DFF">●</span> 弹幕</span>
+              <span><span style="color:#8B7CFF">●</span> 点歌</span>
+              <span style="margin-left:auto">峰值 68/min · 20:41</span>
+            </div>
+          </div>
+          <div class="card pad">
+            <div class="section-head"><h2>快捷操作</h2><span class="hint">一键触达</span></div>
+            <div class="quick-grid">
+              <button class="quick" data-toast="已开启全自动接单"><svg><use href="#i-sparkle"/></svg><b>全自动</b><small>自动接单 + 排序</small></button>
+              <button class="quick" data-toast="队列已清空"><svg><use href="#i-trash"/></svg><b>清空队列</b><small>保留当前播放</small></button>
+              <button class="quick" data-toast="正在探测 44 个音源"><svg><use href="#i-refresh"/></svg><b>探测音源</b><small>44 个 lx 源</small></button>
+              <button class="quick" data-toast="已导出本场歌单"><svg><use href="#i-download"/></svg><b>导出歌单</b><small>CSV / JSON</small></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card pad">
+            <div class="section-head"><h2>本场热门</h2><span class="hint">按点歌次数</span><span class="spacer"></span><span class="tag green">实时</span></div>
+            <div class="bars">
+              <div class="bar-row" style="--i:0"><span class="rk">01</span><div class="bar-track"><span class="bar-fill" style="--v:92%"></span></div><span class="num">23</span></div>
+              <div class="bar-row" style="--i:1"><span class="rk">02</span><div class="bar-track"><span class="bar-fill" style="--v:71%"></span></div><span class="num">18</span></div>
+              <div class="bar-row" style="--i:2"><span class="rk">03</span><div class="bar-track"><span class="bar-fill" style="--v:54%"></span></div><span class="num">14</span></div>
+              <div class="bar-row" style="--i:3"><span class="rk">04</span><div class="bar-track"><span class="bar-fill" style="--v:38%"></span></div><span class="num">9</span></div>
+              <div class="bar-row" style="--i:4"><span class="rk">05</span><div class="bar-track"><span class="bar-fill" style="--v:26%"></span></div><span class="num">6</span></div>
+            </div>
+          </div>
+          <div class="card pad">
+            <div class="section-head"><h2>最近点歌</h2><span class="hint">来自弹幕</span></div>
+            <div class="list">
+              <div class="row"><div class="cover" style="background:linear-gradient(145deg,#33D6E0,#2E8DFF)">稻</div><div class="meta"><div class="t">稻香</div><div class="s">周杰伦 · @小北</div></div><span class="tag blue">已入队</span></div>
+              <div class="row"><div class="cover" style="background:linear-gradient(145deg,#8B7CFF,#FB7299)">孤</div><div class="meta"><div class="t">孤勇者</div><div class="s">陈奕迅 · @夜航船</div></div><span class="tag blue">已入队</span></div>
+              <div class="row"><div class="cover" style="background:linear-gradient(145deg,#FFB020,#FF5C7A)">起</div><div class="meta"><div class="t">起风了</div><div class="s">买辣椒也用券 · @阿澈</div></div><span class="tag amber">冲突回退</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 2. 点歌台 ---------- -->
+      <section class="page" id="page-request" data-stagger>
+        <div class="searchbar">
+          <svg><use href="#i-search"/></svg>
+          <input type="text" placeholder="搜索歌名、歌手，或粘贴 B 站 / 网易云链接…" value="晴天 周杰伦" />
+          <span class="kbd">Enter</span>
+          <button class="btn primary sm" data-toast="已按关键词重新聚合搜索"><svg><use href="#i-sparkle"/></svg>聚合搜索</button>
+        </div>
+        <div class="chips-row">
+          <button class="chip on">全部平台</button>
+          <button class="chip">网易云</button>
+          <button class="chip">QQ 音乐</button>
+          <button class="chip">酷狗</button>
+          <button class="chip">酷我</button>
+          <button class="chip">咪咕</button>
+          <span class="spacer"></span>
+          <button class="chip"><svg><use href="#i-filter"/></svg>仅原版</button>
+          <button class="chip on"><svg><use href="#i-sparkle"/></svg>批量点歌</button>
+        </div>
+
+        <div class="panel-grid">
+          <div>
+            <div class="section-head"><h2>搜索结果</h2><span class="hint">按置信度排序 · 4 条命中</span></div>
+            <div class="result-grid">
+              <div class="row">
+                <div class="cover" style="background:linear-gradient(145deg,#2E8DFF,#8B7CFF)">晴</div>
+                <div class="meta"><div class="t">晴天</div><div class="s">周杰伦 · 叶惠美 · 04:29</div></div>
+                <span class="tag green">原版</span><span class="tag blue">置信 96</span>
+                <div class="actions">
+                  <button class="icon-btn" data-toast="正在试听 晴天"><svg><use href="#i-play"/></svg></button>
+                  <button class="btn primary sm" data-toast="已加入队列：晴天"><svg><use href="#i-plus"/></svg>点歌</button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="cover" style="background:linear-gradient(145deg,#33D6E0,#2E8DFF)">晴</div>
+                <div class="meta"><div class="t">晴天 (Live)</div><div class="s">周杰伦 · 2019 嘉年华 · 05:12</div></div>
+                <span class="tag amber">现场版</span><span class="tag blue">置信 88</span>
+                <div class="actions">
+                  <button class="icon-btn" data-toast="正在试听 Live 版"><svg><use href="#i-play"/></svg></button>
+                  <button class="btn sm" data-toast="已加入队列：晴天 (Live)"><svg><use href="#i-plus"/></svg>点歌</button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="cover" style="background:linear-gradient(145deg,#8B7CFF,#FB7299)">晴</div>
+                <div class="meta"><div class="t">晴天（翻唱）</div><div class="s">不是花火呀 · 翻唱合辑 · 04:21</div></div>
+                <span class="tag violet">翻唱</span><span class="tag amber">置信 71</span>
+                <div class="actions">
+                  <button class="icon-btn" data-toast="正在试听翻唱版"><svg><use href="#i-play"/></svg></button>
+                  <button class="btn sm" data-toast="已加入队列：晴天（翻唱）"><svg><use href="#i-plus"/></svg>点歌</button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="cover" style="background:linear-gradient(145deg,#FFB020,#FF5C7A)">晴</div>
+                <div class="meta"><div class="t">晴天 (伴奏)</div><div class="s">周杰伦 · 伴奏轨 · 04:27</div></div>
+                <span class="tag red">疑似伴奏</span><span class="tag amber">置信 64</span>
+                <div class="actions">
+                  <button class="icon-btn" data-toast="正在试听伴奏轨"><svg><use href="#i-play"/></svg></button>
+                  <button class="btn sm" data-toast="已加入队列：伴奏"><svg><use href="#i-plus"/></svg>点歌</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="side-stack">
+            <div class="card pad">
+              <div class="section-head"><h2>点歌规则</h2><span class="hint">本场</span></div>
+              <div class="rule"><span>每人上限</span><b>3 首</b></div>
+              <div class="rule"><span>点歌冷却</span><b>90 秒</b></div>
+              <div class="rule"><span>队列上限</span><b>30 首</b></div>
+              <div class="rule"><span>投票阈值</span><b>5 票跳过</b></div>
+              <div style="margin-top:12px">
+                <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-3);margin-bottom:6px"><span>你的本场额度</span><span>1 / 3</span></div>
+                <div class="progress"><span class="bar" style="--p:33%"></span></div>
+              </div>
+            </div>
+            <div class="card pad">
+              <div class="section-head"><h2>你的收藏</h2><span class="hint">一键点歌</span></div>
+              <div class="list">
+                <div class="row"><div class="cover" style="background:linear-gradient(145deg,#2E8DFF,#33D6E0)">L</div><div class="meta"><div class="t">Lemon</div><div class="s">米津玄師</div></div><button class="icon-btn"><svg><use href="#i-plus"/></svg></button></div>
+                <div class="row"><div class="cover" style="background:linear-gradient(145deg,#FB7299,#8B7CFF)">言</div><div class="meta"><div class="t">言不由衷</div><div class="s">徐佳莹</div></div><button class="icon-btn"><svg><use href="#i-plus"/></svg></button></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ---------- 3. 播放队列 ---------- -->
+      <section class="page" id="page-queue" data-stagger>
+        <div class="chips-row">
+          <div class="segmented"><button class="on">全部 6</button><button>待播 5</button><button>已播</button></div>
+          <span class="spacer"></span>
+          <button class="chip"><svg><use href="#i-download"/></svg>保存歌单</button>
+          <button class="chip"><svg><use href="#i-trash"/></svg>清空</button>
+        </div>
+
+        <div class="card pad" style="margin-top:14px">
+          <div class="section-head"><h2>正在播放</h2><span class="hint">置顶不可删除</span><span class="spacer"></span><span class="tag green">mpv · 无损</span></div>
+          <div class="row playing">
+            <span class="pin-dot"></span>
+            <div class="cover" style="background:linear-gradient(145deg,#2E8DFF,#8B7CFF)">晴</div>
+            <div class="meta"><div class="t">晴天</div><div class="s">周杰伦 · @小北 · 已播 01:42 / 04:29</div></div>
+            <div class="wave paused" style="width:64px">
+              <i style="--w:0"></i><i style="--w:1"></i><i style="--w:2"></i><i style="--w:3"></i><i style="--w:4"></i><i style="--w:5"></i>
+            </div>
+            <div class="actions" style="opacity:1">
+              <button class="icon-btn" data-toast="已暂停"><svg><use href="#i-pause"/></svg></button>
+              <button class="icon-btn" data-toast="已跳过当前歌曲"><svg><use href="#i-skip"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-top:20px"><h2>待播 5 首</h2><span class="hint">拖动或使用置顶</span></div>
+        <div class="list" id="queueList">
+          <div class="row"><span class="idx">01</span><div class="cover" style="background:linear-gradient(145deg,#33D6E0,#2E8DFF)">稻</div><div class="meta"><div class="t">稻香</div><div class="s">周杰伦 · @小北 · 03:43</div></div><span class="tag blue">2 票</span><div class="actions"><button class="icon-btn"><svg><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">02</span><div class="cover" style="background:linear-gradient(145deg,#8B7CFF,#FB7299)">孤</div><div class="meta"><div class="t">孤勇者</div><div class="s">陈奕迅 · @夜航船 · 04:16</div></div><span class="tag blue">1 票</span><div class="actions"><button class="icon-btn"><svg><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">03</span><div class="cover" style="background:linear-gradient(145deg,#FFB020,#FF5C7A)">起</div><div class="meta"><div class="t">起风了</div><div class="s">买辣椒也用券 · @阿澈 · 05:11</div></div><span class="tag green">跨源回退</span><div class="actions"><button class="icon-btn"><svg><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">04</span><div class="cover" style="background:linear-gradient(145deg,#3FCF8E,#33D6E0)">le</div><div class="meta"><div class="t">Lemon</div><div class="s">米津玄師 · @茶泡饭 · 04:15</div></div><span class="tag blue">3 票</span><div class="actions"><button class="icon-btn"><svg><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">05</span><div class="cover" style="background:linear-gradient(145deg,#2E8DFF,#3FCF8E)">不</div><div class="meta"><div class="t">不该用情</div><div class="s">张远 · @半糖 · 04:02</div></div><span class="tag amber">待验证</span><div class="actions"><button class="icon-btn"><svg><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg><use href="#i-trash"/></svg></button></div></div>
+        </div>
+        <div class="empty-hint">队列已持久化到 <span class="kbd">queue.json</span>，重启后自动恢复（不含过期音源链接）</div>
+      </section>
+
+      <!-- ---------- 4. 播放中心 ---------- -->
+      <section class="page" id="page-player" data-stagger>
+        <div class="player-stage">
+          <div>
+            <div class="cover-wrap">
+              <div class="cover-ring"></div>
+              <div class="cover xl" style="background:linear-gradient(150deg,#1B6FD6,#2E8DFF 45%,#8B7CFF)">晴</div>
+            </div>
+            <div class="section-head" style="margin-top:26px"><h2>晴天</h2><span class="tag green">原版</span></div>
+            <div style="color:var(--text-3);font-size:12.5px;margin-top:-6px">周杰伦 · 叶惠美 · 网易云音乐</div>
+            <div class="big-progress">
+              <div class="progress"><span class="buffered" style="width:74%"></span><span class="bar" style="--p:38%"></span></div>
+              <div class="times"><span>01:42</span><span>04:29</span></div>
+            </div>
+            <div class="transport">
+              <button class="icon-btn" data-toast="上一首"><svg><use href="#i-prev"/></svg></button>
+              <button class="pb-play" data-toast="播放 / 暂停"><svg><use href="#i-pause"/></svg></button>
+              <button class="icon-btn" data-toast="下一首"><svg><use href="#i-skip"/></svg></button>
+              <span class="spacer"></span>
+              <span class="tag">音质 无损</span>
+              <span class="tag green">mpv 后端</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="card pad">
+              <div class="section-head"><h2>歌词</h2><span class="hint">同步滚动</span><span class="spacer"></span><span class="tag blue">自动匹配</span></div>
+              <div class="lyrics" id="lyrics">
+                <div class="lyric-line past">故事的小黄花 从出生那年就飘着</div>
+                <div class="lyric-line past">童年的荡秋千 随记忆一直晃到现在</div>
+                <div class="lyric-line cur">吹着前奏望着天空 我想起花瓣试着掉落</div>
+                <div class="lyric-line">为你翘课的那一天 花落的那一天</div>
+                <div class="lyric-line">教室的那一间 我怎么看不见</div>
+                <div class="lyric-line">消失的下雨天 我好想再淋一遍</div>
+              </div>
+            </div>
+            <div class="card pad" style="margin-top:14px">
+              <div class="section-head"><h2>接下来</h2><span class="hint">队列前 3</span></div>
+              <div class="list">
+                <div class="row"><div class="cover" style="background:linear-gradient(145deg,#33D6E0,#2E8DFF)">稻</div><div class="meta"><div class="t">稻香</div><div class="s">@小北 · 03:43</div></div></div>
+                <div class="row"><div class="cover" style="background:linear-gradient(145deg,#8B7CFF,#FB7299)">孤</div><div class="meta"><div class="t">孤勇者</div><div class="s">@夜航船 · 04:16</div></div></div>
+                <div class="row"><div class="cover" style="background:linear-gradient(145deg,#FFB020,#FF5C7A)">起</div><div class="meta"><div class="t">起风了</div><div class="s">@阿澈 · 05:11</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 5. 弹幕互动 ---------- -->
+      <section class="page" id="page-live" data-stagger>
+        <div class="panel-grid">
+          <div class="card pad">
+            <div class="section-head"><h2>实时弹幕</h2><span class="hint">12 条 / 10 秒</span><span class="spacer"></span>
+              <button class="chip on">全部</button><button class="chip">点歌</button><button class="chip">礼物</button>
+            </div>
+            <div class="danmaku-feed" id="dmFeed">
+              <div class="dm type-request"><span class="who">小北</span><span class="what">点歌 稻香 · 已入队（第 1 位）</span></div>
+              <div class="dm sys"><span class="who">系统</span><span class="what">跨源共识命中：晴天 · wy/tx 双源确认</span></div>
+              <div class="dm"><span class="who">夜航船</span><span class="what">点歌 孤勇者</span></div>
+              <div class="dm type-gift"><span class="who">半糖</span><span class="what">送出 小花花 × 3</span></div>
+              <div class="dm type-request"><span class="who">阿澈</span><span class="what">点歌 起风了 · 音源降级已回退</span></div>
+              <div class="dm type-super"><span class="who">茶泡饭</span><span class="what">SC 30 元：来首 Lemon 吧</span></div>
+              <div class="dm"><span class="who">路过的风</span><span class="what">这首好好听</span></div>
+              <div class="dm sys"><span class="who">系统</span><span class="what">10030 触发，已指数退避 5s 后重试成功</span></div>
+            </div>
+            <div class="sendbox" style="margin-top:14px">
+              <input type="text" placeholder="以主播身份发送弹幕…" />
+              <span class="counter">0 / 20</span>
+              <button class="btn primary sm" data-toast="弹幕已发送"><svg><use href="#i-chat"/></svg>发送</button>
+            </div>
+          </div>
+
+          <aside class="side-stack">
+            <div class="card pad">
+              <div class="section-head"><h2>互动统计</h2></div>
+              <div class="mini-metrics">
+                <div><b data-count="46">0</b><small>弹幕 / 分</small></div>
+                <div><b data-count="127">0</b><small>点歌</small></div>
+                <div><b data-count="92">0</b><small>转化率 %</small></div>
+              </div>
+              <svg class="spark" viewBox="0 0 300 60" preserveAspectRatio="none" style="height:60px;margin-top:8px">
+                <path d="M0 46 L30 40 L60 44 L90 30 L120 36 L150 20 L180 26 L210 14 L240 22 L270 10 L300 16" fill="none" stroke="#2E8DFF" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="card pad">
+              <div class="section-head"><h2>敏感词拦截</h2><span class="tag green">已启用</span></div>
+              <div class="rule"><span>今日拦截</span><b>7 条</b></div>
+              <div class="rule"><span>规则数</span><b>18</b></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ---------- 6. 曲库与统计 ---------- -->
+      <section class="page" id="page-library" data-stagger>
+        <div class="chips-row">
+          <div class="segmented"><button class="on">本场历史</button><button>热门榜</button><button>收藏</button></div>
+          <span class="spacer"></span>
+          <button class="chip"><svg><use href="#i-download"/></svg>导出 CSV</button>
+        </div>
+        <div class="grid-2" style="margin-top:14px;align-items:start">
+          <div class="card pad">
+            <div class="section-head"><h2>播放记录</h2><span class="hint">本场 127 首</span></div>
+            <table class="table">
+              <thead><tr><th>#</th><th>歌曲</th><th>点歌人</th><th>时长</th><th>平台</th></tr></thead>
+              <tbody>
+                <tr><td class="num">01</td><td>晴天</td><td>小北</td><td class="num">04:29</td><td><span class="tag blue">wy</span></td></tr>
+                <tr><td class="num">02</td><td>稻香</td><td>小北</td><td class="num">03:43</td><td><span class="tag blue">wy</span></td></tr>
+                <tr><td class="num">03</td><td>孤勇者</td><td>夜航船</td><td class="num">04:16</td><td><span class="tag green">tx</span></td></tr>
+                <tr><td class="num">04</td><td>起风了</td><td>阿澈</td><td class="num">05:11</td><td><span class="tag amber">kw</span></td></tr>
+                <tr><td class="num">05</td><td>Lemon</td><td>茶泡饭</td><td class="num">04:15</td><td><span class="tag violet">kg</span></td></tr>
+                <tr><td class="num">06</td><td>不该用情</td><td>半糖</td><td class="num">04:02</td><td><span class="tag blue">wy</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="side-stack">
+            <div class="card pad">
+              <div class="section-head"><h2>热门榜 TOP 5</h2><span class="tag green">近 7 天</span></div>
+              <div class="bars">
+                <div class="bar-row" style="--i:0"><span class="rk">01</span><div class="bar-track"><span class="bar-fill" style="--v:96%"></span></div><span class="num">89</span></div>
+                <div class="bar-row" style="--i:1"><span class="rk">02</span><div class="bar-track"><span class="bar-fill" style="--v:74%"></span></div><span class="num">68</span></div>
+                <div class="bar-row" style="--i:2"><span class="rk">03</span><div class="bar-track"><span class="bar-fill" style="--v:58%"></span></div><span class="num">53</span></div>
+                <div class="bar-row" style="--i:3"><span class="rk">04</span><div class="bar-track"><span class="bar-fill" style="--v:41%"></span></div><span class="num">37</span></div>
+                <div class="bar-row" style="--i:4"><span class="rk">05</span><div class="bar-track"><span class="bar-fill" style="--v:27%"></span></div><span class="num">24</span></div>
+              </div>
+            </div>
+            <div class="card pad">
+              <div class="section-head"><h2>平台占比</h2></div>
+              <div class="rule"><span>网易云 wy</span><b>46%</b></div>
+              <div class="rule"><span>QQ 音乐 tx</span><b>28%</b></div>
+              <div class="rule"><span>酷狗 kg</span><b>14%</b></div>
+              <div class="rule"><span>其他</span><b>12%</b></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 7. 音源管理 ---------- -->
+      <section class="page" id="page-sources" data-stagger>
+        <div class="chips-row">
+          <span class="hint" style="font-size:12px;color:var(--text-3)">44 个 lx 音源 · 已启用 12 个 · 上次探测 20:36</span>
+          <span class="spacer"></span>
+          <button class="chip"><svg><use href="#i-refresh"/></svg>全部探测</button>
+          <button class="chip on"><svg><use href="#i-shield"/></svg>仅健康源</button>
+        </div>
+        <div class="source-grid" style="margin-top:14px">
+          <div class="src"><div class="src-top"><span class="src-logo" style="background:linear-gradient(145deg,#2E8DFF,#1B6FD6)">W</span><div><div class="src-name">网易云 wy</div><div class="src-sub">主源 · 无损</div></div><span class="health ok" style="margin-left:auto"><span class="d"></span>健康</span></div><div class="src-metrics"><div class="metric"><b>38ms</b>延迟</div><div class="metric"><b>99.1%</b>成功率</div><div class="metric"><b>1,204</b>命中</div></div></div>
+          <div class="src"><div class="src-top"><span class="src-logo" style="background:linear-gradient(145deg,#3FCF8E,#33D6E0)">Q</span><div><div class="src-name">QQ 音乐 tx</div><div class="src-sub">主源 · 高音质</div></div><span class="health ok" style="margin-left:auto"><span class="d"></span>健康</span></div><div class="src-metrics"><div class="metric"><b>52ms</b>延迟</div><div class="metric"><b>98.4%</b>成功率</div><div class="metric"><b>986</b>命中</div></div></div>
+          <div class="src"><div class="src-top"><span class="src-logo" style="background:linear-gradient(145deg,#FFB020,#FF5C7A)">K</span><div><div class="src-name">酷狗 kg</div><div class="src-sub">备源</div></div><span class="health ok" style="margin-left:auto"><span class="d"></span>健康</span></div><div class="src-metrics"><div class="metric"><b>71ms</b>延迟</div><div class="metric"><b>96.8%</b>成功率</div><div class="metric"><b>612</b>命中</div></div></div>
+          <div class="src"><div class="src-top"><span class="src-logo" style="background:linear-gradient(145deg,#8B7CFF,#FB7299)">S</span><div><div class="src-name">酷我 kw</div><div class="src-sub">备源</div></div><span class="health slow" style="margin-left:auto"><span class="d"></span>偏慢</span></div><div class="src-metrics"><div class="metric"><b>148ms</b>延迟</div><div class="metric"><b>94.2%</b>成功率</div><div class="metric"><b>430</b>命中</div></div></div>
+          <div class="src"><div class="src-top"><span class="src-logo" style="background:linear-gradient(145deg,#33D6E0,#2E8DFF)">M</span><div><div class="src-name">咪咕 mg</div><div class="src-sub">备源</div></div><span class="health slow" style="margin-left:auto"><span class="d"></span>偏慢</span></div><div class="src-metrics"><div class="metric"><b>186ms</b>延迟</div><div class="metric"><b>92.6%</b>成功率</div><div class="metric"><b>288</b>命中</div></div></div>
+          <div class="src"><div class="src-top"><span class="src-logo" style="background:linear-gradient(145deg,#FF5C7A,#8B7CFF)">L</span><div><div class="src-name">lx 聚合桥</div><div class="src-sub">node · 44 源</div></div><span class="health ok" style="margin-left:auto"><span class="d"></span>健康</span></div><div class="src-metrics"><div class="metric"><b>online</b>状态</div><div class="metric"><b>44</b>源数</div><div class="metric"><b>2.4k</b>请求</div></div></div>
+          <div class="src"><div class="src-top"><span class="src-logo" style="background:linear-gradient(145deg,#48566A,#6C7C8F)">B</span><div><div class="src-name">B站收藏夹</div><div class="src-sub">备用音源</div></div><span class="health off" style="margin-left:auto"><span class="d"></span>未启用</span></div><div class="src-metrics"><div class="metric"><b>—</b>延迟</div><div class="metric"><b>—</b>成功率</div><div class="metric"><b>—</b>命中</div></div></div>
+          <div class="src"><div class="src-top"><span class="src-logo" style="background:linear-gradient(145deg,#6C7C8F,#48566A)">+</span><div><div class="src-name">添加自定义源</div><div class="src-sub">遵循 lx 协议</div></div></div><div class="src-metrics"><div class="metric"><b>导入</b>.js 脚本</div></div></div>
+        </div>
+        <div class="empty-hint" style="margin-top:16px">音源失效时自动跨源回退；探测结果缓存 10 分钟，不阻塞点歌主链路。</div>
+      </section>
+
+      <!-- ---------- 8. 设置 ---------- -->
+      <section class="page" id="page-settings" data-stagger>
+        <div class="settings-grid">
+          <div class="card pad">
+            <div class="section-head"><h2>账号</h2><span class="hint">Cookie 热更新</span><span class="spacer"></span><span class="tag green">有效</span></div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">SESSDATA</div><div class="desc">剩余有效期 42 天 · 修改后自动热重载，无需重启</div></div>
+              <div class="ctl"><input class="input" value="••••••••••••••••7a3c" /></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">bili_jct</div><div class="desc">CSRF Token，用于发送弹幕</div></div>
+              <div class="ctl"><input class="input" value="••••••••••••4f92" /></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">buvid3 / buvid4</div><div class="desc">风控校验；缺失时启动自动获取</div></div>
+              <div class="ctl"><button class="btn sm" data-toast="正在重新获取 buvid3"><svg><use href="#i-refresh"/></svg>重新获取</button></div>
+            </div>
+          </div>
+
+          <div class="card pad">
+            <div class="section-head"><h2>直播间</h2></div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">房间号</div><div class="desc">短号自动解析为真实房间号 88250</div></div>
+              <div class="ctl"><input class="input" value="88250" style="max-width:150px" /></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">断线自动重连</div><div class="desc">指数退避，最长 30s</div></div>
+              <div class="ctl"><span class="switch on" data-switch></span></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">启动时自动开播</div><div class="desc">连接成功后立即开始接单</div></div>
+              <div class="ctl"><span class="switch on" data-switch></span></div>
+            </div>
+          </div>
+
+          <div class="card pad">
+            <div class="section-head"><h2>播放</h2></div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">播放后端</div><div class="desc">ffplay 每首一个子进程；mpv 常驻实例，切歌更快（需系统 libmpv）</div></div>
+              <div class="ctl"><div class="segmented"><button class="on">ffplay</button><button>mpv</button></div></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">音质策略</div><div class="desc">不可用时自动降级</div></div>
+              <div class="ctl"><div class="segmented"><button>标准</button><button>高</button><button class="on">无损</button></div></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">歌词自动匹配</div><div class="desc">点歌后异步搜索歌词，不影响播放</div></div>
+              <div class="ctl"><span class="switch on" data-switch></span></div>
+            </div>
+          </div>
+
+          <div class="card pad">
+            <div class="section-head"><h2>点歌行为</h2></div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">每人每场上限</div><div class="desc">超出后弹幕提示剩余冷却</div></div>
+              <div class="ctl"><input class="input" value="3" style="max-width:92px" /></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">点歌冷却（秒）</div><div class="desc">同一用户两次点歌的最小间隔</div></div>
+              <div class="ctl"><input class="input" value="90" style="max-width:92px" /></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">投票跳过阈值</div><div class="desc">达到票数后自动切歌</div></div>
+              <div class="ctl"><input class="input" value="5" style="max-width:92px" /></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">队列持久化</div><div class="desc">重启后恢复未播完的队列</div></div>
+              <div class="ctl"><span class="switch on" data-switch></span></div>
+            </div>
+          </div>
+
+          <div class="card pad">
+            <div class="section-head"><h2>外观</h2><span class="hint">Material 3 · Dark</span></div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">主题色</div><div class="desc">影响按钮、进度与选中态</div></div>
+              <div class="ctl"><div class="swatches"><i class="on" style="background:#2E8DFF"></i><i style="background:#8B7CFF"></i><i style="background:#3FCF8E"></i><i style="background:#FB7299"></i></div></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">毛玻璃强度</div><div class="desc">侧栏、播放条与浮层的模糊程度</div></div>
+              <div class="ctl" style="display:flex;align-items:center;gap:10px"><span class="slider"><i style="width:64%"></i></span><span class="tag">64</span></div>
+            </div>
+            <div class="setting-row">
+              <div><div style="font-weight:700;font-size:13px">减少动态效果</div><div class="desc">遵循系统 prefers-reduced-motion</div></div>
+              <div class="ctl"><span class="switch" data-switch></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="savebar">
+          <span style="font-size:12px;color:var(--text-3)">有未保存的更改</span>
+          <span style="flex:1"></span>
+          <button class="btn ghost sm" data-toast="已放弃更改">放弃</button>
+          <button class="btn primary sm" data-toast="设置已保存并热重载"><svg><use href="#i-check"/></svg>保存并应用</button>
+        </div>
+      </section>
+
+      <!-- ---------- 9. 日志 ---------- -->
+      <section class="page" id="page-logs" data-stagger>
+        <div class="chips-row">
+          <div class="segmented"><button class="on">全部</button><button>INFO</button><button>WARN</button><button>ERROR</button></div>
+          <span class="spacer"></span>
+          <input class="input" placeholder="过滤关键字…" style="max-width:220px;height:32px" />
+          <button class="chip on"><svg><use href="#i-refresh"/></svg>自动滚动</button>
+          <button class="chip"><svg><use href="#i-download"/></svg>导出</button>
+        </div>
+        <div class="log-panel" style="margin-top:14px">
+          <div class="log-line"><span class="ts">20:41:02.184</span><span class="lv info">INFO</span><span class="msg">[danmaku] 连接成功 room=88250 protover=2</span></div>
+          <div class="log-line"><span class="ts">20:41:02.201</span><span class="lv dbg">DBG</span><span class="msg">[wbi] 签名就绪（由 bilibili-api 托管）</span></div>
+          <div class="log-line"><span class="ts">20:41:08.337</span><span class="lv info">INFO</span><span class="msg">[search] "晴天 周杰伦" → wy 命中，置信 96</span></div>
+          <div class="log-line"><span class="ts">20:41:08.402</span><span class="lv info">INFO</span><span class="msg">[queue] 入队 晴天 @小北 position=1</span></div>
+          <div class="log-line"><span class="ts">20:41:09.118</span><span class="lv info">INFO</span><span class="msg">[player] 开始播放 晴天 · 无损 · ffplay</span></div>
+          <div class="log-line"><span class="ts">20:41:12.560</span><span class="lv warn">WARN</span><span class="msg">[lyrics] 歌词源超时，回退到本地缓存（不影响播放）</span></div>
+          <div class="log-line"><span class="ts">20:41:20.771</span><span class="lv info">INFO</span><span class="msg">[danmaku] 点歌 稻香 @小北 score=88</span></div>
+          <div class="log-line"><span class="ts">20:41:22.090</span><span class="lv info">INFO</span><span class="msg">[source] kw 延迟 148ms，标记偏慢</span></div>
+          <div class="log-line"><span class="ts">20:41:31.455</span><span class="lv err">ERR</span><span class="msg">[danmaku] 发送失败 code=10030，指数退避 5s</span></div>
+          <div class="log-line"><span class="ts">20:41:36.470</span><span class="lv info">INFO</span><span class="msg">[danmaku] 重试成功，已发送</span></div>
+          <div class="log-line"><span class="ts">20:41:44.002</span><span class="lv info">INFO</span><span class="msg">[queue] 持久化写入 queue.json（6 项，原子替换）</span></div>
+          <div class="log-line"><span class="ts">20:41:48.219</span><span class="lv warn">WARN</span><span class="msg">[cookie] SESSDATA 剩余 42 天，建议提前更新</span></div>
+          <div class="log-line"><span class="ts">20:41:52.810</span><span class="lv dbg">DBG</span><span class="msg">[cache] search hit=71 miss=12 ttl=30s</span></div>
+          <div class="log-line"><span class="ts">20:42:01.334</span><span class="lv info">INFO</span><span class="msg">[vote] 跳过投票 3/5（未达阈值）</span></div>
+        </div>
+      </section>
+
+      <!-- ---------- 10. 设计规范 ---------- -->
+      <section class="page" id="page-design" data-stagger>
+        <div class="panel-grid" style="grid-template-columns:minmax(0,1fr) 320px">
+          <div class="side-stack">
+            <div class="card pad">
+              <div class="section-head"><h2>色彩角色</h2><span class="hint">M3 Dark Tonal</span></div>
+              <div class="token-grid">
+                <div class="token"><div class="swatch" style="background:#2E8DFF"></div><div class="tname">Primary</div><div class="thex">#2E8DFF</div></div>
+                <div class="token"><div class="swatch" style="background:#74B6FF"></div><div class="tname">Primary Hi</div><div class="thex">#74B6FF</div></div>
+                <div class="token"><div class="swatch" style="background:#0F141B"></div><div class="tname">Surface 1</div><div class="thex">#0F141B</div></div>
+                <div class="token"><div class="swatch" style="background:#18212C"></div><div class="tname">Surface 3</div><div class="thex">#18212C</div></div>
+                <div class="token"><div class="swatch" style="background:#E9EFF7"></div><div class="tname">On Surface</div><div class="thex">#E9EFF7</div></div>
+                <div class="token"><div class="swatch" style="background:#A7B4C6"></div><div class="tname">Variant</div><div class="thex">#A7B4C6</div></div>
+                <div class="token"><div class="swatch" style="background:#3FCF8E"></div><div class="tname">Success</div><div class="thex">#3FCF8E</div></div>
+                <div class="token"><div class="swatch" style="background:#FFB020"></div><div class="tname">Warning</div><div class="thex">#FFB020</div></div>
+              </div>
+            </div>
+
+            <div class="card pad">
+              <div class="section-head"><h2>字号阶梯</h2><span class="hint">Manrope / 思源黑</span></div>
+              <div class="type-scale">
+                <div class="ts-row"><span class="lbl">Display 42</span><span style="font-size:42px;font-weight:800;letter-spacing:-.045em;line-height:1">点歌台在营业</span></div>
+                <div class="ts-row"><span class="lbl">Title 22</span><span style="font-size:22px;font-weight:800;letter-spacing:-.03em">播放队列</span></div>
+                <div class="ts-row"><span class="lbl">Body 14</span><span style="font-size:14px;color:var(--text-2)">队列已持久化，重启后自动恢复</span></div>
+                <div class="ts-row"><span class="lbl">Label 11</span><span style="font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--primary-hi)">LIVE · 88250</span></div>
+              </div>
+            </div>
+
+            <div class="card pad">
+              <div class="section-head"><h2>动效三件套</h2><span class="hint">Spring · Stagger · Kinetic</span></div>
+              <div class="motion-cards">
+                <div class="motion-card">
+                  <h3>Spring 弹簧</h3>
+                  <p>页面入场、浮层弹出、侧栏指示器滑动。过冲不超过 1.003，落点稳定。</p>
+                  <div class="motion-demo" data-demo><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span></div>
+                  <button class="btn sm ghost" data-replay="spring"><svg><use href="#i-refresh"/></svg>重播</button>
+                </div>
+                <div class="motion-card">
+                  <h3>Stagger 交错</h3>
+                  <p>卡片、列表、指标以 46ms 递增上浮入场，形成阅读节奏。</p>
+                  <div class="motion-demo" data-demo><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span></div>
+                  <button class="btn sm ghost" data-replay="stagger"><svg><use href="#i-refresh"/></svg>重播</button>
+                </div>
+                <div class="motion-card">
+                  <h3>Kinetic 动力学</h3>
+                  <p>数字滚动、波形呼吸、标题逐字上浮；让“正在发生”可被感知。</p>
+                  <div class="motion-demo" data-demo><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span></div>
+                  <button class="btn sm ghost" data-replay="kinetic"><svg><use href="#i-refresh"/></svg>重播</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card pad">
+              <div class="section-head"><h2>页面切换矩阵</h2><span class="hint">方向感知 · 520ms</span></div>
+              <table class="table">
+                <thead><tr><th>从 → 到</th><th>转场</th><th>曲线 / 时长</th></tr></thead>
+                <tbody>
+                  <tr><td>任意相邻页</td><td>横向滑入 + 淡入 + 微缩</td><td class="num">spring · 520ms</td></tr>
+                  <tr><td>页内浮层（引导/确认）</td><td>背景模糊 + 上浮缩放</td><td class="num">spring · 460ms</td></tr>
+                  <tr><td>Toast 通知</td><td>右侧滑入 + 回弹</td><td class="num">spring · 520ms</td></tr>
+                  <tr><td>队列删除</td><td>右移淡出 + 高度折叠</td><td class="num">accel · 280ms</td></tr>
+                  <tr><td>侧栏选中</td><td>指示器弹簧位移</td><td class="num">spring · 420ms</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <aside class="side-stack">
+            <div class="card pad">
+              <div class="section-head"><h2>页面清单</h2><span class="hint">10 页</span></div>
+              <div class="page-list">
+                <span class="tag blue">01 概览</span><span class="tag">02 点歌台</span><span class="tag">03 队列</span>
+                <span class="tag">04 播放中心</span><span class="tag">05 弹幕</span><span class="tag">06 曲库</span>
+                <span class="tag">07 音源</span><span class="tag">08 设置</span><span class="tag">09 日志</span>
+                <span class="tag violet">10 设计规范</span>
+              </div>
+            </div>
+            <div class="card pad">
+              <div class="section-head"><h2>形状与层级</h2></div>
+              <div class="rule"><span>卡片圆角</span><b>20 / 16</b></div>
+              <div class="rule"><span>浮层圆角</span><b>28</b></div>
+              <div class="rule"><span>控件高度</span><b>38 / 40</b></div>
+              <div class="rule"><span>栅格间距</span><b>8 的倍数</b></div>
+              <div class="rule"><span>毛玻璃</span><b>blur 18–26</b></div>
+            </div>
+            <div class="card pad">
+              <div class="section-head"><h2>可访问性</h2></div>
+              <div class="rule"><span>正文对比度</span><b>≥ 7:1</b></div>
+              <div class="rule"><span>焦点环</span><b>3px 蓝</b></div>
+              <div class="rule"><span>动效降级</span><b>系统级</b></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ================= player bar ================= -->
+  <footer class="playerbar">
+    <div class="cover pb-cover" style="background:linear-gradient(145deg,#2E8DFF,#8B7CFF)">晴</div>
+    <div class="pb-meta">
+      <div class="pb-title"><span class="txt">晴天</span><span class="tag blue">wy</span></div>
+      <div class="pb-artist">周杰伦 · 无损 · ffplay</div>
+    </div>
+    <div class="pb-controls">
+      <button class="icon-btn" data-toast="上一首"><svg><use href="#i-prev"/></svg></button>
+      <button class="pb-play" id="pbPlay"><svg id="pbPlayIcon"><use href="#i-pause"/></svg></button>
+      <button class="icon-btn" data-toast="下一首"><svg><use href="#i-skip"/></svg></button>
+    </div>
+    <div class="pb-progress">
+      <span class="pb-time">01:42</span>
+      <div class="progress"><span class="buffered" style="width:74%"></span><span class="bar" style="--p:38%"></span></div>
+      <span class="pb-time">04:29</span>
+    </div>
+    <div class="pb-right">
+      <div class="wave" id="pbWave">
+        <i style="--w:0"></i><i style="--w:1"></i><i style="--w:2"></i><i style="--w:3"></i><i style="--w:4"></i><i style="--w:5"></i>
+      </div>
+      <div class="volume"><svg><use href="#i-volume"/></svg><span class="track"><i></i></span></div>
+      <button class="icon-btn" data-nav="queue" title="打开队列"><svg><use href="#i-list"/></svg></button>
+    </div>
+  </footer>
+</div>
+
+<!-- ================= onboarding ================= -->
+<div class="overlay" id="wizardOverlay">
+  <div class="wizard">
+    <div class="wiz-dots"><i class="on"></i><i></i><i></i></div>
+    <div class="wiz-step on">
+      <div class="hero-kicker">Step 1 / 3</div>
+      <h2 style="margin:10px 0 6px;font-size:24px;letter-spacing:-.03em">连接你的 B 站账号</h2>
+      <p style="color:var(--text-3);font-size:12.5px;margin:0 0 18px">Cookie 只保存在本地配置文件中，用于发送弹幕与读取房间信息。</p>
+      <div class="field" style="margin-bottom:12px"><label>SESSDATA</label><input class="input" placeholder="粘贴浏览器 Cookie 中的 SESSDATA" /></div>
+      <div class="field"><label>bili_jct（CSRF Token）</label><input class="input" placeholder="粘贴 bili_jct" /></div>
+      <div style="display:flex;gap:10px;margin-top:22px;justify-content:flex-end">
+        <button class="btn ghost" data-close-wizard>稍后设置</button>
+        <button class="btn primary" data-wiz-next>下一步<svg><use href="#i-skip"/></svg></button>
+      </div>
+    </div>
+    <div class="wiz-step">
+      <div class="hero-kicker">Step 2 / 3</div>
+      <h2 style="margin:10px 0 6px;font-size:24px;letter-spacing:-.03em">选择直播间</h2>
+      <p style="color:var(--text-3);font-size:12.5px;margin:0 0 18px">短号会自动解析为真实房间号；支持断线自动重连。</p>
+      <div class="field" style="margin-bottom:12px"><label>房间号</label><input class="input" value="88250" /></div>
+      <div class="setting-row" style="padding:10px 0;border-bottom:0">
+        <div><div style="font-weight:700;font-size:13px">启动后自动接单</div><div class="desc">连接成功后立即开始接受点歌</div></div>
+        <div class="ctl"><span class="switch on" data-switch></span></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+        <button class="btn ghost" data-wiz-prev>上一步</button>
+        <button class="btn primary" data-wiz-next>下一步<svg><use href="#i-skip"/></svg></button>
+      </div>
+    </div>
+    <div class="wiz-step">
+      <div class="hero-kicker">Step 3 / 3</div>
+      <h2 style="margin:10px 0 6px;font-size:24px;letter-spacing:-.03em">准备就绪</h2>
+      <p style="color:var(--text-3);font-size:12.5px;margin:0 0 16px">44 个 lx 音源已就绪，播放后端默认为 ffplay（可在设置中切换 mpv）。</p>
+      <div class="list">
+        <div class="row"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--ok)" style="flex:0 0 auto"><use href="#i-check"/></svg><div class="meta"><div class="t">Cookie 有效</div><div class="s">剩余 42 天</div></div></div>
+        <div class="row"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--ok)" style="flex:0 0 auto"><use href="#i-check"/></svg><div class="meta"><div class="t">房间 88250 可访问</div><div class="s">真实房间号已解析</div></div></div>
+        <div class="row"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--ok)" style="flex:0 0 auto"><use href="#i-check"/></svg><div class="meta"><div class="t">音源桥在线</div><div class="s">node · 44 源</div></div></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+        <button class="btn ghost" data-wiz-prev>上一步</button>
+        <button class="btn primary" data-close-wizard data-toast="引导完成，开始接单"><svg><use href="#i-play"/></svg>开始营业</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
