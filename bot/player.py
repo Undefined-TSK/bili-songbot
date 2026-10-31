@@ -1,8 +1,10 @@
 """播放与下载：URL 预验证、音频下载（含 Node 桥兜底）、ffplay 子进程管理。"""
 import asyncio
 import os
+import signal
 import subprocess
 import tempfile
+import time
 from typing import Optional
 
 import aiohttp
@@ -153,8 +155,67 @@ async def download_audio_via_bridge(url: str) -> Optional[str]:
         return None
 
 
+def _parse_duration(value) -> float:
+    """把歌曲时长（"04:29" / "269" / 269）解析为秒；无法解析返回 0。"""
+    if not value:
+        return 0.0
+    if isinstance(value, (int, float)):
+        return max(0.0, float(value))
+    text = str(value).strip()
+    try:
+        if ":" in text:
+            parts = [float(p) for p in text.split(":")]
+            total = 0.0
+            for p in parts:
+                total = total * 60 + p
+            return max(0.0, total)
+        return max(0.0, float(text))
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _suspend_process(proc) -> bool:
+    """挂起子进程（Windows 用 NtSuspendProcess，POSIX 用 SIGSTOP）。"""
+    if proc is None or proc.poll() is not None:
+        return False
+    try:
+        if os.name == "nt":
+            import ctypes
+            handle = ctypes.c_void_p(int(proc._handle))
+            ctypes.windll.ntdll.NtSuspendProcess(handle)
+        else:
+            os.kill(proc.pid, signal.SIGSTOP)
+        return True
+    except Exception as e:
+        log.debug(f"挂起播放进程失败（忽略）: {e}")
+        return False
+
+
+def _resume_process(proc) -> bool:
+    """恢复子进程（Windows 用 NtResumeProcess，POSIX 用 SIGCONT）。"""
+    if proc is None or proc.poll() is not None:
+        return False
+    try:
+        if os.name == "nt":
+            import ctypes
+            handle = ctypes.c_void_p(int(proc._handle))
+            ctypes.windll.ntdll.NtResumeProcess(handle)
+        else:
+            os.kill(proc.pid, signal.SIGCONT)
+        return True
+    except Exception as e:
+        log.debug(f"恢复播放进程失败（忽略）: {e}")
+        return False
+
+
 class PlaybackManager:
-    """音频播放管理。先下载到临时文件，再用 ffplay 播放。"""
+    """音频播放管理。先下载到临时文件，再用 ffplay 播放。
+
+    额外提供暂停/恢复/音量/进度（ffplay 无原生接口，用进程挂起 + 带 `-ss`
+    重启实现；所有操作失败都只影响对应能力，不影响正常播放）。
+    """
+
+    BACKEND = "ffplay"
 
     def __init__(self, session: aiohttp.ClientSession = None):
         self.process: Optional[subprocess.Popen] = None
@@ -162,6 +223,14 @@ class PlaybackManager:
         self.session = session
         self._tmp_file: Optional[str] = None
         self._intentional_stop = False  # 标记主动停止（切歌/停止）
+        # 进度：已累计秒数 + 本次起播时间（monotonic），暂停时冻结
+        self._position_base = 0.0
+        self._run_started: Optional[float] = None
+        self._paused = False
+        self._duration = 0.0
+        self._volume = 100
+        self._target: Optional[str] = None
+        self._volume_restart = False
 
     def set_session(self, session: aiohttp.ClientSession):
         self.session = session
@@ -172,6 +241,11 @@ class PlaybackManager:
         self.stop()
         self._intentional_stop = False  # 重置：stop()的标记是给上一首歌的
         self.current_song = song
+        self._duration = _parse_duration(song.interval)
+        self._position_base = 0.0
+        self._run_started = None
+        self._paused = False
+        self._target = None
         success = False
         tmp_path = None
         try:
@@ -192,14 +266,13 @@ class PlaybackManager:
                 # 回退：直接用 URL（可能因缺少 headers 失败）
                 play_target = url
 
+            self._target = play_target
             # 2. 用 ffplay 播放本地文件
-            cmd = [FFPLAY_PATH] + FFPLAY_ARGS + [play_target]
+            self._spawn(play_target, 0.0)
             # 下载完成，即将开始播放 → 发送"正在播放"弹幕（确保弹幕状态与实际一致）
             if on_start:
                 await on_start()
             log.info(f"开始播放: {song.name} - {song.singer}")
-            # 捕获 stderr 用于调试
-            self.process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, self._wait_process)
             # 先检查主动停止（stop()可能已将self.process置为None）
@@ -224,6 +297,9 @@ class PlaybackManager:
             self.process = None
             self.current_song = None
             self._intentional_stop = False  # 重置标记
+            self._paused = False
+            self._run_started = None
+            self._target = None
             # 清理临时文件
             if tmp_path:
                 _safe_unlink(tmp_path)
@@ -233,11 +309,44 @@ class PlaybackManager:
             await on_finish(success, intentional=intentional)
         return True
 
+    def _build_cmd(self, target: str, start_at: float) -> list:
+        """构造 ffplay 命令行：过滤已有 -volume，带上当前音量与起播位置。"""
+        args = list(FFPLAY_ARGS)
+        cleaned = []
+        skip_next = False
+        for a in args:
+            if skip_next:
+                skip_next = False
+                continue
+            if a == "-volume":
+                skip_next = True
+                continue
+            cleaned.append(a)
+        cmd = [FFPLAY_PATH] + cleaned + ["-volume", str(self._volume)]
+        if start_at > 0.05:
+            cmd += ["-ss", f"{start_at:.3f}"]
+        cmd.append(target)
+        return cmd
+
+    def _spawn(self, target: str, start_at: float):
+        self.process = subprocess.Popen(self._build_cmd(target, start_at),
+                                        stdout=subprocess.DEVNULL,
+                                        stderr=subprocess.PIPE)
+        self._position_base = start_at
+        self._run_started = time.monotonic()
+        self._paused = False
+
     def _wait_process(self):
-        # 使用局部引用，防止 stop() 将 self.process 置 None 后此处访问崩溃
-        proc = self.process
-        if proc:
+        """等待子进程退出；音量调整导致的换进程不视为播放结束，继续等待新进程。"""
+        while True:
+            proc = self.process
+            if proc is None:
+                return
             proc.wait()
+            if self._volume_restart:
+                self._volume_restart = False
+                continue
+            return
 
     def stop(self):
         """停止当前播放（标记为主动停止，不触发播放失败回调）。"""
@@ -253,11 +362,80 @@ class PlaybackManager:
                     pass
             self.process = None
             log.info("已停止当前播放")
+        self._paused = False
+        self._run_started = None
         # 清理临时文件
         if self._tmp_file:
             _safe_unlink(self._tmp_file)
             self._tmp_file = None
 
+    # ---------------------------------------------------------------- 播放控制
+
+    def pause(self) -> bool:
+        if not self.process or self._paused:
+            return False
+        self._position_base = self.position
+        self._run_started = None
+        self._paused = True
+        _suspend_process(self.process)
+        return True
+
+    def resume(self) -> bool:
+        if not self.process or not self._paused:
+            return False
+        self._paused = False
+        self._run_started = time.monotonic()
+        _resume_process(self.process)
+        return True
+
+    def set_volume(self, volume: int) -> int:
+        """设置音量（0-100）。播放中会带 `-ss` 重启进程，保持当前进度。"""
+        try:
+            volume = max(0, min(100, int(volume)))
+        except (TypeError, ValueError):
+            return self._volume
+        if volume == self._volume:
+            return self._volume
+        self._volume = volume
+        if self.process and self._target and not self._paused:
+            pos = self.position
+            old = self.process
+            self._volume_restart = True
+            try:
+                old.terminate()
+            except Exception:
+                try:
+                    old.kill()
+                except Exception:
+                    pass
+            self._spawn(self._target, pos)
+        return self._volume
+
+    @property
+    def position(self) -> float:
+        pos = self._position_base
+        if self._run_started is not None:
+            pos += time.monotonic() - self._run_started
+        if self._duration > 0:
+            pos = min(pos, self._duration)
+        return max(0.0, pos)
+
     @property
     def is_playing(self) -> bool:
         return self.process is not None
+
+    @property
+    def is_paused(self) -> bool:
+        return self._paused
+
+    def state(self) -> dict:
+        """播放器状态快照（供本地 API 渲染进度/控制按钮）。"""
+        return {
+            "backend": self.BACKEND,
+            "playing": self.is_playing,
+            "paused": self._paused,
+            "position": round(self.position, 2),
+            "duration": round(self._duration, 2),
+            "volume": self._volume,
+            "capabilities": {"pause": True, "resume": True, "volume": True, "seek": False},
+        }

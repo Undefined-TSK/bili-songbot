@@ -47,6 +47,8 @@ _REASON_MAP = {
 class PlaybackManager:
     """mpv 播放管理（与 player.PlaybackManager 同接口，core.py 无需改调用代码）。"""
 
+    BACKEND = "mpv"
+
     def __init__(self, session=None, mpv_options: dict = None):
         self.process = None  # 兼容属性：手写/ffplay 版持有子进程，此处置 None
         self.current_song: Optional[SongInfo] = None
@@ -179,11 +181,70 @@ class PlaybackManager:
             except Exception as e:
                 log.debug(f"mpv stop 异常（忽略）: {e}")
 
+    # ------------------------------------------------------------------ 播放控制
+
+    def pause(self) -> bool:
+        if self._mpv is None or not self.is_playing:
+            return False
+        try:
+            self._mpv.pause = True
+            return True
+        except Exception as e:
+            log.debug(f"mpv 暂停失败（忽略）: {e}")
+            return False
+
+    def resume(self) -> bool:
+        if self._mpv is None or not self.is_playing:
+            return False
+        try:
+            self._mpv.pause = False
+            return True
+        except Exception as e:
+            log.debug(f"mpv 恢复失败（忽略）: {e}")
+            return False
+
+    def set_volume(self, volume: int) -> int:
+        try:
+            volume = max(0, min(100, int(volume)))
+        except (TypeError, ValueError):
+            return 100
+        if self._mpv is not None:
+            try:
+                self._mpv.volume = volume
+            except Exception as e:
+                log.debug(f"mpv 音量设置失败（忽略）: {e}")
+        return volume
+
+    def _prop(self, name: str, default=None):
+        if self._mpv is None:
+            return default
+        try:
+            value = getattr(self._mpv, name)
+            return default if value is None else value
+        except Exception:
+            return default
+
+    def state(self) -> dict:
+        paused = bool(self._prop("pause", False))
+        return {
+            "backend": self.BACKEND,
+            "playing": self.is_playing,
+            "paused": paused,
+            "position": round(float(self._prop("time_pos", 0.0) or 0.0), 2),
+            "duration": round(float(self._prop("duration", 0.0) or 0.0), 2),
+            "volume": int(self._prop("volume", 100) or 100),
+            "capabilities": {"pause": True, "resume": True, "volume": True, "seek": True},
+        }
+
     # ------------------------------------------------------------------ 状态
 
     @property
     def is_playing(self) -> bool:
         return self._playing and self._end_future is not None and not self._end_future.done()
+
+    @property
+    def is_paused(self) -> bool:
+        return bool(self._prop("pause", False))
 
     def close(self):
         """销毁常驻实例（bot 退出时调用；stop() 只停当前歌，不销毁实例）。"""

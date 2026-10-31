@@ -5,6 +5,7 @@ import asyncio
 import aiohttp
 
 from bot import log
+from bot.api import ApiServer
 from bot.bridge import SourceBridge, set_bridge
 from bot.core import BiliMusicBot
 from bot import protocol
@@ -32,6 +33,12 @@ async def main():
     async with aiohttp.ClientSession() as session:
         protocol.REAL_ROOM_ID = await protocol.get_real_room_id(session)
     bot = BiliMusicBot()
+    # 本地 HTTP API：供桌面 UI 读取真实状态并操作点歌/播放（仅监听 127.0.0.1）
+    api = ApiServer(bot)
+    try:
+        await api.start()
+    except Exception as e:
+        log.error(f"本地 API 启动失败（桌面控制不可用）: {e}")
     try:
         await bot.run()
     except KeyboardInterrupt:
@@ -40,6 +47,7 @@ async def main():
         log.error(f"运行异常: {e}")
         raise
     finally:
+        await api.stop()
         if bridge:
             await bridge.stop()
         if bot.session:

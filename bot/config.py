@@ -17,7 +17,9 @@ log = logging.getLogger("点歌机")
 
 
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CONFIG_PATH = os.path.join(_PROJECT_ROOT, "config.json")
+# 桌面外壳可在打包后把配置放到用户可写目录（app.getPath('userData')），
+# 通过 SONGBOT_CONFIG 环境变量传入绝对路径；未设置时仍用项目根目录的 config.json。
+CONFIG_PATH = os.environ.get("SONGBOT_CONFIG") or os.path.join(_PROJECT_ROOT, "config.json")
 
 
 def load_config() -> dict:
@@ -215,11 +217,22 @@ PLAYER_BACKEND = str(CFG.get("player_backend", "ffplay")).lower()
 # 默认空 = mpv 使用系统默认音频输出
 MPV_OPTIONS = CFG.get("mpv_options", {})
 
-# 点歌统计文件（/top 点歌排行数据源；置空字符串可关闭统计）
-STATS_FILE = CFG.get("stats_file", "song_stats.json")
+# 数据文件（队列/统计/日志）默认与配置文件同目录：打包后配置在用户目录，
+# 避免写入 asar 解包目录（可能只读）。相对路径按配置目录解析。
+_CONFIG_DIR = os.path.dirname(CONFIG_PATH)
 
-# 队列持久化文件：进程重启后恢复未播完的队列（置空字符串可关闭，退回纯内存队列）
-QUEUE_FILE = CFG.get("queue_file", "queue.json")
+
+def _data_path(value: str) -> str:
+    if not value:
+        return ""
+    return value if os.path.isabs(value) else os.path.join(_CONFIG_DIR, value)
+
+
+# 点歌统计文件（/top 点歌排行数据源；置空字符串可关闭统计）
+STATS_FILE = _data_path(CFG.get("stats_file", "song_stats.json"))
+
+# 队列持久化文件：进程重启后恢复未播完的队列（置空字符串可关闭，退回内存队列）
+QUEUE_FILE = _data_path(CFG.get("queue_file", "queue.json"))
 
 # ===== 自定义回复模板（高度自定义）=====
 # config.json 的 "replies" 可按键覆盖；缺失用默认值（= 内置文案，零行为变化）。

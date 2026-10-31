@@ -505,6 +505,7 @@ button, .btn, .chip, .cmd { white-space: nowrap; }
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
+select.input { cursor: pointer; padding-right: 8px; }
 
 /* ================= 搜索栏 ================= */
 .searchbar {
@@ -926,6 +927,7 @@ button, .btn, .chip, .cmd { white-space: nowrap; }
   background: var(--layer2-hover);
   border-radius: var(--r-ctl);
   position: relative;
+  cursor: pointer;
 }
 .volume .track i {
   position: absolute; top: 0; left: 0; bottom: 0;

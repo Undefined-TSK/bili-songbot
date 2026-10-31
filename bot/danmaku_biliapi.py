@@ -40,6 +40,11 @@ class BiliDanmaku:
         # 不需要等 start() 置位（connect 是阻塞循环，事件只在其内部 dispatch）
         self._running = True
 
+    @property
+    def connected(self) -> bool:
+        """弹幕监听是否处于运行状态（供本地 API 的连接指示）。"""
+        return bool(self._dm is not None and self._running)
+
     def _build_credential(self) -> Credential:
         """从 protocol 模块实时取 Cookie 配置（热更新后新建/更新均生效）。"""
         return Credential(

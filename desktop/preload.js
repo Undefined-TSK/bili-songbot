@@ -11,4 +11,12 @@ contextBridge.exposeInMainWorld('songbot', {
     ipcRenderer.on('window:state', handler);
     return () => ipcRenderer.removeListener('window:state', handler);
   },
+  // 本地后端：请求经主进程代理（token 不暴露给页面）
+  api: (path, method = 'GET', body) => ipcRenderer.invoke('api:request', { path, method, body }),
+  getBackendState: () => ipcRenderer.invoke('backend:get-state'),
+  onBackendState: (fn) => {
+    const handler = (_event, state) => fn(state);
+    ipcRenderer.on('backend:state', handler);
+    return () => ipcRenderer.removeListener('backend:state', handler);
+  },
 });

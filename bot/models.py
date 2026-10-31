@@ -150,6 +150,26 @@ class PlayQueue:
             return item
         return None
 
+    def move_to(self, index: int, target: int) -> Optional[QueueItem]:
+        """把位置 index（0 起）的项移动到 target 位置并返回；越界返回 None。"""
+        if not (0 <= index < len(self._items)) or not (0 <= target < len(self._items)):
+            return None
+        if index == target:
+            return self._items[index]
+        item = self._items[index]
+        del self._items[index]
+        self._items.insert(target, item)
+        self._save()
+        return item
+
+    def clear(self, keep_first: bool = False):
+        """清空队列；keep_first=True 时保留队首（正在播放的当前项）。"""
+        kept = [self._items[0]] if keep_first and self._items else []
+        self._items.clear()
+        for item in kept:
+            self._items.append(item)
+        self._save()
+
     def snapshot(self) -> list:
         """当前队列快照（列表，位置与展示一致，/queue 查看队列用）。"""
         return list(self._items)

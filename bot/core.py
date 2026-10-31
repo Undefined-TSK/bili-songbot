@@ -1,11 +1,12 @@
 """主控编排：BiliMusicBot——指令路由、队列消费、播放编排、Cookie 热更新循环的粘合层。"""
 import asyncio
 import re
+import time
 from typing import List, Optional, Tuple
 
 import aiohttp
 
-from . import protocol
+from . import events, protocol
 from .artist_alias import canonical_display, canonical_singer as _canon_singer
 from .batch import MAX_BATCH_SONGS, batch_plans, cap_batch_queries
 from .bridge import get_bridge
@@ -156,6 +157,10 @@ class BiliMusicBot:
         self.cookie_mgr = CookieManager()
         self.vote = VoteManager(self.sender)  # 会被更新
         self._playing = False
+        # 本地 API 展示用状态（不影响主链路）
+        self.viewer_count = 0
+        self.accepting = True          # 暂停接单开关（本地 API 可切换）
+        self.started_at = time.time()  # 本次运行起始时间（概览「运行时长」）
 
     async def run(self):
         self.session = aiohttp.ClientSession()
@@ -203,6 +208,7 @@ class BiliMusicBot:
             await self.session.close()
 
     async def _on_viewer_count(self, count: int):
+        self.viewer_count = count
         self.vote.update_viewer_count(count)
 
     async def _on_danmaku(self, text: str, uid: int, username: str):
@@ -210,12 +216,18 @@ class BiliMusicBot:
         text = text.strip()
         if not text:
             return
+        kind = ("request" if text.lower().startswith(("/play", "/lyric", "/歌词"))
+                else "chat")
+        events.hub.add_danmaku(username, text, kind)
         # 投票处理
         if self.vote.active and text.upper() in ("Y", "N", "YES", "NO"):
             self.vote.handle_vote(uid, text[0])
             return
         # /play 指令
         if text.lower().startswith("/play"):
+            if not self.accepting:
+                await self.sender.send("暂停接单中，稍后再点歌哦~")
+                return
             query = text[5:].strip()
             if not query:
                 await self.sender.send("格式: /play 歌名 (可选歌手，如 /play 告白气球 周杰伦)")
@@ -228,6 +240,9 @@ class BiliMusicBot:
                 asyncio.create_task(self._handle_play(query, username, uid))
         # /lyric 或 /歌词 指令：主动用歌词片段点歌（片段→内核解析）
         elif text.lower().startswith("/lyric") or text.lower().startswith("/歌词"):
+            if not self.accepting:
+                await self.sender.send("暂停接单中，稍后再点歌哦~")
+                return
             if text.lower().startswith("/lyric"):
                 fragment = text[6:].strip()
             else:

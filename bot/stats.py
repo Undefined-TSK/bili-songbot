@@ -56,3 +56,17 @@ class SongStats:
             items = [(k, int(v.get("count", 0))) for k, v in self._data.items()]
         items.sort(key=lambda x: (-x[1], x[0]))
         return items[:n]
+
+    def total(self) -> int:
+        """历史点播总次数（跨重启累计）。"""
+        with self._lock:
+            return sum(int(v.get("count", 0)) for v in self._data.values())
+
+    def today(self) -> int:
+        """今日有过点播记录的歌曲数（按最后一次点播时间判断，用于概览 KPI）。"""
+        import datetime
+        start = datetime.datetime.combine(
+            datetime.date.today(), datetime.time.min).timestamp()
+        with self._lock:
+            return sum(1 for v in self._data.values()
+                       if float(v.get("last", 0) or 0) >= start)

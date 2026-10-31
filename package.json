@@ -24,11 +24,25 @@
       "buildResources": "desktop/build"
     },
     "files": [
-      "desktop/main.js",
-      "desktop/preload.js",
-      "design/**/*"
+      "desktop/**/*",
+      "design/**/*",
+      "main.py",
+      "bot/**/*",
+      "source_bridge.js",
+      "musicSdk_bundle.cjs",
+      "sources/**/*",
+      "config.example.json",
+      "requirements.txt"
     ],
     "asar": true,
+    "asarUnpack": [
+      "main.py",
+      "bot/**/*",
+      "source_bridge.js",
+      "musicSdk_bundle.cjs",
+      "sources/**/*",
+      "config.example.json"
+    ],
     "win": {
       "target": [
         {
