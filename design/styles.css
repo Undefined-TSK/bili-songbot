@@ -2,7 +2,7 @@
    SongBot Desktop · Fluent 2 / WinUI 3
    色：层 0/1/2 · 字 12/14/20/28 · 圆角 4/8/0
    材质：Mica 基底 + Acrylic（侧栏/播放条/浮层）
-   动效：100/150/250/280ms · ease-in/out/standard
+   动效：100/150/250/280ms · standard / decelerate / accelerate
    ============================================================ */
 
 :root {
@@ -60,10 +60,10 @@
   --t-ovl: 250ms;
   --t-page: 280ms;
 
-  /* ---- 缓动 ---- */
-  --ease-in: cubic-bezier(0, 0, 0, 1);          /* 进入 */
-  --ease-out: cubic-bezier(0.7, 0, 1, 0.5);     /* 退出 */
-  --ease-std: cubic-bezier(0.33, 0, 0.67, 1);   /* 标准 */
+  /* ---- 缓动（仅 standard / decelerate / accelerate 三条） ---- */
+  --ease-decelerate: cubic-bezier(0, 0, 0, 1);   /* 进入：快到慢 */
+  --ease-accelerate: cubic-bezier(0.7, 0, 1, 0.5); /* 退出：慢到快 */
+  --ease-standard: cubic-bezier(0.33, 0, 0.67, 1); /* 标准 */
 
   /* ---- 布局 ---- */
   --sidebar-w: 232px;
@@ -104,6 +104,7 @@ body {
 /* ================= App 壳 ================= */
 .app {
   position: relative;
+  isolation: isolate;
   height: 100vh;
   display: grid;
   grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
@@ -114,6 +115,18 @@ body {
     "player player";
 }
 
+/* 窗口底层氛围光：让亚克力有内容可糊（极淡中性蓝灰，≤0.10） */
+.app::before {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(62% 46% at 16% 6%, rgba(90, 130, 180, .10) 0%, rgba(90, 130, 180, 0) 70%),
+    radial-gradient(58% 52% at 90% 84%, rgba(78, 110, 150, .08) 0%, rgba(78, 110, 150, 0) 72%);
+}
+
+
 /* ================= 标题栏（与侧栏同色，Mica 一体化） ================= */
 .titlebar {
   grid-area: title;
@@ -121,10 +134,11 @@ body {
   align-items: center;
   gap: 12px;
   padding: 0 0 0 16px;
-  background: var(--layer0);
+  background: transparent;
   border-bottom: 1px solid var(--stroke);
   -webkit-app-region: drag;
   user-select: none;
+  position: relative;
   z-index: 10;
 }
 .brand { display: flex; align-items: center; gap: 10px; }
@@ -135,7 +149,7 @@ body {
   display: grid; place-items: center;
   color: var(--accent-text);
 }
-.logo svg { width: 13px; height: 13px; }
+.logo svg { width: 16px; height: 16px; }
 .brand-name { font-size: var(--fs-body); font-weight: 600; color: var(--text); }
 .brand-name span { color: var(--accent); }
 .brand-sub { font-size: var(--fs-cap); color: var(--text-3); margin-top: -1px; }
@@ -157,12 +171,12 @@ body {
   width: 44px; height: var(--titlebar-h);
   border: 0; background: transparent; color: var(--text-2);
   display: grid; place-items: center; cursor: pointer;
-  transition: background var(--t-micro) var(--ease-std), color var(--t-micro);
+  transition: background var(--t-micro) var(--ease-standard), color var(--t-micro);
 }
 .win-btn:hover { background: var(--layer2); color: var(--text); }
 .win-btn:active { background: var(--layer2-press); }
 .win-btn.close:hover { background: var(--err); color: #fff; }
-.win-btn svg { width: 14px; height: 14px; }
+.win-btn svg { width: 16px; height: 16px; }
 
 /* ================= 侧边栏（Acrylic） ================= */
 .sidebar {
@@ -190,9 +204,9 @@ body {
   background: transparent; color: var(--text-2);
   font: inherit; font-size: var(--fs-body);
   cursor: pointer; text-align: left;
-  transition: background var(--t-micro) var(--ease-std), color var(--t-micro);
+  transition: background var(--t-micro) var(--ease-standard), color var(--t-micro);
 }
-.nav-item svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.nav-item svg { width: 20px; height: 20px; flex: 0 0 auto; }
 .nav-item:hover { background: var(--layer2); color: var(--text); }
 .nav-item:active { background: var(--layer2-press); }
 .nav-item.active {
@@ -239,7 +253,9 @@ body {
   grid-area: main;
   display: flex; flex-direction: column;
   min-height: 0;
-  background: var(--layer0);
+  position: relative;
+  z-index: 1;
+  background: transparent;
 }
 .topbar {
   display: flex; align-items: center; gap: 10px;
@@ -257,7 +273,7 @@ body {
   border: 1px solid var(--stroke);
   font-size: var(--fs-body); color: var(--text-2);
 }
-.stat-chip svg { width: 15px; height: 15px; color: var(--text-3); }
+.stat-chip svg { width: 16px; height: 16px; color: var(--text-3); }
 .stat-chip b { color: var(--text); font-weight: 600; }
 
 .avatar {
@@ -280,24 +296,28 @@ body {
 
 /* 页面切换：Frame.Navigate 心智（chrome 不动，仅内容区） */
 .page.entering {
-  animation: pageIn var(--t-page) var(--ease-in) both;
+  animation: pageIn var(--t-page) var(--ease-decelerate) both;
 }
 .page.leaving {
-  animation: pageOut 180ms var(--ease-out) both;
+  animation: pageOut var(--t-page) var(--ease-accelerate) both;
 }
 @keyframes pageIn {
-  from { opacity: 0; transform: translate3d(24px, 0, 0); }
+  from { opacity: 0; transform: translate3d(var(--enter-x, 24px), 0, 0); }
   to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 @keyframes pageOut {
   from { opacity: 1; transform: translate3d(0, 0, 0); }
-  to   { opacity: 0; transform: translate3d(-16px, 0, 0); }
+  to   { opacity: 0; transform: translate3d(var(--exit-x, -24px), 0, 0); }
 }
 
-/* 页内入场：淡入 + 8px 上移，≤400ms，无长 stagger */
-.page.active > * {
-  animation: rise 320ms var(--ease-in) both;
-  animation-delay: calc(var(--i, 0) * 28ms);
+/* 页内入场：仅首次进入该页，列表 stagger 20ms/项，总时长 ≤400ms */
+.page.stagger > * {
+  animation: rise 280ms var(--ease-decelerate) both;
+  animation-delay: calc(var(--i, 0) * 20ms);
+}
+.page.stagger .row {
+  animation: rise 280ms var(--ease-decelerate) both;
+  animation-delay: calc(var(--i, 0) * 20ms);
 }
 @keyframes rise {
   from { opacity: 0; transform: translateY(8px); }
@@ -309,10 +329,12 @@ body {
   background: var(--layer1);
   border: 1px solid var(--stroke);
   border-radius: var(--r-ctl);
-  transition: border-color var(--t-micro) var(--ease-std);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+  transition: background var(--t-micro) var(--ease-standard),
+              border-color var(--t-micro) var(--ease-standard);
 }
 .card.pad { padding: 16px; }
-.card:hover { border-color: var(--stroke-hover); }
+.card:hover { background: #2b2b2b; border-color: var(--stroke-hover); }
 
 .section-head {
   display: flex; align-items: center; gap: 10px;
@@ -347,11 +369,11 @@ body {
   color: var(--text);
   font: inherit; font-size: var(--fs-body);
   cursor: pointer;
-  transition: background var(--t-micro) var(--ease-std), border-color var(--t-micro);
+  transition: background var(--t-micro) var(--ease-standard), border-color var(--t-micro);
 }
 .btn:hover { background: var(--layer2); border-color: var(--stroke-hover); }
 .btn:active { background: var(--layer2-press); }
-.btn svg { width: 15px; height: 15px; }
+.btn svg { width: 16px; height: 16px; }
 
 .btn.primary {
   background: var(--accent);
@@ -366,7 +388,7 @@ body {
 .btn.ghost:hover { background: var(--layer2); color: var(--text); }
 
 .btn.sm { height: 28px; padding: 0 10px; font-size: var(--fs-cap); }
-.btn.sm svg { width: 13px; height: 13px; }
+.btn.sm svg { width: 16px; height: 16px; }
 
 .btn.danger:hover { background: var(--err); border-color: var(--err); color: #fff; }
 
@@ -378,7 +400,7 @@ body {
   border: 1px solid transparent;
   background: transparent; color: var(--text-2);
   cursor: pointer;
-  transition: background var(--t-micro) var(--ease-std), color var(--t-micro);
+  transition: background var(--t-micro) var(--ease-standard), color var(--t-micro);
 }
 .icon-btn:hover { background: var(--layer2); color: var(--text); }
 .icon-btn:active { background: var(--layer2-press); transform: none; }
@@ -395,7 +417,7 @@ body {
   color: var(--text-2);
   font: inherit; font-size: var(--fs-body);
   cursor: pointer;
-  transition: background var(--t-micro) var(--ease-std), border-color var(--t-micro), color var(--t-micro);
+  transition: background var(--t-micro) var(--ease-standard), border-color var(--t-micro), color var(--t-micro);
 }
 .chip:hover { background: var(--layer2); color: var(--text); }
 .chip.on {
@@ -403,43 +425,45 @@ body {
   border-color: var(--accent);
   color: var(--accent);
 }
-.chip svg { width: 14px; height: 14px; }
+.chip svg { width: 16px; height: 16px; }
 
+/* 标签：中性描边；仅低置信 / 需人工确认用 warn */
 .tag {
   display: inline-flex; align-items: center;
   height: 20px; padding: 0 8px;
   border-radius: var(--r-ctl);
-  background: var(--layer2);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .10);
   color: var(--text-2);
   font-size: var(--fs-cap);
 }
-.tag.blue { background: rgba(76, 194, 255, .14); color: var(--accent); }
-.tag.green { background: rgba(63, 207, 142, .14); color: var(--ok); }
-.tag.amber { background: rgba(255, 176, 32, .14); color: var(--warn); }
-.tag.violet { background: rgba(139, 124, 255, .16); color: #a99eff; }
-.tag.red { background: rgba(255, 92, 122, .14); color: var(--err); }
+.tag.amber { border-color: var(--warn); color: var(--warn); }
 
 /* ================= 开关 / 分段 / 输入 ================= */
 .switch {
   position: relative;
   display: inline-block;
   width: 40px; height: 20px;
-  border-radius: var(--r-ctl);
-  background: var(--layer2-hover);
+  border-radius: 999px;
+  background: var(--layer2);
+  border: 1px solid var(--stroke);
   cursor: pointer;
-  transition: background var(--t-micro) var(--ease-std);
+  transition: background var(--t-std) var(--ease-standard),
+              border-color var(--t-std) var(--ease-standard);
 }
 .switch::after {
   content: "";
   position: absolute;
-  top: 2px; left: 2px;
-  width: 16px; height: 16px;
+  top: 50%; left: 3px;
+  width: 12px; height: 12px;
   border-radius: 50%;
-  background: #fff;
-  transition: transform var(--t-std) var(--ease-std);
+  background: #cfcfcf;
+  transform: translateY(-50%);
+  transition: transform var(--t-std) var(--ease-standard),
+              background var(--t-std) var(--ease-standard);
 }
-.switch.on { background: var(--accent); }
-.switch.on::after { transform: translateX(20px); }
+.switch.on { background: var(--accent); border-color: transparent; }
+.switch.on::after { transform: translate(20px, -50%); background: #fff; }
 
 .segmented {
   display: inline-flex;
@@ -454,7 +478,7 @@ body {
   background: transparent; color: var(--text-2);
   font: inherit; font-size: var(--fs-cap);
   cursor: pointer;
-  transition: background var(--t-micro) var(--ease-std), color var(--t-micro);
+  transition: background var(--t-micro) var(--ease-standard), color var(--t-micro);
 }
 .segmented button:hover { color: var(--text); }
 .segmented button.on { background: var(--layer2-hover); color: var(--text); font-weight: 600; }
@@ -469,7 +493,7 @@ body {
   color: var(--text);
   font: inherit; font-size: var(--fs-body);
   outline: none;
-  transition: border-color var(--t-micro) var(--ease-std), background var(--t-micro);
+  transition: border-color var(--t-micro) var(--ease-standard), background var(--t-micro);
 }
 .input:hover { border-color: var(--stroke-hover); }
 .input:focus {
@@ -505,7 +529,7 @@ body {
   display: flex; align-items: center; gap: 12px;
   padding: 8px 10px;
   border-radius: var(--r-ctl);
-  transition: background var(--t-micro) var(--ease-std);
+  transition: background var(--t-micro) var(--ease-standard);
 }
 .row:hover { background: var(--layer2); }
 .row.playing {
@@ -555,12 +579,13 @@ body {
   background: var(--layer1);
   border: 1px solid var(--stroke);
   border-radius: var(--r-ctl);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
 }
 .k-label {
   display: flex; align-items: center; gap: 6px;
   font-size: var(--fs-cap); color: var(--text-3);
 }
-.k-label svg { width: 13px; height: 13px; }
+.k-label svg { width: 16px; height: 16px; }
 .k-value {
   font-size: var(--fs-title);
   font-weight: 600;
@@ -606,10 +631,10 @@ body {
   width: var(--p, 0%);
   background: var(--accent);
   border-radius: var(--r-ctl);
-  transition: width var(--t-std) var(--ease-std);
+  transition: width var(--t-std) var(--ease-standard);
 }
 
-/* ================= 均衡器（仅此处允许循环动画） ================= */
+/* ================= 均衡器（播放状态指示，循环动画） ================= */
 .wave {
   display: flex; align-items: flex-end; gap: 2px;
   height: 20px;
@@ -619,7 +644,7 @@ body {
   width: 3px;
   background: var(--accent);
   border-radius: var(--r-ctl);
-  animation: eq 900ms var(--ease-std) infinite;
+  animation: eq 300ms var(--ease-standard) infinite;
   animation-delay: calc(var(--w, 0) * 90ms);
 }
 .wave.paused i { animation-play-state: paused; opacity: .4; }
@@ -628,27 +653,28 @@ body {
   50% { height: 100%; }
 }
 
-/* ================= 快捷操作 ================= */
-.quick-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+/* ================= 命令栏（概览快捷操作，一行） ================= */
+.cmdbar {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
 }
-.quick {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
-  padding: 12px;
+.cmd {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: var(--control-h); padding: 0 12px;
   background: var(--layer1);
   border: 1px solid var(--stroke);
   border-radius: var(--r-ctl);
+  color: var(--text-2);
+  font: inherit; font-size: var(--fs-body);
   cursor: pointer;
-  text-align: left;
-  transition: background var(--t-micro) var(--ease-std), border-color var(--t-micro);
+  transition: background var(--t-micro) var(--ease-standard),
+              border-color var(--t-micro) var(--ease-standard),
+              color var(--t-micro) var(--ease-standard);
 }
-.quick:hover { background: var(--layer2); border-color: var(--stroke-hover); }
-.quick:active { background: var(--layer2-press); }
-.quick svg { width: 18px; height: 18px; color: var(--accent); margin-bottom: 4px; }
-.quick b { font-size: var(--fs-body); font-weight: 600; }
-.quick small { font-size: var(--fs-cap); color: var(--text-3); }
+.cmd:hover { background: var(--layer2); border-color: var(--stroke-hover); color: var(--text); }
+.cmd:active { background: var(--layer2-press); }
+.cmd svg { width: 16px; height: 16px; color: var(--text-3); }
+.cmd:hover svg { color: var(--text-2); }
 
 /* ================= 条形图 ================= */
 .bars { display: flex; flex-direction: column; gap: 10px; }
@@ -671,7 +697,7 @@ body {
   width: var(--v, 0%);
   background: var(--accent);
   border-radius: var(--r-ctl);
-  transition: width 300ms var(--ease-std);
+  transition: width 300ms var(--ease-standard);
 }
 .bar-row .num { font-size: var(--fs-cap); color: var(--text-3); text-align: right; }
 
@@ -721,7 +747,7 @@ body {
   background: var(--layer1);
   border: 1px solid var(--stroke);
   border-radius: var(--r-ctl);
-  transition: border-color var(--t-micro) var(--ease-std);
+  transition: border-color var(--t-micro) var(--ease-standard);
 }
 .src:hover { border-color: var(--stroke-hover); }
 .src-top { display: flex; align-items: center; gap: 10px; }
@@ -897,11 +923,11 @@ body {
   background: var(--accent);
   color: var(--accent-text);
   cursor: pointer;
-  transition: background var(--t-micro) var(--ease-std);
+  transition: background var(--t-micro) var(--ease-standard);
 }
 .pb-play:hover { background: var(--accent-hover); }
 .pb-play:active { background: var(--accent-press); }
-.pb-play svg { width: 18px; height: 18px; }
+.pb-play svg { width: 20px; height: 20px; }
 .pb-progress {
   flex: 1; display: flex; align-items: center; gap: 10px;
   min-width: 0;
@@ -932,7 +958,7 @@ body {
   align-items: center; justify-content: center;
   z-index: 100;
 }
-.overlay.open { display: flex; animation: fadeIn var(--t-ovl) var(--ease-in) both; }
+.overlay.open { display: flex; animation: fadeIn var(--t-ovl) var(--ease-decelerate) both; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .wizard {
@@ -942,7 +968,7 @@ body {
   border: 1px solid var(--stroke-strong);
   border-radius: var(--r-ovl);
   box-shadow: var(--shadow-overlay);
-  animation: overlayIn var(--t-ovl) var(--ease-in) both;
+  animation: overlayIn var(--t-ovl) var(--ease-decelerate) both;
 }
 @keyframes overlayIn {
   from { opacity: 0; transform: translateY(12px) scale(.98); }
@@ -952,7 +978,7 @@ body {
 .wiz-dots i {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--layer2-hover);
-  transition: background var(--t-std) var(--ease-std);
+  transition: background var(--t-std) var(--ease-standard);
 }
 .wiz-dots i.on { background: var(--accent); }
 .wiz-step { display: none; }
@@ -968,7 +994,7 @@ body {
   align-items: center; justify-content: center;
   z-index: 110;
 }
-.player-overlay.open { display: flex; animation: fadeIn var(--t-ovl) var(--ease-in) both; }
+.player-overlay.open { display: flex; animation: fadeIn var(--t-ovl) var(--ease-decelerate) both; }
 .player-flyout {
   width: 720px; max-width: calc(100vw - 40px);
   padding: 20px;
@@ -995,7 +1021,7 @@ body {
   font-size: var(--fs-body);
   color: var(--text-3);
   border-radius: var(--r-ctl);
-  transition: color var(--t-std) var(--ease-std);
+  transition: color var(--t-std) var(--ease-standard);
 }
 .lyric-line.past { color: var(--text-3); opacity: .6; }
 .lyric-line.cur { color: var(--accent); font-weight: 600; background: rgba(76, 194, 255, .08); }
@@ -1017,10 +1043,10 @@ body {
   color: var(--text);
   font-size: var(--fs-body);
   min-width: 200px;
-  animation: toastIn var(--t-ovl) var(--ease-in) both;
+  animation: toastIn var(--t-ovl) var(--ease-decelerate) both;
 }
 .toast svg { width: 16px; height: 16px; color: var(--accent); flex: 0 0 auto; }
-.toast.out { animation: toastOut 180ms var(--ease-out) both; }
+.toast.out { animation: toastOut 180ms var(--ease-accelerate) both; }
 @keyframes toastIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -1032,7 +1058,7 @@ body {
 
 /* ================= 队列删除动画 ================= */
 .row.removing {
-  animation: rowOut 220ms var(--ease-out) both;
+  animation: rowOut 220ms var(--ease-accelerate) both;
   overflow: hidden;
 }
 @keyframes rowOut {
@@ -1040,7 +1066,7 @@ body {
 }
 
 /* ================= Connected Animation 辅助类 ================= */
-.flip-source { transition: opacity var(--t-std) var(--ease-out); }
+.flip-source { transition: opacity var(--t-std) var(--ease-accelerate); }
 .flip-source.flying { opacity: 0; }
 
 /* ================= 响应式 ================= */
@@ -1060,6 +1086,6 @@ body {
     transition-duration: 1ms !important;
   }
   .page.entering, .page.leaving { animation: none; }
-  .page.active > * { animation: none; opacity: 1; transform: none; }
+  .page.stagger > *, .page.stagger .row { animation: none; opacity: 1; transform: none; }
   .wave i { animation: none; height: 60% !important; }
 }

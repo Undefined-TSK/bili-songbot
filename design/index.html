@@ -8,45 +8,45 @@
 </head>
 <body>
 
-<!-- ================= icon sprite ================= -->
+<!-- ================= icon sprite（圆头圆拐角 · 24 栅格 · 1.5px 描边） ================= -->
 <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
-  <symbol id="i-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
-  <symbol id="i-search" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.5 6.5 0 1 0 13.5 15.5l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 9.5 5a4.5 4.5 0 0 1 0 9z"/></symbol>
-  <symbol id="i-list" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2v-2H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 5v2h14V5H7z"/></symbol>
-  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
-  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></symbol>
-  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></symbol>
-  <symbol id="i-disc" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></symbol>
-  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M16 7V3h-2v4h-4V3H8v4a4 4 0 0 0 3 3.9V21h2v-10a4 4 0 0 0 3-3.9V7z"/></symbol>
-  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.5.5 0 0 0-.59-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.5.5 0 0 0-.59.22L2.74 8.87a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.37 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.03-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></symbol>
-  <symbol id="i-terminal" viewBox="0 0 24 24"><path d="M2 4h20v16H2V4zm2 2v4h16V6H4zm0 6v4h10v-4H4z"/></symbol>
-  <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></symbol>
-  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z"/></symbol>
-  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></symbol>
-  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></symbol>
-  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></symbol>
-  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></symbol>
-  <symbol id="i-check" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></symbol>
-  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 0a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4zm8 0c-.29 0-.62.02-.97.05C16.19 13.89 17 15.15 17 17V20h6v-3c0-2.66-5.33-4-8-4z"/></symbol>
-  <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4 10h-5V7h-2v7h7v-2z"/></symbol>
-  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 16l-4-4h3V4h2v8h3l-4 4zm-8 2h16v2H4v-2z"/></symbol>
-  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M17.65 6.35A8 8 0 1 0 19.73 14h-2.08A6 6 0 1 1 12 6a5.9 5.9 0 0 1 4.19 1.81L13 11h7V4l-2.35 2.35z"/></symbol>
-  <symbol id="i-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
-  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M12 22a2.2 2.2 0 0 0 2.2-2.2h-4.4A2.2 2.2 0 0 0 12 22zm7-5.5V10a7 7 0 0 0-5-6.7V3a2 2 0 0 0-4 0v.3A7 7 0 0 0 5 10v6.5L3 18.5v1h18v-1l-2-1.5z"/></symbol>
-  <symbol id="i-more" viewBox="0 0 24 24"><path d="M6 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></symbol>
-  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2zm7 12l1.1 3 3 1.1-3 1.1L19 22l-1.1-3-3-1.1 3-1.1L19 14z"/></symbol>
-  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 3v7c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V5l8-3zm-1 13l5-5-1.4-1.4L11 12.2 8.4 9.6 7 11l4 4z"/></symbol>
-  <symbol id="i-music" viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3H12z"/></symbol>
-  <symbol id="i-broadcast" viewBox="0 0 24 24"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-8.5-.5a10 10 0 0 1 0 5l-2 .5a12 12 0 0 1 0-6l2 .5zm17 0l2-.5a12 12 0 0 1 0 6l-2-.5a10 10 0 0 1 0-5z"/></symbol>
-  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18v2H3v-2zm2-3h3v-7H5v7zm6 0h3V6h-3v11zm6 0h3V9h-3v8z"/></symbol>
-  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 5h16l-6 7v6l-4 2v-8L4 5z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6 9.8V20h12V9.8"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01" stroke-width="2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5 18.5 12 8 18.5V5.5Z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5v14M15 5v14"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4V6Z"/></symbol>
+  <symbol id="i-disc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5"/><path d="M7 8h10v2a5 5 0 0 1-5 5 5 5 0 0 1-5-5V8Z"/><path d="M12 15v6"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></symbol>
+  <symbol id="i-skip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l9 6-9 6V6Z"/><path d="M18 6v12"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-9 6 9 6V6Z"/><path d="M6 6v12"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h3l5-4v14l-5-4H4V9Z"/><path d="M16 9.5a4 4 0 0 1 0 5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z"/><path d="M12 14v7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 9.5 17 19 7"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 14.8a5.5 5.5 0 0 1 3 5.2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.4 6.3"/><path d="M20 4v7h-7"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7Z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h.01M12 12h.01M18 12h.01"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z"/><path d="M18 15l1 2.5 2.5 1-2.5 1L18 22l-1-2.5-2.5-1 2.5-1L18 15Z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l9-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="15.5" cy="16" r="2.5"/></symbol>
+  <symbol id="i-broadcast" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.5 5.5a9 9 0 0 0 0 13M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 20v-6M12 20V8M17 20v-9"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7v6l-4 2v-8L4 5Z"/></symbol>
 </svg>
 
 <div class="app">
   <!-- ================= titlebar ================= -->
   <header class="titlebar">
     <div class="brand">
-      <span class="logo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20h2v-6H3v6zm4 0h2V4H7v16zm4 0h2v-9h-2v9zm4 0h2v-5h-2v5zm4 0h2V7h-2v13z"/></svg></span>
+      <span class="logo"><svg viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h2v-6H3v6zm4 0h2V4H7v16zm4 0h2v-9h-2v9zm4 0h2v-5h-2v5zm4 0h2V7h-2v13z"/></svg></span>
       <div>
         <div class="brand-name">Song<span>Bot</span></div>
         <div class="brand-sub">Live Request Desk</div>
@@ -55,9 +55,9 @@
     <div class="titlebar-spacer"></div>
     <span class="tb-chip"><span class="dot"></span> 直播间 88250 · 已连接</span>
     <div class="win-controls">
-      <button class="win-btn" data-win="minimize" aria-label="最小化"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h16v1.5H4z"/></svg></button>
-      <button class="win-btn" data-win="maximize" aria-label="最大化"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 5h14v14H5z"/></svg></button>
-      <button class="win-btn close" data-win="close" aria-label="关闭"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      <button class="win-btn" data-win="minimize" aria-label="最小化"><svg viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h16v1.5H4z"/></svg></button>
+      <button class="win-btn" data-win="maximize" aria-label="最大化"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v14H5z"/></svg></button>
+      <button class="win-btn close" data-win="close" aria-label="关闭"><svg viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
     </div>
   </header>
 
@@ -66,22 +66,22 @@
     <div class="nav-label">工作台</div>
     <nav class="nav" id="nav">
       <button class="nav-item active" data-page="dashboard" data-eyebrow="今日概览" data-title="概览">
-        <svg><use href="#i-home"/></svg><span>概览</span>
+        <svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg><span>概览</span>
       </button>
       <button class="nav-item" data-page="request" data-eyebrow="多源聚合搜索" data-title="点歌台">
-        <svg><use href="#i-search"/></svg><span>点歌台</span>
+        <svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-search"/></svg><span>点歌台</span>
       </button>
       <button class="nav-item" data-page="queue" data-eyebrow="FIFO · 已持久化" data-title="播放队列">
-        <svg><use href="#i-list"/></svg><span>播放队列</span><span class="badge">6</span>
+        <svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-list"/></svg><span>播放队列</span><span class="badge">6</span>
       </button>
       <button class="nav-item" data-page="live" data-eyebrow="实时弹幕流" data-title="弹幕互动">
-        <svg><use href="#i-chat"/></svg><span>弹幕互动</span><span class="badge">12</span>
+        <svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-chat"/></svg><span>弹幕互动</span><span class="badge">12</span>
       </button>
       <button class="nav-item" data-page="sources" data-eyebrow="lx 音源桥 · 配置" data-title="音源与设置">
-        <svg><use href="#i-plug"/></svg><span>音源与设置</span>
+        <svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plug"/></svg><span>音源与设置</span>
       </button>
       <button class="nav-item" data-page="logs" data-eyebrow="诊断与追踪" data-title="日志">
-        <svg><use href="#i-terminal"/></svg><span>日志</span>
+        <svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-terminal"/></svg><span>日志</span>
       </button>
     </nav>
 
@@ -94,8 +94,8 @@
         </div>
       </div>
       <div class="foot-actions">
-        <button class="btn sm ghost" data-open-wizard><svg><use href="#i-sparkle"/></svg><span>启动引导</span></button>
-        <button class="btn sm ghost" data-toast="已复制连接信息"><svg><use href="#i-shield"/></svg><span>安全</span></button>
+        <button class="btn sm ghost" data-open-wizard><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-sparkle"/></svg><span>启动引导</span></button>
+        <button class="btn sm ghost" data-toast="已复制连接信息"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg><span>安全</span></button>
       </div>
     </div>
   </aside>
@@ -108,10 +108,10 @@
         <h1 class="page-title" id="pageTitle">概览</h1>
       </div>
       <div class="topbar-spacer"></div>
-      <span class="stat-chip"><svg><use href="#i-users"/></svg>在线 <b id="viewers">3,842</b></span>
-      <span class="stat-chip"><svg><use href="#i-music"/></svg>队列 <b>6</b></span>
-      <button class="btn primary sm" id="botToggle"><svg><use href="#i-pause"/></svg><span>暂停接单</span></button>
-      <button class="icon-btn" data-toast="暂无新通知"><svg><use href="#i-bell"/></svg></button>
+      <span class="stat-chip"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-users"/></svg>在线 <b id="viewers">3,842</b></span>
+      <span class="stat-chip"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-music"/></svg>队列 <b>6</b></span>
+      <button class="btn primary sm" id="botToggle"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg><span>暂停接单</span></button>
+      <button class="icon-btn" data-toast="暂无新通知"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-bell"/></svg></button>
       <div class="avatar">主</div>
     </div>
 
@@ -120,7 +120,7 @@
       <!-- ---------- 1. 概览（主视觉：当前播放 + 队列） ---------- -->
       <section class="page active" id="page-dashboard" data-stagger>
         <div class="card pad" style="margin-bottom:12px">
-          <div class="section-head"><h2>现在播放</h2><span class="tag green">mpv · 无损</span><span class="spacer"></span><span class="hint">来自弹幕点歌</span></div>
+          <div class="section-head"><h2>现在播放</h2><span class="tag">mpv · 无损</span><span class="spacer"></span><span class="hint">来自弹幕点歌</span></div>
           <div class="now-card" style="margin-top:0;border:0;padding:0;background:transparent">
             <div class="cover c1 flip-source" id="npCover">晴</div>
             <div class="np-meta">
@@ -134,59 +134,31 @@
               <i style="--w:0"></i><i style="--w:1"></i><i style="--w:2"></i><i style="--w:3"></i><i style="--w:4"></i><i style="--w:5"></i><i style="--w:6"></i><i style="--w:7"></i>
             </div>
             <div class="actions" style="opacity:1">
-              <button class="icon-btn" data-toast="已暂停"><svg><use href="#i-pause"/></svg></button>
-              <button class="icon-btn" data-toast="已跳过当前歌曲"><svg><use href="#i-skip"/></svg></button>
-              <button class="icon-btn" data-open-player title="打开播放详情"><svg><use href="#i-disc"/></svg></button>
+              <button class="icon-btn" data-toast="已暂停"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
+              <button class="icon-btn" data-toast="已跳过当前歌曲"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
+              <button class="icon-btn" data-open-player title="打开播放详情"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></button>
             </div>
           </div>
+        </div>
+
+        <div class="cmdbar" style="margin-bottom:12px">
+          <button class="cmd" data-toast="已开启全自动接单"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-sparkle"/></svg><span>全自动</span></button>
+          <button class="cmd" data-toast="队列已清空"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg><span>清空队列</span></button>
+          <button class="cmd" data-toast="正在探测 44 个音源"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg><span>探测音源</span></button>
+          <button class="cmd" data-toast="已导出本场歌单"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg><span>导出歌单</span></button>
         </div>
 
         <div class="grid-2">
           <div class="card pad">
             <div class="section-head"><h2>队列</h2><span class="hint">待播 5 首</span><span class="spacer"></span><button class="btn sm ghost" data-nav="queue">查看全部</button></div>
             <div class="list">
-              <div class="row"><span class="idx">01</span><div class="cover c5">稻</div><div class="meta"><div class="t">稻香</div><div class="s">周杰伦 · @小北 · 03:43</div></div><span class="tag blue">2 票</span></div>
-              <div class="row"><span class="idx">02</span><div class="cover c4">孤</div><div class="meta"><div class="t">孤勇者</div><div class="s">陈奕迅 · @夜航船 · 04:16</div></div><span class="tag blue">1 票</span></div>
-              <div class="row"><span class="idx">03</span><div class="cover c3">起</div><div class="meta"><div class="t">起风了</div><div class="s">买辣椒也用券 · @阿澈 · 05:11</div></div><span class="tag green">跨源回退</span></div>
+              <div class="row"><span class="idx">01</span><div class="cover c5">稻</div><div class="meta"><div class="t">稻香</div><div class="s">周杰伦 · @小北 · 03:43</div></div><span class="tag">2 票</span></div>
+              <div class="row"><span class="idx">02</span><div class="cover c4">孤</div><div class="meta"><div class="t">孤勇者</div><div class="s">陈奕迅 · @夜航船 · 04:16</div></div><span class="tag">1 票</span></div>
+              <div class="row"><span class="idx">03</span><div class="cover c3">起</div><div class="meta"><div class="t">起风了</div><div class="s">买辣椒也用券 · @阿澈 · 05:11</div></div><span class="tag">跨源回退</span></div>
             </div>
           </div>
           <div class="card pad">
-            <div class="section-head"><h2>快捷操作</h2><span class="hint">一键触达</span></div>
-            <div class="quick-grid">
-              <button class="quick" data-toast="已开启全自动接单"><svg><use href="#i-sparkle"/></svg><b>全自动</b><small>自动接单 + 排序</small></button>
-              <button class="quick" data-toast="队列已清空"><svg><use href="#i-trash"/></svg><b>清空队列</b><small>保留当前播放</small></button>
-              <button class="quick" data-toast="正在探测 44 个音源"><svg><use href="#i-refresh"/></svg><b>探测音源</b><small>44 个 lx 源</small></button>
-              <button class="quick" data-toast="已导出本场歌单"><svg><use href="#i-download"/></svg><b>导出歌单</b><small>CSV / JSON</small></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="kpi-grid" style="margin-bottom:12px">
-          <div class="kpi">
-            <div class="k-label"><svg><use href="#i-users"/></svg>在线人气</div>
-            <div class="k-value"><span data-count="3842">0</span></div>
-            <div class="k-delta up">+12.4% 较上一时段</div>
-          </div>
-          <div class="kpi">
-            <div class="k-label"><svg><use href="#i-music"/></svg>今日点歌</div>
-            <div class="k-value"><span data-count="127">0</span><small>首</small></div>
-            <div class="k-delta up">+31 首</div>
-          </div>
-          <div class="kpi">
-            <div class="k-label"><svg><use href="#i-clock"/></svg>播放时长</div>
-            <div class="k-value"><span data-count="4">0</span><small>h 12m</small></div>
-            <div class="k-delta flat">连续 3 小时</div>
-          </div>
-          <div class="kpi">
-            <div class="k-label"><svg><use href="#i-broadcast"/></svg>弹幕速率</div>
-            <div class="k-value"><span data-count="46">0</span><small>/min</small></div>
-            <div class="k-delta down">-8% 波动</div>
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div class="card pad">
-            <div class="section-head"><h2>实时态势</h2><span class="hint">弹幕 / 点歌 双轴</span><span class="spacer"></span><span class="tag blue">近 30 分钟</span></div>
+            <div class="section-head"><h2>实时态势</h2><span class="hint">弹幕 / 点歌 双轴</span><span class="spacer"></span><span class="tag">近 30 分钟</span></div>
             <svg class="spark" viewBox="0 0 600 74" preserveAspectRatio="none">
               <defs><linearGradient id="sp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4CC2FF" stop-opacity=".5"/><stop offset="1" stop-color="#4CC2FF" stop-opacity="0"/></linearGradient></defs>
               <path d="M0 58 L60 50 L120 54 L180 38 L240 44 L300 26 L360 32 L420 18 L480 24 L540 12 L600 20 L600 74 L0 74 Z" fill="url(#sp)"/>
@@ -199,15 +171,39 @@
               <span style="margin-left:auto">峰值 68/min · 20:41</span>
             </div>
           </div>
-          <div class="card pad">
-            <div class="section-head"><h2>本场热门 TOP 5</h2><span class="hint">按点歌次数</span></div>
-            <div class="bars">
-              <div class="bar-row"><span class="rk">01</span><div class="bar-track"><span class="bar-fill" style="--v:92%"></span></div><span class="num">23</span></div>
-              <div class="bar-row"><span class="rk">02</span><div class="bar-track"><span class="bar-fill" style="--v:71%"></span></div><span class="num">18</span></div>
-              <div class="bar-row"><span class="rk">03</span><div class="bar-track"><span class="bar-fill" style="--v:54%"></span></div><span class="num">14</span></div>
-              <div class="bar-row"><span class="rk">04</span><div class="bar-track"><span class="bar-fill" style="--v:38%"></span></div><span class="num">9</span></div>
-              <div class="bar-row"><span class="rk">05</span><div class="bar-track"><span class="bar-fill" style="--v:26%"></span></div><span class="num">6</span></div>
-            </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-bottom:12px">
+          <div class="kpi">
+            <div class="k-label"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-users"/></svg>在线人气</div>
+            <div class="k-value"><span data-count="3842">0</span></div>
+            <div class="k-delta up">+12.4% 较上一时段</div>
+          </div>
+          <div class="kpi">
+            <div class="k-label"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-music"/></svg>今日点歌</div>
+            <div class="k-value"><span data-count="127">0</span><small>首</small></div>
+            <div class="k-delta up">+31 首</div>
+          </div>
+          <div class="kpi">
+            <div class="k-label"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-clock"/></svg>播放时长</div>
+            <div class="k-value"><span data-count="4">0</span><small>h 12m</small></div>
+            <div class="k-delta flat">连续 3 小时</div>
+          </div>
+          <div class="kpi">
+            <div class="k-label"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-broadcast"/></svg>弹幕速率</div>
+            <div class="k-value"><span data-count="46">0</span><small>/min</small></div>
+            <div class="k-delta down">-8% 波动</div>
+          </div>
+        </div>
+
+        <div class="card pad">
+          <div class="section-head"><h2>本场热门 TOP 5</h2><span class="hint">按点歌次数</span></div>
+          <div class="bars">
+            <div class="bar-row"><span class="rk">01</span><div class="bar-track"><span class="bar-fill" style="--v:92%"></span></div><span class="num">23</span></div>
+            <div class="bar-row"><span class="rk">02</span><div class="bar-track"><span class="bar-fill" style="--v:71%"></span></div><span class="num">18</span></div>
+            <div class="bar-row"><span class="rk">03</span><div class="bar-track"><span class="bar-fill" style="--v:54%"></span></div><span class="num">14</span></div>
+            <div class="bar-row"><span class="rk">04</span><div class="bar-track"><span class="bar-fill" style="--v:38%"></span></div><span class="num">9</span></div>
+            <div class="bar-row"><span class="rk">05</span><div class="bar-track"><span class="bar-fill" style="--v:26%"></span></div><span class="num">6</span></div>
           </div>
         </div>
       </section>
@@ -215,10 +211,10 @@
       <!-- ---------- 2. 点歌台 ---------- -->
       <section class="page" id="page-request" data-stagger>
         <div class="searchbar">
-          <svg><use href="#i-search"/></svg>
+          <svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-search"/></svg>
           <input type="text" placeholder="搜索歌名、歌手，或粘贴 B 站 / 网易云链接…" value="晴天 周杰伦" />
           <span class="kbd">Enter</span>
-          <button class="btn primary sm" data-toast="已按关键词重新聚合搜索"><svg><use href="#i-sparkle"/></svg>聚合搜索</button>
+          <button class="btn primary sm" data-toast="已按关键词重新聚合搜索"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-sparkle"/></svg>聚合搜索</button>
         </div>
         <div class="chips-row">
           <button class="chip on">全部平台</button>
@@ -228,8 +224,8 @@
           <button class="chip">酷我</button>
           <button class="chip">咪咕</button>
           <span class="spacer"></span>
-          <button class="chip"><svg><use href="#i-filter"/></svg>仅原版</button>
-          <button class="chip on"><svg><use href="#i-sparkle"/></svg>批量点歌</button>
+          <button class="chip"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-filter"/></svg>仅原版</button>
+          <button class="chip on"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-sparkle"/></svg>批量点歌</button>
         </div>
 
         <div class="panel-grid" style="margin-top:12px">
@@ -239,37 +235,37 @@
               <div class="row">
                 <div class="cover c1">晴</div>
                 <div class="meta"><div class="t">晴天</div><div class="s">周杰伦 · 叶惠美 · 04:29</div></div>
-                <span class="tag green">原版</span><span class="tag blue">置信 96</span>
+                <span class="tag">原版</span><span class="tag">置信 96</span>
                 <div class="actions">
-                  <button class="icon-btn" data-toast="正在试听 晴天"><svg><use href="#i-play"/></svg></button>
-                  <button class="btn primary sm" data-toast="已加入队列：晴天"><svg><use href="#i-plus"/></svg>点歌</button>
+                  <button class="icon-btn" data-toast="正在试听 晴天"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
+                  <button class="btn primary sm" data-toast="已加入队列：晴天"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>点歌</button>
                 </div>
               </div>
               <div class="row">
                 <div class="cover c5">晴</div>
                 <div class="meta"><div class="t">晴天 (Live)</div><div class="s">周杰伦 · 2019 嘉年华 · 05:12</div></div>
-                <span class="tag amber">现场版</span><span class="tag blue">置信 88</span>
+                <span class="tag">现场版</span><span class="tag">置信 88</span>
                 <div class="actions">
-                  <button class="icon-btn" data-toast="正在试听 Live 版"><svg><use href="#i-play"/></svg></button>
-                  <button class="btn sm" data-toast="已加入队列：晴天 (Live)"><svg><use href="#i-plus"/></svg>点歌</button>
+                  <button class="icon-btn" data-toast="正在试听 Live 版"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
+                  <button class="btn sm" data-toast="已加入队列：晴天 (Live)"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>点歌</button>
                 </div>
               </div>
               <div class="row">
                 <div class="cover c4">晴</div>
                 <div class="meta"><div class="t">晴天（翻唱）</div><div class="s">不是花火呀 · 翻唱合辑 · 04:21</div></div>
-                <span class="tag violet">翻唱</span><span class="tag amber">置信 71</span>
+                <span class="tag">翻唱</span><span class="tag amber">置信 71</span>
                 <div class="actions">
-                  <button class="icon-btn" data-toast="正在试听翻唱版"><svg><use href="#i-play"/></svg></button>
-                  <button class="btn sm" data-toast="已加入队列：晴天（翻唱）"><svg><use href="#i-plus"/></svg>点歌</button>
+                  <button class="icon-btn" data-toast="正在试听翻唱版"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
+                  <button class="btn sm" data-toast="已加入队列：晴天（翻唱）"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>点歌</button>
                 </div>
               </div>
               <div class="row">
                 <div class="cover c3">晴</div>
                 <div class="meta"><div class="t">晴天 (伴奏)</div><div class="s">周杰伦 · 伴奏轨 · 04:27</div></div>
-                <span class="tag red">疑似伴奏</span><span class="tag amber">置信 64</span>
+                <span class="tag">疑似伴奏</span><span class="tag amber">置信 64</span>
                 <div class="actions">
-                  <button class="icon-btn" data-toast="正在试听伴奏轨"><svg><use href="#i-play"/></svg></button>
-                  <button class="btn sm" data-toast="已加入队列：伴奏"><svg><use href="#i-plus"/></svg>点歌</button>
+                  <button class="icon-btn" data-toast="正在试听伴奏轨"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
+                  <button class="btn sm" data-toast="已加入队列：伴奏"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>点歌</button>
                 </div>
               </div>
             </div>
@@ -290,8 +286,8 @@
             <div class="card pad">
               <div class="section-head"><h2>你的收藏</h2><span class="hint">一键点歌</span></div>
               <div class="list">
-                <div class="row"><div class="cover c7">L</div><div class="meta"><div class="t">Lemon</div><div class="s">米津玄師</div></div><button class="icon-btn"><svg><use href="#i-plus"/></svg></button></div>
-                <div class="row"><div class="cover c4">言</div><div class="meta"><div class="t">言不由衷</div><div class="s">徐佳莹</div></div><button class="icon-btn"><svg><use href="#i-plus"/></svg></button></div>
+                <div class="row"><div class="cover c7">L</div><div class="meta"><div class="t">Lemon</div><div class="s">米津玄師</div></div><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg></button></div>
+                <div class="row"><div class="cover c4">言</div><div class="meta"><div class="t">言不由衷</div><div class="s">徐佳莹</div></div><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg></button></div>
               </div>
             </div>
           </aside>
@@ -303,12 +299,12 @@
         <div class="chips-row">
           <div class="segmented"><button class="on">全部 6</button><button>待播 5</button><button>已播</button></div>
           <span class="spacer"></span>
-          <button class="chip"><svg><use href="#i-download"/></svg>保存歌单</button>
-          <button class="chip"><svg><use href="#i-trash"/></svg>清空</button>
+          <button class="chip"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg>保存歌单</button>
+          <button class="chip"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg>清空</button>
         </div>
 
         <div class="card pad" style="margin-top:12px">
-          <div class="section-head"><h2>正在播放</h2><span class="hint">置顶不可删除</span><span class="spacer"></span><span class="tag green">mpv · 无损</span></div>
+          <div class="section-head"><h2>正在播放</h2><span class="hint">置顶不可删除</span><span class="spacer"></span><span class="tag">mpv · 无损</span></div>
           <div class="row playing">
             <div class="cover c1 flip-source" id="qCover">晴</div>
             <div class="meta"><div class="t">晴天</div><div class="s">周杰伦 · @小北 · 已播 01:42 / 04:29</div></div>
@@ -316,20 +312,20 @@
               <i style="--w:0"></i><i style="--w:1"></i><i style="--w:2"></i><i style="--w:3"></i><i style="--w:4"></i><i style="--w:5"></i>
             </div>
             <div class="actions" style="opacity:1">
-              <button class="icon-btn" data-toast="已暂停"><svg><use href="#i-pause"/></svg></button>
-              <button class="icon-btn" data-toast="已跳过当前歌曲"><svg><use href="#i-skip"/></svg></button>
-              <button class="icon-btn" data-open-player title="打开播放详情"><svg><use href="#i-disc"/></svg></button>
+              <button class="icon-btn" data-toast="已暂停"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
+              <button class="icon-btn" data-toast="已跳过当前歌曲"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
+              <button class="icon-btn" data-open-player title="打开播放详情"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></button>
             </div>
           </div>
         </div>
 
         <div class="section-head" style="margin-top:16px"><h2>待播 5 首</h2><span class="hint">拖动或使用置顶</span></div>
         <div class="list" id="queueList">
-          <div class="row"><span class="idx">01</span><div class="cover c5">稻</div><div class="meta"><div class="t">稻香</div><div class="s">周杰伦 · @小北 · 03:43</div></div><span class="tag blue">2 票</span><div class="actions"><button class="icon-btn"><svg><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg><use href="#i-trash"/></svg></button></div></div>
-          <div class="row"><span class="idx">02</span><div class="cover c4">孤</div><div class="meta"><div class="t">孤勇者</div><div class="s">陈奕迅 · @夜航船 · 04:16</div></div><span class="tag blue">1 票</span><div class="actions"><button class="icon-btn"><svg><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg><use href="#i-trash"/></svg></button></div></div>
-          <div class="row"><span class="idx">03</span><div class="cover c3">起</div><div class="meta"><div class="t">起风了</div><div class="s">买辣椒也用券 · @阿澈 · 05:11</div></div><span class="tag green">跨源回退</span><div class="actions"><button class="icon-btn"><svg><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg><use href="#i-trash"/></svg></button></div></div>
-          <div class="row"><span class="idx">04</span><div class="cover c2">le</div><div class="meta"><div class="t">Lemon</div><div class="s">米津玄師 · @茶泡饭 · 04:15</div></div><span class="tag blue">3 票</span><div class="actions"><button class="icon-btn"><svg><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg><use href="#i-trash"/></svg></button></div></div>
-          <div class="row"><span class="idx">05</span><div class="cover c6">不</div><div class="meta"><div class="t">不该用情</div><div class="s">张远 · @半糖 · 04:02</div></div><span class="tag amber">待验证</span><div class="actions"><button class="icon-btn"><svg><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">01</span><div class="cover c5">稻</div><div class="meta"><div class="t">稻香</div><div class="s">周杰伦 · @小北 · 03:43</div></div><span class="tag">2 票</span><div class="actions"><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">02</span><div class="cover c4">孤</div><div class="meta"><div class="t">孤勇者</div><div class="s">陈奕迅 · @夜航船 · 04:16</div></div><span class="tag">1 票</span><div class="actions"><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">03</span><div class="cover c3">起</div><div class="meta"><div class="t">起风了</div><div class="s">买辣椒也用券 · @阿澈 · 05:11</div></div><span class="tag">跨源回退</span><div class="actions"><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">04</span><div class="cover c2">le</div><div class="meta"><div class="t">Lemon</div><div class="s">米津玄師 · @茶泡饭 · 04:15</div></div><span class="tag">3 票</span><div class="actions"><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">05</span><div class="cover c6">不</div><div class="meta"><div class="t">不该用情</div><div class="s">张远 · @半糖 · 04:02</div></div><span class="tag amber">待验证</span><div class="actions"><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
         </div>
         <div class="empty-hint">队列已持久化到 <span class="kbd">queue.json</span>，重启后自动恢复（不含过期音源链接）</div>
       </section>
@@ -354,7 +350,7 @@
             <div class="sendbox" style="margin-top:12px">
               <input type="text" placeholder="以主播身份发送弹幕…" />
               <span class="counter">0 / 20</span>
-              <button class="btn primary sm" data-toast="弹幕已发送"><svg><use href="#i-chat"/></svg>发送</button>
+              <button class="btn primary sm" data-toast="弹幕已发送"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-chat"/></svg>发送</button>
             </div>
           </div>
 
@@ -371,7 +367,7 @@
               </svg>
             </div>
             <div class="card pad">
-              <div class="section-head"><h2>敏感词拦截</h2><span class="tag green">已启用</span></div>
+              <div class="section-head"><h2>敏感词拦截</h2><span class="tag">已启用</span></div>
               <div class="rule"><span>今日拦截</span><b>7 条</b></div>
               <div class="rule"><span>规则数</span><b>18</b></div>
             </div>
@@ -384,8 +380,8 @@
         <div class="chips-row">
           <span class="hint" style="font-size:12px;color:var(--text-3)">44 个 lx 音源 · 已启用 12 个 · 上次探测 20:36</span>
           <span class="spacer"></span>
-          <button class="chip"><svg><use href="#i-refresh"/></svg>全部探测</button>
-          <button class="chip on"><svg><use href="#i-shield"/></svg>仅健康源</button>
+          <button class="chip"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg>全部探测</button>
+          <button class="chip on"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg>仅健康源</button>
         </div>
         <div class="source-grid" style="margin-top:12px">
           <div class="src"><div class="src-top"><span class="src-logo c1">W</span><div><div class="src-name">网易云 wy</div><div class="src-sub">主源 · 无损</div></div><span class="health ok" style="margin-left:auto"><span class="d"></span>健康</span></div><div class="src-metrics"><div class="metric"><b>38ms</b>延迟</div><div class="metric"><b>99.1%</b>成功率</div><div class="metric"><b>1,204</b>命中</div></div></div>
@@ -400,7 +396,7 @@
 
         <div class="settings-grid" style="margin-top:16px">
           <div class="card pad">
-            <div class="section-head"><h2>账号</h2><span class="hint">Cookie 热更新</span><span class="spacer"></span><span class="tag green">有效</span></div>
+            <div class="section-head"><h2>账号</h2><span class="hint">Cookie 热更新</span><span class="spacer"></span><span class="tag">有效</span></div>
             <div class="setting-row">
               <div><div style="font-weight:600">SESSDATA</div><div class="desc">剩余有效期 42 天 · 修改后自动热重载，无需重启</div></div>
               <div class="ctl"><input class="input" value="••••••••••••••••7a3c" /></div>
@@ -411,7 +407,7 @@
             </div>
             <div class="setting-row">
               <div><div style="font-weight:600">buvid3 / buvid4</div><div class="desc">风控校验；缺失时启动自动获取</div></div>
-              <div class="ctl"><button class="btn sm" data-toast="正在重新获取 buvid3"><svg><use href="#i-refresh"/></svg>重新获取</button></div>
+              <div class="ctl"><button class="btn sm" data-toast="正在重新获取 buvid3"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg>重新获取</button></div>
             </div>
           </div>
 
@@ -483,7 +479,7 @@
           <span style="font-size:12px;color:var(--text-3)">有未保存的更改</span>
           <span style="flex:1"></span>
           <button class="btn ghost sm" data-toast="已放弃更改">放弃</button>
-          <button class="btn primary sm" data-toast="设置已保存并热重载"><svg><use href="#i-check"/></svg>保存并应用</button>
+          <button class="btn primary sm" data-toast="设置已保存并热重载"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg>保存并应用</button>
         </div>
       </section>
 
@@ -493,8 +489,8 @@
           <div class="segmented"><button class="on">全部</button><button>INFO</button><button>WARN</button><button>ERROR</button></div>
           <span class="spacer"></span>
           <input class="input" placeholder="过滤关键字…" style="max-width:220px;height:32px" />
-          <button class="chip on"><svg><use href="#i-refresh"/></svg>自动滚动</button>
-          <button class="chip"><svg><use href="#i-download"/></svg>导出</button>
+          <button class="chip on"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg>自动滚动</button>
+          <button class="chip"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg>导出</button>
         </div>
         <div class="log-panel" style="margin-top:12px">
           <div class="log-line"><span class="ts">20:41:02.184</span><span class="lv info">INFO</span><span class="msg">[danmaku] 连接成功 room=88250 protover=2</span></div>
@@ -521,13 +517,13 @@
   <footer class="playerbar">
     <div class="cover c1 pb-cover flip-source" id="pbCover" data-open-player>晴</div>
     <div class="pb-meta" data-open-player>
-      <div class="pb-title"><span class="txt">晴天</span><span class="tag blue">wy</span></div>
+      <div class="pb-title"><span class="txt">晴天</span><span class="tag">wy</span></div>
       <div class="pb-artist">周杰伦 · 无损 · ffplay</div>
     </div>
     <div class="pb-controls">
-      <button class="icon-btn" data-toast="上一首"><svg><use href="#i-prev"/></svg></button>
-      <button class="pb-play" id="pbPlay"><svg id="pbPlayIcon"><use href="#i-pause"/></svg></button>
-      <button class="icon-btn" data-toast="下一首"><svg><use href="#i-skip"/></svg></button>
+      <button class="icon-btn" data-toast="上一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-prev"/></svg></button>
+      <button class="pb-play" id="pbPlay"><svg id="pbPlayIcon" stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
+      <button class="icon-btn" data-toast="下一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
     </div>
     <div class="pb-progress">
       <span class="pb-time">01:42</span>
@@ -538,8 +534,8 @@
       <div class="wave" id="pbWave">
         <i style="--w:0"></i><i style="--w:1"></i><i style="--w:2"></i><i style="--w:3"></i><i style="--w:4"></i><i style="--w:5"></i>
       </div>
-      <div class="volume"><svg><use href="#i-volume"/></svg><span class="track"><i></i></span></div>
-      <button class="icon-btn" data-nav="queue" title="打开队列"><svg><use href="#i-list"/></svg></button>
+      <div class="volume"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-volume"/></svg><span class="track"><i></i></span></div>
+      <button class="icon-btn" data-nav="queue" title="打开队列"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-list"/></svg></button>
     </div>
   </footer>
 </div>
@@ -551,22 +547,22 @@
       <div class="cover c1 xl" id="flyoutCover">晴</div>
     </div>
     <div>
-      <div class="section-head"><h2>晴天</h2><span class="tag green">原版</span></div>
+      <div class="section-head"><h2>晴天</h2><span class="tag">原版</span></div>
       <div style="color:var(--text-3);font-size:12px;margin-top:-6px">周杰伦 · 叶惠美 · 网易云音乐</div>
       <div class="big-progress">
         <div class="progress"><span class="buffered" style="width:74%"></span><span class="bar" style="--p:38%"></span></div>
         <div class="times"><span>01:42</span><span>04:29</span></div>
       </div>
       <div class="transport">
-        <button class="icon-btn" data-toast="上一首"><svg><use href="#i-prev"/></svg></button>
-        <button class="pb-play" id="flyoutPlay"><svg><use href="#i-pause"/></svg></button>
-        <button class="icon-btn" data-toast="下一首"><svg><use href="#i-skip"/></svg></button>
+        <button class="icon-btn" data-toast="上一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-prev"/></svg></button>
+        <button class="pb-play" id="flyoutPlay"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
+        <button class="icon-btn" data-toast="下一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
         <span class="spacer"></span>
         <span class="tag">音质 无损</span>
-        <span class="tag green">mpv 后端</span>
+        <span class="tag">mpv 后端</span>
       </div>
       <div class="card pad" style="margin-top:14px;background:var(--layer2);border:0">
-        <div class="section-head"><h2>歌词</h2><span class="hint">同步滚动</span><span class="spacer"></span><span class="tag blue">自动匹配</span></div>
+        <div class="section-head"><h2>歌词</h2><span class="hint">同步滚动</span><span class="spacer"></span><span class="tag">自动匹配</span></div>
         <div class="lyrics" id="lyrics">
           <div class="lyric-line past">故事的小黄花 从出生那年就飘着</div>
           <div class="lyric-line past">童年的荡秋千 随记忆一直晃到现在</div>
@@ -600,7 +596,7 @@
       <div class="field"><label>bili_jct（CSRF Token）</label><input class="input" placeholder="粘贴 bili_jct" /></div>
       <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
         <button class="btn ghost" data-close-wizard>稍后设置</button>
-        <button class="btn primary" data-wiz-next>下一步<svg><use href="#i-skip"/></svg></button>
+        <button class="btn primary" data-wiz-next>下一步<svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
       </div>
     </div>
     <div class="wiz-step">
@@ -614,7 +610,7 @@
       </div>
       <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
         <button class="btn ghost" data-wiz-prev>上一步</button>
-        <button class="btn primary" data-wiz-next>下一步<svg><use href="#i-skip"/></svg></button>
+        <button class="btn primary" data-wiz-next>下一步<svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
       </div>
     </div>
     <div class="wiz-step">
@@ -622,13 +618,13 @@
       <h2 style="margin:0 0 6px;font-size:20px;font-weight:600">准备就绪</h2>
       <p style="color:var(--text-3);font-size:12px;margin:0 0 14px">44 个 lx 音源已就绪，播放后端默认为 ffplay（可在设置中切换 mpv）。</p>
       <div class="list">
-        <div class="row"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--ok)" style="flex:0 0 auto"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><div class="meta"><div class="t">Cookie 有效</div><div class="s">剩余 42 天</div></div></div>
-        <div class="row"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--ok)" style="flex:0 0 auto"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><div class="meta"><div class="t">房间 88250 可访问</div><div class="s">真实房间号已解析</div></div></div>
-        <div class="row"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--ok)" style="flex:0 0 auto"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><div class="meta"><div class="t">音源桥在线</div><div class="s">node · 44 源</div></div></div>
+        <div class="row"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--ok)" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><div class="meta"><div class="t">Cookie 有效</div><div class="s">剩余 42 天</div></div></div>
+        <div class="row"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--ok)" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><div class="meta"><div class="t">房间 88250 可访问</div><div class="s">真实房间号已解析</div></div></div>
+        <div class="row"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--ok)" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><div class="meta"><div class="t">音源桥在线</div><div class="s">node · 44 源</div></div></div>
       </div>
       <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
         <button class="btn ghost" data-wiz-prev>上一步</button>
-        <button class="btn primary" data-close-wizard data-toast="引导完成，开始接单"><svg><use href="#i-play"/></svg>开始营业</button>
+        <button class="btn primary" data-close-wizard data-toast="引导完成，开始接单"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg>开始营业</button>
       </div>
     </div>
   </div>

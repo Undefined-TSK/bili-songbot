@@ -13,7 +13,9 @@ function createWindow() {
     minWidth: 1040,
     minHeight: 680,
     frame: false,
-    backgroundColor: '#06080C',
+    backgroundColor: '#202020',
+    // Windows 11 用系统 Mica 材质；其他平台保持纯色，避免渲染异常
+    ...(process.platform === 'win32' ? { backgroundMaterial: 'mica' } : {}),
     show: false,
     autoHideMenuBar: true,
     title: 'SongBot 点歌台',

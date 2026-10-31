@@ -1,6 +1,6 @@
 /* ============================================================
    SongBot Desktop · Fluent 2 交互层
-   动效：100/150/250/280ms · ease-in/out/standard · 无 ripple / spring
+   动效：100/150/250/280ms · standard / decelerate / accelerate
    ============================================================ */
 (() => {
   'use strict';
@@ -18,12 +18,20 @@
   let current = 'dashboard';
   let isPlaying = true;
 
-  /* 页内入场序号 */
-  $$('[data-stagger]').forEach(group => {
-    Array.from(group.children).forEach((child, i) => {
-      child.style.setProperty('--i', String(i));
+  /* 页内 stagger：仅首次进入该页，20ms/项，序号上限 6（总时长 ≤400ms） */
+  const visited = new Set();
+  function staggerIn(page) {
+    if (!page || visited.has(page.id)) return;
+    visited.add(page.id);
+    Array.from(page.children).forEach((child, i) => {
+      child.style.setProperty('--i', String(Math.min(i, 6)));
     });
-  });
+    Array.from(page.querySelectorAll('.row')).forEach((row, i) => {
+      row.style.setProperty('--i', String(Math.min(i, 6)));
+    });
+    page.classList.add('stagger');
+    setTimeout(() => page.classList.remove('stagger'), 420);
+  }
 
   /* ---------------- 页面切换（Frame.Navigate 心智） ---------------- */
   function switchPage(id, opts = {}) {
@@ -42,18 +50,21 @@
     if (oldPage) {
       oldPage.classList.remove('active', 'entering');
       if (!reducedMotion) {
+        oldPage.style.setProperty('--exit-x', forward ? '-24px' : '24px');
         oldPage.classList.add('leaving');
         const leaving = oldPage;
-        setTimeout(() => leaving.classList.remove('leaving'), 180);
+        setTimeout(() => leaving.classList.remove('leaving'), 300);
       }
     }
 
     newPage.classList.remove('leaving');
     newPage.classList.add('active');
     if (!reducedMotion) {
+      newPage.style.setProperty('--enter-x', forward ? '24px' : '-24px');
       newPage.classList.add('entering');
       setTimeout(() => newPage.classList.remove('entering'), 300);
     }
+    staggerIn(newPage);
     newPage.scrollTop = 0;
 
     const item = navItems.find(i => i.dataset.page === id);
@@ -70,12 +81,12 @@
     item.addEventListener('click', () => switchPage(item.dataset.page));
   });
 
-  /* ---------------- 数字滚动（≤400ms，标准减速） ---------------- */
+  /* ---------------- 数字滚动（800ms，减速曲线） ---------------- */
   function runCountUp(root) {
     $$('[data-count]', root).forEach(el => {
       const target = Number(el.dataset.count || 0);
       if (reducedMotion) { el.textContent = fmt(target); return; }
-      const dur = 360;
+      const dur = 800;
       const t0 = performance.now();
       function frame(t) {
         const p = Math.min(1, (t - t0) / dur);
@@ -94,7 +105,7 @@
     if (!msg || !toastWrap) return;
     const el = document.createElement('div');
     el.className = 'toast';
-    el.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span></span>';
+    el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7"/></svg><span></span>';
     el.querySelector('span').textContent = msg;
     toastWrap.appendChild(el);
     setTimeout(() => {
@@ -154,7 +165,7 @@
     // 强制 reflow
     void flyoutCover.offsetWidth;
     // Play：补间到目标
-    flyoutCover.style.transition = `transform 300ms var(--ease-in), border-radius 300ms var(--ease-in)`;
+    flyoutCover.style.transition = `transform 300ms var(--ease-decelerate), border-radius 300ms var(--ease-decelerate)`;
     flyoutCover.style.transform = 'translate(0,0) scale(1,1)';
     setTimeout(() => {
       flyoutCover.style.transition = '';
@@ -169,7 +180,7 @@
 
   /* ---------------- 委托交互 ---------------- */
   document.addEventListener('click', ev => {
-    const target = ev.target.closest('button, .chip, .switch, .quick, .nav-item, .icon-btn, [data-open-player]');
+    const target = ev.target.closest('button, .chip, .switch, .cmd, .nav-item, .icon-btn, [data-open-player]');
     if (!target) return;
 
     // 播放详情浮层
@@ -244,6 +255,7 @@
 
   /* ---------------- 初始化 ---------------- */
   requestAnimationFrame(() => {
+    staggerIn($(`#page-${current}`));
     runCountUp($(`#page-${current}`));
   });
 
