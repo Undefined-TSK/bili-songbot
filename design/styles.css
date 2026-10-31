@@ -101,6 +101,9 @@ body {
   font-family: "Cascadia Mono", "Cascadia Code", Consolas, monospace;
 }
 
+/* 按钮/Chip 文字永不竖排：空间不足由容器处理 */
+button, .btn, .chip, .cmd { white-space: nowrap; }
+
 /* ================= App 壳 ================= */
 .app {
   position: relative;
@@ -320,7 +323,7 @@ body {
   animation-delay: calc(var(--i, 0) * 20ms);
 }
 @keyframes rise {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 

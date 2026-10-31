@@ -18,19 +18,19 @@
   let current = 'dashboard';
   let isPlaying = true;
 
-  /* 页内 stagger：仅首次进入该页，20ms/项，序号上限 6（总时长 ≤400ms） */
-  const visited = new Set();
+  /* 页内 stagger：每次切页都触发，20ms/项，序号上限 8（总时长 ≤450ms） */
   function staggerIn(page) {
-    if (!page || visited.has(page.id)) return;
-    visited.add(page.id);
+    if (!page) return;
     Array.from(page.children).forEach((child, i) => {
-      child.style.setProperty('--i', String(Math.min(i, 6)));
+      child.style.setProperty('--i', String(Math.min(i, 8)));
     });
     Array.from(page.querySelectorAll('.row')).forEach((row, i) => {
-      row.style.setProperty('--i', String(Math.min(i, 6)));
+      row.style.setProperty('--i', String(Math.min(i, 8)));
     });
+    page.classList.remove('stagger');
+    void page.offsetWidth; // 允许重复触发
     page.classList.add('stagger');
-    setTimeout(() => page.classList.remove('stagger'), 420);
+    setTimeout(() => page.classList.remove('stagger'), 470);
   }
 
   /* ---------------- 页面切换（串行：旧页退完 → 新页再进） ---------------- */

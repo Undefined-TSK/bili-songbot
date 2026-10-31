@@ -49,15 +49,14 @@
       <span class="logo"><svg viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h2v-6H3v6zm4 0h2V4H7v16zm4 0h2v-9h-2v9zm4 0h2v-5h-2v5zm4 0h2V7h-2v13z"/></svg></span>
       <div>
         <div class="brand-name">Song<span>Bot</span></div>
-        <div class="brand-sub">Live Request Desk</div>
       </div>
     </div>
     <div class="titlebar-spacer"></div>
     <span class="tb-chip"><span class="dot"></span> 直播间 88250 · 已连接</span>
     <div class="win-controls">
-      <button class="win-btn" data-win="minimize" aria-label="最小化"><svg viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h16v1.5H4z"/></svg></button>
-      <button class="win-btn" data-win="maximize" aria-label="最大化"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v14H5z"/></svg></button>
-      <button class="win-btn close" data-win="close" aria-label="关闭"><svg viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      <button class="win-btn" data-win="minimize" title="最小化" aria-label="最小化"><svg viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h16v1.5H4z"/></svg></button>
+      <button class="win-btn" data-win="maximize" title="最大化" aria-label="最大化"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v14H5z"/></svg></button>
+      <button class="win-btn close" data-win="close" title="关闭" aria-label="关闭"><svg viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
     </div>
   </header>
 
@@ -90,12 +89,11 @@
         <span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--ok)"></span>
         <div>
           <b>服务运行中</b>
-          <small>pid 4831 · 12ms</small>
+          <small>延迟 12ms</small>
         </div>
       </div>
       <div class="foot-actions">
-        <button class="btn sm ghost" data-open-wizard><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-sparkle"/></svg><span>启动引导</span></button>
-        <button class="btn sm ghost" data-toast="已复制连接信息"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg><span>安全</span></button>
+        <button class="btn sm ghost" data-toast="已复制连接信息" title="复制连接信息" aria-label="复制连接信息"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg><span>连接安全</span></button>
       </div>
     </div>
   </aside>
@@ -111,7 +109,7 @@
       <span class="stat-chip"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-users"/></svg>在线 <b id="viewers">3,842</b></span>
       <span class="stat-chip"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-music"/></svg>队列 <b>6</b></span>
       <button class="btn primary sm" id="botToggle"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg><span>暂停接单</span></button>
-      <button class="icon-btn" data-toast="暂无新通知"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-bell"/></svg></button>
+      <button class="icon-btn" data-toast="暂无新通知" title="通知" aria-label="通知"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-bell"/></svg></button>
       <div class="avatar">主</div>
     </div>
 
@@ -131,9 +129,9 @@
               </div>
             </div>
             <div class="actions" style="opacity:1">
-              <button class="icon-btn" data-toast="已暂停"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
-              <button class="icon-btn" data-toast="已跳过当前歌曲"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
-              <button class="icon-btn" data-open-player title="打开播放详情"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></button>
+              <button class="icon-btn" data-toast="已暂停" title="暂停" aria-label="暂停"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
+              <button class="icon-btn" data-toast="已跳过当前歌曲" title="下一首" aria-label="下一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
+              <button class="icon-btn" data-open-player title="打开播放详情" aria-label="打开播放详情"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></button>
             </div>
           </div>
         </div>
@@ -234,7 +232,7 @@
                 <div class="meta"><div class="t">晴天</div><div class="s">周杰伦 · 叶惠美 · 04:29</div></div>
                 <span class="tag">原版</span><span class="tag">置信 96</span>
                 <div class="actions">
-                  <button class="icon-btn" data-toast="正在试听 晴天"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
+                  <button class="icon-btn" title="试听" aria-label="试听" data-toast="正在试听 晴天"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
                   <button class="btn primary sm" data-toast="已加入队列：晴天"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>点歌</button>
                 </div>
               </div>
@@ -243,7 +241,7 @@
                 <div class="meta"><div class="t">晴天 (Live)</div><div class="s">周杰伦 · 2019 嘉年华 · 05:12</div></div>
                 <span class="tag">现场版</span><span class="tag">置信 88</span>
                 <div class="actions">
-                  <button class="icon-btn" data-toast="正在试听 Live 版"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
+                  <button class="icon-btn" title="试听" aria-label="试听" data-toast="正在试听 Live 版"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
                   <button class="btn sm" data-toast="已加入队列：晴天 (Live)"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>点歌</button>
                 </div>
               </div>
@@ -252,7 +250,7 @@
                 <div class="meta"><div class="t">晴天（翻唱）</div><div class="s">不是花火呀 · 翻唱合辑 · 04:21</div></div>
                 <span class="tag">翻唱</span><span class="tag amber">置信 71</span>
                 <div class="actions">
-                  <button class="icon-btn" data-toast="正在试听翻唱版"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
+                  <button class="icon-btn" title="试听" aria-label="试听" data-toast="正在试听翻唱版"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
                   <button class="btn sm" data-toast="已加入队列：晴天（翻唱）"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>点歌</button>
                 </div>
               </div>
@@ -261,7 +259,7 @@
                 <div class="meta"><div class="t">晴天 (伴奏)</div><div class="s">周杰伦 · 伴奏轨 · 04:27</div></div>
                 <span class="tag">疑似伴奏</span><span class="tag amber">置信 64</span>
                 <div class="actions">
-                  <button class="icon-btn" data-toast="正在试听伴奏轨"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
+                  <button class="icon-btn" title="试听" aria-label="试听" data-toast="正在试听伴奏轨"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-play"/></svg></button>
                   <button class="btn sm" data-toast="已加入队列：伴奏"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>点歌</button>
                 </div>
               </div>
@@ -283,8 +281,8 @@
             <div class="card pad">
               <div class="section-head"><h2>你的收藏</h2><span class="hint">一键点歌</span></div>
               <div class="list">
-                <div class="row"><div class="cover c7">L</div><div class="meta"><div class="t">Lemon</div><div class="s">米津玄師</div></div><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg></button></div>
-                <div class="row"><div class="cover c4">言</div><div class="meta"><div class="t">言不由衷</div><div class="s">徐佳莹</div></div><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg></button></div>
+                <div class="row"><div class="cover c7">L</div><div class="meta"><div class="t">Lemon</div><div class="s">米津玄師</div></div><button class="icon-btn" title="一键点歌" aria-label="一键点歌"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg></button></div>
+                <div class="row"><div class="cover c4">言</div><div class="meta"><div class="t">言不由衷</div><div class="s">徐佳莹</div></div><button class="icon-btn" title="一键点歌" aria-label="一键点歌"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg></button></div>
               </div>
             </div>
           </aside>
@@ -306,20 +304,20 @@
             <div class="cover c1 flip-source" id="qCover">晴</div>
             <div class="meta"><div class="t">晴天</div><div class="s">周杰伦 · @小北 · 已播 01:42 / 04:29</div></div>
             <div class="actions" style="opacity:1">
-              <button class="icon-btn" data-toast="已暂停"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
-              <button class="icon-btn" data-toast="已跳过当前歌曲"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
-              <button class="icon-btn" data-open-player title="打开播放详情"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></button>
+              <button class="icon-btn" data-toast="已暂停" title="暂停" aria-label="暂停"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
+              <button class="icon-btn" data-toast="已跳过当前歌曲" title="下一首" aria-label="下一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
+              <button class="icon-btn" data-open-player title="打开播放详情" aria-label="打开播放详情"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></button>
             </div>
           </div>
         </div>
 
         <div class="section-head" style="margin-top:16px"><h2>待播 5 首</h2><span class="hint">拖动或使用置顶</span></div>
         <div class="list" id="queueList">
-          <div class="row"><span class="idx">01</span><div class="cover c5">稻</div><div class="meta"><div class="t">稻香</div><div class="s">周杰伦 · @小北 · 03:43</div></div><span class="tag">2 票</span><div class="actions"><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
-          <div class="row"><span class="idx">02</span><div class="cover c4">孤</div><div class="meta"><div class="t">孤勇者</div><div class="s">陈奕迅 · @夜航船 · 04:16</div></div><span class="tag">1 票</span><div class="actions"><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
-          <div class="row"><span class="idx">03</span><div class="cover c3">起</div><div class="meta"><div class="t">起风了</div><div class="s">买辣椒也用券 · @阿澈 · 05:11</div></div><span class="tag">跨源回退</span><div class="actions"><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
-          <div class="row"><span class="idx">04</span><div class="cover c2">le</div><div class="meta"><div class="t">Lemon</div><div class="s">米津玄師 · @茶泡饭 · 04:15</div></div><span class="tag">3 票</span><div class="actions"><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
-          <div class="row"><span class="idx">05</span><div class="cover c6">不</div><div class="meta"><div class="t">不该用情</div><div class="s">张远 · @半糖 · 04:02</div></div><span class="tag amber">待验证</span><div class="actions"><button class="icon-btn"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">01</span><div class="cover c5">稻</div><div class="meta"><div class="t">稻香</div><div class="s">周杰伦 · @小北 · 03:43</div></div><span class="tag">2 票</span><div class="actions"><button class="icon-btn" title="置顶" aria-label="置顶"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" title="跳过" aria-label="跳过" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del" title="移除" aria-label="移除"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">02</span><div class="cover c4">孤</div><div class="meta"><div class="t">孤勇者</div><div class="s">陈奕迅 · @夜航船 · 04:16</div></div><span class="tag">1 票</span><div class="actions"><button class="icon-btn" title="置顶" aria-label="置顶"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" title="跳过" aria-label="跳过" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del" title="移除" aria-label="移除"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">03</span><div class="cover c3">起</div><div class="meta"><div class="t">起风了</div><div class="s">买辣椒也用券 · @阿澈 · 05:11</div></div><span class="tag">跨源回退</span><div class="actions"><button class="icon-btn" title="置顶" aria-label="置顶"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" title="跳过" aria-label="跳过" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del" title="移除" aria-label="移除"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">04</span><div class="cover c2">le</div><div class="meta"><div class="t">Lemon</div><div class="s">米津玄師 · @茶泡饭 · 04:15</div></div><span class="tag">3 票</span><div class="actions"><button class="icon-btn" title="置顶" aria-label="置顶"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" title="跳过" aria-label="跳过" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del" title="移除" aria-label="移除"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
+          <div class="row"><span class="idx">05</span><div class="cover c6">不</div><div class="meta"><div class="t">不该用情</div><div class="s">张远 · @半糖 · 04:02</div></div><span class="tag amber">待验证</span><div class="actions"><button class="icon-btn" title="置顶" aria-label="置顶"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></button><button class="icon-btn" title="跳过" aria-label="跳过" data-toast="已跳过"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button><button class="icon-btn del" title="移除" aria-label="移除"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg></button></div></div>
         </div>
         <div class="empty-hint">队列已持久化到 <span class="kbd">queue.json</span>，重启后自动恢复（不含过期音源链接）</div>
       </section>
@@ -339,7 +337,7 @@
               <div class="dm type-request"><span class="who">阿澈</span><span class="what">点歌 起风了 · 音源降级已回退</span></div>
               <div class="dm type-super"><span class="who">茶泡饭</span><span class="what">SC 30 元：来首 Lemon 吧</span></div>
               <div class="dm"><span class="who">路过的风</span><span class="what">这首好好听</span></div>
-              <div class="dm sys"><span class="who">系统</span><span class="what">10030 触发，已指数退避 5s 后重试成功</span></div>
+              <div class="dm sys"><span class="who">系统</span><span class="what">连接波动，已自动恢复</span></div>
             </div>
             <div class="sendbox" style="margin-top:12px">
               <input type="text" placeholder="以主播身份发送弹幕…" />
@@ -354,7 +352,7 @@
               <div class="mini-metrics">
                 <div><b data-count="46">0</b><small>弹幕 / 分</small></div>
                 <div><b data-count="127">0</b><small>点歌</small></div>
-                <div><b data-count="92">0</b><small>转化率 %</small></div>
+                <div><b data-count="92">0</b><small>弹幕→点歌 转化</small></div>
               </div>
               <svg class="spark" viewBox="0 0 300 60" preserveAspectRatio="none" style="height:60px;margin-top:8px">
                 <path d="M0 46 L30 40 L60 44 L90 30 L120 36 L150 20 L180 26 L210 14 L240 22 L270 10 L300 16" fill="none" stroke="#4CC2FF" stroke-width="2"/>
@@ -412,7 +410,7 @@
               <div class="ctl"><input class="input" value="88250" style="max-width:150px" /></div>
             </div>
             <div class="setting-row">
-              <div><div style="font-weight:600">断线自动重连</div><div class="desc">指数退避，最长 30s</div></div>
+              <div><div style="font-weight:600">断线自动重连</div><div class="desc">断线后自动重试，最长 30 秒</div></div>
               <div class="ctl"><span class="switch on" data-switch></span></div>
             </div>
             <div class="setting-row">
@@ -515,9 +513,9 @@
       <div class="pb-artist">周杰伦 · 无损 · ffplay</div>
     </div>
     <div class="pb-controls">
-      <button class="icon-btn" data-toast="上一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-prev"/></svg></button>
-      <button class="pb-play" id="pbPlay"><svg id="pbPlayIcon" stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
-      <button class="icon-btn" data-toast="下一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
+      <button class="icon-btn" data-toast="上一首" title="上一首" aria-label="上一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-prev"/></svg></button>
+      <button class="pb-play" id="pbPlay" title="播放或暂停" aria-label="播放或暂停"><svg id="pbPlayIcon" stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
+      <button class="icon-btn" data-toast="下一首" title="下一首" aria-label="下一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
     </div>
     <div class="pb-progress">
       <span class="pb-time">01:42</span>
@@ -526,7 +524,7 @@
     </div>
     <div class="pb-right">
       <div class="volume"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-volume"/></svg><span class="track"><i></i></span></div>
-      <button class="icon-btn" data-nav="queue" title="打开队列"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-list"/></svg></button>
+      <button class="icon-btn" data-nav="queue" title="打开队列" aria-label="打开队列"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-list"/></svg></button>
     </div>
   </footer>
 </div>
@@ -545,9 +543,9 @@
         <div class="times"><span>01:42</span><span>04:29</span></div>
       </div>
       <div class="transport">
-        <button class="icon-btn" data-toast="上一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-prev"/></svg></button>
-        <button class="pb-play" id="flyoutPlay"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
-        <button class="icon-btn" data-toast="下一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
+        <button class="icon-btn" data-toast="上一首" title="上一首" aria-label="上一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-prev"/></svg></button>
+        <button class="pb-play" id="flyoutPlay" title="播放或暂停" aria-label="播放或暂停"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-pause"/></svg></button>
+        <button class="icon-btn" data-toast="下一首" title="下一首" aria-label="下一首"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-skip"/></svg></button>
         <span class="spacer"></span>
         <span class="tag">音质 无损</span>
         <span class="tag">mpv 后端</span>
