@@ -33,10 +33,17 @@
     setTimeout(() => page.classList.remove('stagger'), 420);
   }
 
-  /* ---------------- 页面切换（Frame.Navigate 心智） ---------------- */
+  /* ---------------- 页面切换（串行：旧页退完 → 新页再进） ---------------- */
+  const EXIT_MS = 140;            // 退场时长 ≤150ms
+  const ENTER_MS = 280;
+  let pendingEnter = null;        // 排队中的进入动画定时器（防抖用）
+
   function switchPage(id, opts = {}) {
     if (!ORDER.includes(id)) return;
     if (id === current && !opts.force) return;
+
+    // 连点防抖：取消尚未触发的进入，直接改目标
+    if (pendingEnter) { clearTimeout(pendingEnter); pendingEnter = null; }
 
     const from = ORDER.indexOf(current);
     const to = ORDER.indexOf(id);
@@ -45,27 +52,35 @@
     const newPage = $(`#page-${id}`);
     if (!newPage) return;
 
-    current = id;
-
+    // 旧页先退场（140ms，加速曲线）
     if (oldPage) {
-      oldPage.classList.remove('active', 'entering');
-      if (!reducedMotion) {
-        oldPage.style.setProperty('--exit-x', forward ? '-24px' : '24px');
-        oldPage.classList.add('leaving');
-        const leaving = oldPage;
-        setTimeout(() => leaving.classList.remove('leaving'), 300);
-      }
+      oldPage.classList.remove('active', 'entering', 'leaving');
+      void oldPage.offsetWidth; // 重触发退场动画
+      oldPage.style.setProperty('--exit-x', forward ? '-24px' : '24px');
+      oldPage.classList.add('leaving');
     }
 
-    newPage.classList.remove('leaving');
-    newPage.classList.add('active');
-    if (!reducedMotion) {
-      newPage.style.setProperty('--enter-x', forward ? '24px' : '-24px');
-      newPage.classList.add('entering');
-      setTimeout(() => newPage.classList.remove('entering'), 300);
+    const enter = () => {
+      pendingEnter = null;
+      if (oldPage) oldPage.classList.remove('leaving');
+      current = id;
+      newPage.classList.remove('leaving');
+      newPage.classList.add('active');
+      if (!reducedMotion) {
+        newPage.style.setProperty('--enter-x', forward ? '24px' : '-24px');
+        newPage.classList.add('entering');
+        setTimeout(() => newPage.classList.remove('entering'), ENTER_MS + 20);
+      }
+      staggerIn(newPage);
+      newPage.scrollTop = 0;
+      runCountUp(newPage);
+    };
+
+    if (reducedMotion || !oldPage) {
+      enter();
+    } else {
+      pendingEnter = setTimeout(enter, EXIT_MS);
     }
-    staggerIn(newPage);
-    newPage.scrollTop = 0;
 
     const item = navItems.find(i => i.dataset.page === id);
     if (item) {
@@ -73,8 +88,6 @@
       pageEyebrow.textContent = item.dataset.eyebrow || pageEyebrow.textContent;
       navItems.forEach(n => n.classList.toggle('active', n === item));
     }
-
-    runCountUp(newPage);
   }
 
   navItems.forEach(item => {
@@ -133,7 +146,6 @@
   const pbPlayIcon = $('#pbPlayIcon');
   function setPlaying(next) {
     isPlaying = next;
-    $$('.wave').forEach(w => w.classList.toggle('paused', !isPlaying));
     if (pbPlayIcon) pbPlayIcon.querySelector('use').setAttribute('href', isPlaying ? '#i-pause' : '#i-play');
     const fp = $('#flyoutPlay use');
     if (fp) fp.setAttribute('href', isPlaying ? '#i-pause' : '#i-play');

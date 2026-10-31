@@ -299,7 +299,7 @@ body {
   animation: pageIn var(--t-page) var(--ease-decelerate) both;
 }
 .page.leaving {
-  animation: pageOut var(--t-page) var(--ease-accelerate) both;
+  animation: pageOut 140ms var(--ease-accelerate) both;
 }
 @keyframes pageIn {
   from { opacity: 0; transform: translate3d(var(--enter-x, 24px), 0, 0); }
@@ -632,25 +632,6 @@ body {
   background: var(--accent);
   border-radius: var(--r-ctl);
   transition: width var(--t-std) var(--ease-standard);
-}
-
-/* ================= 均衡器（播放状态指示，循环动画） ================= */
-.wave {
-  display: flex; align-items: flex-end; gap: 2px;
-  height: 20px;
-}
-.wave i {
-  display: block;
-  width: 3px;
-  background: var(--accent);
-  border-radius: var(--r-ctl);
-  animation: eq 300ms var(--ease-standard) infinite;
-  animation-delay: calc(var(--w, 0) * 90ms);
-}
-.wave.paused i { animation-play-state: paused; opacity: .4; }
-@keyframes eq {
-  0%, 100% { height: 30%; }
-  50% { height: 100%; }
 }
 
 /* ================= 命令栏（概览快捷操作，一行） ================= */
@@ -1087,5 +1068,4 @@ body {
   }
   .page.entering, .page.leaving { animation: none; }
   .page.stagger > *, .page.stagger .row { animation: none; opacity: 1; transform: none; }
-  .wave i { animation: none; height: 60% !important; }
 }
