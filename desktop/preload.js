@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld('songbot', {
   getBackendState: () => ipcRenderer.invoke('backend:get-state'),
   openLog: () => ipcRenderer.invoke('app:open-log'),
   openDataDir: () => ipcRenderer.invoke('app:open-data'),
+  readLog: () => ipcRenderer.invoke('app:read-log'),
   onBackendState: (fn) => {
     const handler = (_event, state) => fn(state);
     ipcRenderer.on('backend:state', handler);

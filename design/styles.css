@@ -873,6 +873,13 @@ select.input { cursor: pointer; padding-right: 8px; }
 .log-line .lv.dbg { color: var(--text-3); }
 .log-line .msg { color: var(--text-2); }
 
+.log-hint {
+  margin-top: 10px;
+  font-size: var(--fs-cap);
+  color: var(--text-3);
+  word-break: break-all;
+}
+
 .empty-hint {
   margin-top: 16px;
   padding: 10px 14px;

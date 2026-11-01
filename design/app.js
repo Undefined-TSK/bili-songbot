@@ -35,6 +35,10 @@
     lastDmId: 0,
     dmFilter: 'all',
     logs: [],
+    fileLogs: [],
+    logSource: 'api',
+    logPath: '',
+    logDataDir: '',
     lastLogId: 0,
     logLevel: 'all',
     logKeyword: '',
@@ -252,10 +256,12 @@
         ? `127.0.0.1:${next.port} · ${next.external ? '外部后端' : '本地进程'}`
         : (next.error || (next.status === 'starting' ? '首次启动可能需要 30-60 秒…' : '等待 Python 后端…'));
     }
+    const dirHint = $('#dataDirHint');
+    if (dirHint && next.dataDir) dirHint.textContent = next.dataDir;
     if (!online && next.status === 'offline' && !state.backendNotified) {
       state.backendNotified = true;
       const dir = next.dataDir ? `${next.dataDir}\\backend.log` : 'backend.log';
-      toast(`后端未就绪：日志在 ${dir}，可点左下角「打开日志」`);
+      toast(`后端未就绪：可在「日志」页直接查看 ${dir}`);
     }
     if (online) state.backendNotified = false;
   }
@@ -673,7 +679,8 @@
   }
 
   function filteredLogs() {
-    return state.logs.filter(item => {
+    const source = state.logSource === 'file' ? state.fileLogs : state.logs;
+    return source.filter(item => {
       const lv = String(item.level || '').toUpperCase();
       if (state.logLevel === 'INFO' && lv !== 'INFO') return false;
       if (state.logLevel === 'WARN' && !lv.startsWith('WARN')) return false;
@@ -689,13 +696,21 @@
   function renderLogs() {
     const panel = $('#logPanel');
     if (!panel) return;
+    const sourceLabel = $('#logSource');
+    if (sourceLabel) {
+      sourceLabel.textContent = state.logSource === 'file'
+        ? `后端未启动 · 直接读取 backend.log${state.logPath ? `：${state.logPath}` : ''}`
+        : '来源：本地 API 实时日志（含启动阶段 INFO / WARN / ERROR）';
+    }
     const list = filteredLogs();
     panel.textContent = '';
     if (!list.length) {
       const hint = document.createElement('div');
       hint.className = 'empty-hint';
       hint.style.marginTop = '0';
-      hint.textContent = state.logs.length ? '没有匹配的日志。' : '等待后端日志…';
+      hint.textContent = state.logSource === 'file'
+        ? 'backend.log 暂无内容，等待后端输出…'
+        : (state.logs.length ? '没有匹配的日志。' : '等待后端日志…');
       panel.append(hint);
       return;
     }
@@ -703,7 +718,7 @@
       const row = document.createElement('div');
       row.className = 'log-line';
       const ts = document.createElement('span');
-      ts.className = 'ts'; ts.textContent = clockTime(item.ts);
+      ts.className = 'ts'; ts.textContent = item.ts ? clockTime(item.ts) : '';
       const lv = logLevelClass(item.level);
       const lvEl = document.createElement('span');
       lvEl.className = `lv ${lv.cls}`; lvEl.textContent = lv.text;
@@ -715,14 +730,65 @@
     if (state.logAuto) panel.scrollTop = panel.scrollHeight;
   }
 
+  const LOG_LEVEL_MAP = {
+    WARNING: 'WARN', WARN: 'WARN', ERROR: 'ERROR', CRITICAL: 'ERROR',
+    DEBUG: 'DEBUG', INFO: 'INFO',
+  };
+
+  /** 把 backend.log 的纯文本行解析成日志条目（API 未启动时的界面数据源）。 */
+  function parseLogText(text) {
+    const lines = String(text || '').split(/\r?\n/).filter(line => line.trim());
+    let seq = 0;
+    return lines.slice(-300).map(line => {
+      seq += 1;
+      const m = line.match(/^(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2})(?:,\d{3})?\s*\[(\w+)\]\s*(?:\[([^\]]+)\]\s*)?(.*)$/);
+      if (!m) return { id: seq, ts: 0, level: 'INFO', name: 'backend', msg: line };
+      const parsed = new Date(m[1].replace(' ', 'T')).getTime();
+      return {
+        id: seq,
+        ts: Number.isFinite(parsed) ? parsed / 1000 : 0,
+        level: LOG_LEVEL_MAP[String(m[2]).toUpperCase()] || m[2],
+        name: m[3] || 'backend',
+        msg: m[4] || '',
+      };
+    });
+  }
+
+  async function loadFileLogs() {
+    if (!bridge || typeof bridge.readLog !== 'function') return;
+    const data = await bridge.readLog();
+    if (!data || !data.ok) return;
+    const wasFile = state.logSource === 'file';
+    state.logSource = 'file';
+    state.logPath = data.path || '';
+    state.logDataDir = data.dataDir || '';
+    const parsed = parseLogText(data.text);
+    const last = parsed[parsed.length - 1];
+    const prev = state.fileLogs[state.fileLogs.length - 1];
+    const changed = !wasFile || !last !== !prev || (last && prev && (last.msg !== prev.msg || last.level !== prev.level));
+    state.fileLogs = parsed;
+    if (changed) renderLogs();
+  }
+
   async function fetchLogs() {
     const res = await api(`/api/logs?after=${state.lastLogId}&limit=200`);
-    if (!res.ok || !res.data || !res.data.ok) return;
-    const items = res.data.items || [];
-    if (!items.length) return;
-    state.lastLogId = items[items.length - 1].id;
-    state.logs = state.logs.concat(items).slice(-300);
-    renderLogs();
+    if (res.ok && res.data && res.data.ok) {
+      if (state.logSource !== 'api') {
+        // 后端（重启后）可用：丢弃文件日志，改用 API 的实时日志
+        state.logSource = 'api';
+        state.logs = [];
+        state.lastLogId = 0;
+        renderLogs();
+      }
+      const items = res.data.items || [];
+      if (!items.length) return;
+      state.lastLogId = items[items.length - 1].id;
+      state.logs = state.logs.concat(items).slice(-300);
+      renderLogs();
+      return;
+    }
+    // 后端未就绪（启动失败/启动中）：直接读 backend.log，界面不再“只提示去看文件”
+    await loadFileLogs();
   }
 
   /* ---------------------------------------------------------------- 搜索 / 点歌 */

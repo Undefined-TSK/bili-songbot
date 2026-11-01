@@ -1,6 +1,6 @@
 {
   "name": "songbot-desktop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "bili-songbot 直播间点歌台的桌面外壳（Electron）",
   "author": "bili-songbot",

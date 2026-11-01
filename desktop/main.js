@@ -7,6 +7,39 @@ const { spawn } = require('node:child_process');
 
 const ROOT = path.join(__dirname, '..');
 const RENDERER = path.join(ROOT, 'design', 'index.html');
+
+/**
+ * 数据目录（config.json / backend.log / queue.json / song_stats.json）：
+ * - SONGBOT_DATA_DIR 环境变量可自定义任意路径；
+ * - 便携版默认放在 exe 同级的 SongBotData，路径固定、用户可直接找到；
+ * - 只读目录（如 Program Files）自动回退到系统默认 %APPDATA%\SongBot。
+ */
+function resolveDataDir() {
+  const custom = (process.env.SONGBOT_DATA_DIR || '').trim();
+  if (custom) return path.resolve(custom);
+  if (app.isPackaged && process.env.PORTABLE_EXECUTABLE_DIR) {
+    const beside = path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'SongBotData');
+    try {
+      fs.mkdirSync(beside, { recursive: true });
+      fs.accessSync(beside, fs.constants.W_OK);
+      return beside;
+    } catch { /* 不可写：回退系统目录 */ }
+  }
+  return app.getPath('userData');
+}
+
+const LEGACY_DATA_DIR = app.getPath('userData');
+const DATA_DIR = resolveDataDir();
+try { app.setPath('userData', DATA_DIR); } catch { /* 忽略 */ }
+// 老版本数据在 %APPDATA%\SongBot：新目录还没有配置时迁移一次，避免用户重新填写。
+if (DATA_DIR !== LEGACY_DATA_DIR) {
+  try {
+    const legacyCfg = path.join(LEGACY_DATA_DIR, 'config.json');
+    const targetCfg = path.join(DATA_DIR, 'config.json');
+    if (!fs.existsSync(targetCfg) && fs.existsSync(legacyCfg)) fs.copyFileSync(legacyCfg, targetCfg);
+  } catch { /* 忽略 */ }
+}
+
 const BACKEND_ROOT = app.isPackaged
   ? path.join(process.resourcesPath, 'app.asar.unpacked')
   : ROOT;
@@ -43,6 +76,7 @@ function publicState() {
     external: backend.external,
     error: backend.error,
     dataDir: app.getPath('userData'),
+    logPath: logFile(),
   };
 }
 
@@ -132,6 +166,25 @@ function logFile() {
   const dir = app.getPath('userData');
   try { fs.mkdirSync(dir, { recursive: true }); } catch { /* 忽略 */ }
   return path.join(dir, 'backend.log');
+}
+
+/** 读取文件尾部（最多 maxBytes），用于后端未启动时在界面查看日志。 */
+function readTail(file, maxBytes = 512 * 1024) {
+  try {
+    if (!fs.existsSync(file)) return '';
+    const size = fs.statSync(file).size;
+    const start = Math.max(0, size - maxBytes);
+    const fd = fs.openSync(file, 'r');
+    try {
+      const buf = Buffer.alloc(size - start);
+      fs.readSync(fd, buf, 0, buf.length, start);
+      return buf.toString('utf8');
+    } finally {
+      fs.closeSync(fd);
+    }
+  } catch {
+    return '';
+  }
 }
 
 /**
@@ -339,6 +392,17 @@ ipcMain.handle('app:open-log', () => {
   else return shell.openPath(app.getPath('userData'));
 });
 ipcMain.handle('app:open-data', () => shell.openPath(app.getPath('userData')));
+
+/** 后端未启动时也能在界面看日志：直接读 backend.log，缺失时回退 bot.log 尾部。 */
+ipcMain.handle('app:read-log', () => {
+  const dataDir = app.getPath('userData');
+  let text = readTail(logFile()).trimEnd();
+  if (!text) {
+    const botText = readTail(path.join(dataDir, 'logs', 'bot.log')).trimEnd();
+    if (botText) text = `--- logs/bot.log ---\n${botText}`;
+  }
+  return { ok: true, path: logFile(), dataDir, text };
+});
 
 /**
  * 渲染层通过主进程代理访问本地 API：避免 file:// 的 CORS 限制，

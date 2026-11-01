@@ -4,7 +4,7 @@ import asyncio
 
 import aiohttp
 
-from bot import log
+from bot import log, events
 from bot.api import ApiServer
 from bot.bridge import SourceBridge, set_bridge
 from bot.core import BiliMusicBot
@@ -12,6 +12,8 @@ from bot import protocol
 
 
 async def main():
+    # 先把日志接进内存环形缓冲：API 启动前的启动日志也能在界面日志页看到。
+    events.install_log_handler(log)
     # 文件日志：按 config.json 的 log_file/log_level 落盘（日志轮转 + 过期清理）
     from bot.config import CFG, ROOM_ID, cleanup_old_logs, setup_file_logging
     setup_file_logging(CFG)

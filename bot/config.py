@@ -11,9 +11,15 @@ import time
 
 
 _console_handler = logging.StreamHandler()
+_console_handler.setFormatter(logging.Formatter(
+    "%(asctime)s [%(levelname)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+))
 
 
 log = logging.getLogger("点歌机")
+# 控制台输出 → 桌面外壳把子进程 stdout/stderr 写入 backend.log，
+# 界面在 API 未就绪时可直接读取该文件，因此启动阶段的 INFO/WARN/ERROR 都要落盘。
+log.addHandler(_console_handler)
 
 
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
