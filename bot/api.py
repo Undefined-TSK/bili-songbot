@@ -247,6 +247,17 @@ class ApiServer:
             "items": items,
         }
 
+    @staticmethod
+    def _available_backends() -> list:
+        """可用播放后端：ffplay 始终可用，mpv 需 python-mpv + 系统 libmpv。"""
+        backends = ["ffplay"]
+        try:
+            import mpv  # noqa: F401
+            backends.append("mpv")
+        except Exception:
+            pass
+        return backends
+
     def _settings_payload(self) -> dict:
         cfg = _read_cfg()
         sessdata = str(cfg.get("bili_sessdata") or "")
@@ -265,7 +276,7 @@ class ApiServer:
             "max_msg_per_minute": int(cfg.get("max_msg_per_minute", 20)),
             "danmaku_interval": float(cfg.get("danmaku_interval", 5)),
             "qualities": list(QUALITY_LADDER),
-            "backends": ["ffplay", "mpv"],
+            "backends": self._available_backends(),
             "api_port": self.port or _read_cfg().get("api_port") or DEFAULT_PORT,
         }
 
@@ -395,7 +406,7 @@ class ApiServer:
         if song is None:
             try:
                 sug = await asyncio.wait_for(
-                    suggest_song(self.bot.session, query), timeout=10)
+                    suggest_song(self.bot.session, query), timeout=4)
                 suggestion = song_dict(sug)
             except Exception:
                 suggestion = None

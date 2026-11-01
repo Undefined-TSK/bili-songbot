@@ -23,7 +23,6 @@ from .config import (BRIDGE_SCRIPT, NODE_PATH, SOURCE_DIR, SOURCE_URLS, log,
 SEARCH_TIMEOUT = 10     # 单脚本搜索超时（秒）
 READY_TIMEOUT = max(25, SOURCE_INIT_TIMEOUT + 15)  # 单脚本加载超时（秒）≥脚本侧 init 超时
 URL_TIMEOUT = 15        # 单脚本取 URL 超时（秒，真实脚本需网络往返）
-COLLECT_WINDOW = 8      # 取 URL 收集候选窗口（秒）：快源先返回，慢/死源不入围
 
 
 class _ScriptProc:
@@ -498,20 +497,13 @@ class SourceBridge:
             fallback.append(self.builtin)
         return fallback
 
-    async def _race(self, procs: List[_ScriptProc], payload_tpl: dict, timeout: float,
-                    collect_window: Optional[float] = None, collect_all: bool = False):
-        """并发竞速。
-
-        - collect_all=False：返回首个成功且非空的结果（其余取消）。
-        - collect_all=True（仅 musicUrl）：在 collect_window 内收集全部 http URL 候选，
-          返回列表，交由调用方校验后择优（避免"死链先返回抢赢"）。
-        """
+    async def _race(self, procs: List[_ScriptProc], payload_tpl: dict, timeout: float):
+        """并发竞速：返回首个成功且非空的结果（其余取消）。"""
         if not procs:
             raise RuntimeError("没有可用音源进程")
         action = payload_tpl.get("action")
         tasks = {asyncio.create_task(p.request(dict(payload_tpl), timeout)): p for p in procs}
-        deadline = asyncio.get_event_loop().time() + (collect_window or timeout)
-        collected: List[str] = []
+        deadline = asyncio.get_event_loop().time() + timeout
         try:
             while tasks:
                 remain = max(0.05, deadline - asyncio.get_event_loop().time())
@@ -527,25 +519,14 @@ class SourceBridge:
                     if action == "search":
                         v = data.get("data")
                         if v and (not isinstance(v, list) or len(v) > 0):
-                            if collect_all:
-                                collected.append(v)
-                            else:
-                                return v
+                            return v
                     else:
                         v = data.get("url")
                         if v and isinstance(v, str) and v.startswith("http"):
-                            if collect_all:
-                                if v not in collected:
-                                    collected.append(v)
-                            else:
-                                return v
-                if collect_window and asyncio.get_event_loop().time() >= deadline:
-                    break
+                            return v
         finally:
             for t in tasks:
                 t.cancel()
-        if collect_all:
-            return collected
         raise RuntimeError("所有音源进程请求失败")
 
     # ---------------------------------------------------------------- 接口
@@ -612,53 +593,74 @@ class SourceBridge:
         return None
 
     async def get_url(self, source: str, song_info: dict, quality: str) -> Optional[str]:
-        """musicUrl：收集所有脚本/内置引擎返回的候选 URL，校验真实可播后择优返回。
+        """musicUrl：候选 URL 一到就立即校验，首个真实可播即返回（快源约 1-2s 出链）。
         死链（失效 API 返回 0 字节 text/html）被校验拒绝，自动落到下一个真实音源——
-        避免"快返回的死链抢赢真实音源"。全败时返回 None。"""
+        避免"快返回的死链抢赢真实音源"。全败时退回首个原始候选，无候选返回 None。"""
         enriched = self._enrich(source, song_info)
-        candidates: List[str] = []
-        try:
-            procs = self._procs_for("musicUrl", source)
-            # 收集窗口内拿到全部候选（快源 2-5s 返回，慢/死源不入围）
-            got = await self._race(procs, {"action": "musicUrl", "source": source,
-                                          "info": enriched, "type": quality},
-                                  URL_TIMEOUT, collect_window=COLLECT_WINDOW,
-                                  collect_all=True)
-            if isinstance(got, list):
-                candidates += got
-        except Exception as e:
-            log.debug(f"脚本 URL 收集 {source} 失败: {e}")
-        # 内置引擎兜底候选
+        payload = {"action": "musicUrl", "source": source, "info": enriched, "type": quality}
+        work = [asyncio.create_task(p.request(dict(payload), URL_TIMEOUT))
+                for p in self._procs_for("musicUrl", source)]
         if self.builtin and self.builtin.ready:
-            try:
-                d = await self.builtin.request({"action": "musicUrl", "source": source,
-                                                "info": enriched, "type": quality}, URL_TIMEOUT)
-                u = d.get("url")
-                if u and str(u).startswith("http") and u not in candidates:
-                    candidates.append(u)
-            except Exception as e:
-                log.debug(f"内置引擎 URL {source} 失败: {e}")
-
-        if not candidates:
+            work.append(asyncio.create_task(self.builtin.request(dict(payload), URL_TIMEOUT)))
+        if not work:
             return None
-        # 并发校验，返回首个真实可播 URL
-        results = await asyncio.gather(*(self._validate_url(u) for u in candidates))
-        for u, ok in zip(candidates, results):
-            if ok:
-                return u
-        # 校验全部失败（网络隔离等）：退而求其次返回首个原始候选
-        log.debug(f"{source} 全部候选校验失败，退回首个原始 URL")
-        return candidates[0]
 
-    async def download(self, url: str, output_path: str, headers: dict = None) -> dict:
-        """Node 原生下载（aiohttp 失败的回退）：发给第一个存活进程。"""
+        raw: List[str] = []
+        pending = set(work)
+        checks: Dict[asyncio.Task, str] = {}
+        deadline = asyncio.get_event_loop().time() + URL_TIMEOUT
+        try:
+            while pending or checks:
+                remain = deadline - asyncio.get_event_loop().time()
+                if remain <= 0:
+                    break
+                done, pending = await asyncio.wait(pending | set(checks),
+                                                   timeout=min(remain, 1.0),
+                                                   return_when=asyncio.FIRST_COMPLETED)
+                for t in done:
+                    if t in checks:
+                        url = checks.pop(t)
+                        if not t.cancelled() and t.exception() is None and t.result():
+                            return url  # 边收候选边校验：首个可播即返回，免等收集窗口
+                        continue
+                    if t.cancelled():
+                        continue
+                    try:
+                        data = t.result()
+                    except Exception:
+                        continue
+                    u = data.get("url") if isinstance(data, dict) else None
+                    if not u or not isinstance(u, str) or not u.startswith("http") or u in raw:
+                        continue
+                    raw.append(u)
+                    checks[asyncio.create_task(self._validate_url(u))] = u
+        except Exception as e:
+            log.debug(f"脚本 URL 获取 {source} 失败: {e}")
+
+        if raw:
+            # 校验全部失败（网络隔离等）：退而求其次返回首个原始候选
+            log.debug(f"{source} 全部候选校验失败，退回首个原始 URL")
+            return raw[0]
+        return None
+
+    async def download(self, url: str, output_path: str, headers: dict = None) -> int:
+        """Node 原生下载（aiohttp 失败的回退）：发给第一个存活进程，返回字节数。"""
         alive = ([self.builtin] if (self.builtin and self.builtin.ready) else []) + \
                 [p for p in self.procs if p.ready]
         if not alive:
             raise RuntimeError("没有存活的桥接进程")
         data = await alive[0].request({"action": "download", "url": url,
                                        "outputPath": output_path, "headers": headers or {}}, 30)
-        return data.get("data") or {}
+        payload = data.get("data")
+        if isinstance(payload, dict):
+            try:
+                return int(payload.get("size") or 0)
+            except (TypeError, ValueError):
+                return 0
+        try:
+            return int(payload or 0)
+        except (TypeError, ValueError):
+            return 0
 
     async def stop(self):
         for t in self._bg_tasks:

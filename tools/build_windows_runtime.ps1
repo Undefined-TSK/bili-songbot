@@ -1,4 +1,4 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 <#
   在 Windows 上准备 build-runtime/（免安装便携版内置的 Python / Node / ffplay）。
   用法：powershell -ExecutionPolicy Bypass -File tools/build_windows_runtime.ps1 [-Force]
@@ -69,6 +69,16 @@ if ($LASTEXITCODE -ne 0) { throw '依赖安装失败' }
 & python -m pip install --upgrade --target $site --no-deps jieba qrcode-terminal
 if ($LASTEXITCODE -ne 0) { throw 'jieba / qrcode-terminal 安装失败' }
 
+# ---------------------------------------------------------------- 运行时瘦身
+# 删除运行时不使用的可选组件（jieba 的 LAC 模型/词性标注/关键词分析、Pillow 的 AVIF 插件），
+# 相当一部分体积，且不影响分词、拼音模糊匹配与播放。
+foreach ($p in @('jieba\lac_small', 'jieba\analyse', 'jieba\posseg')) {
+  $full = Join-Path $site $p
+  if (Test-Path $full) { Remove-Item $full -Recurse -Force }
+}
+Get-ChildItem (Join-Path $site 'PIL') -Filter '_avif*.pyd' -ErrorAction SilentlyContinue |
+  Remove-Item -Force
+
 # ---------------------------------------------------------------- Node
 $nodeExe = Join-Path $nodeDir 'node.exe'
 Get-File @(
@@ -81,7 +91,8 @@ $ffplay = Join-Path $ffDir 'ffplay.exe'
 if (-not (Test-Path $ffplay) -or $Force) {
   $zip = Join-Path $runtime 'ffmpeg-release-essentials.zip'
   Get-File @(
-    'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip'
+    'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip',
+    'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip'
   ) $zip
   $tmp = Join-Path $runtime 'ffmpeg-extract'
   Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue

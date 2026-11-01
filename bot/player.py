@@ -99,17 +99,26 @@ async def validate_audio_url(session: aiohttp.ClientSession, url: str, platform:
         return True
 
 
+def is_dead_proxy_url(url: str) -> bool:
+    """已知无法下载的代理链接（.php?id= 模式）：新版接口普遍返回 404，
+    提前跳过可省掉一次必然失败的请求与一条误导性告警。"""
+    return ".php?" in url and "id=" in url
+
+
 async def download_audio(session: aiohttp.ClientSession, url: str, platform: str = "") -> Optional[str]:
     """下载音频到临时文件，返回文件路径。失败返回 None。
     Headers 按 URL 域名选择（参考 Museek cdnHeadersForUrl），而非平台名。
     """
+    if is_dead_proxy_url(url):
+        log.debug(f"跳过代理音频链接（.php?id= 模式）: {url[:80]}")
+        return None
     headers = get_headers_for_url(url)
     tmp_path = _new_tmp_path()
     try:
         async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=30),
                                 allow_redirects=True) as resp:
             if resp.status >= 400 or resp.status < 200:
-                log.warning(f"下载音频失败: HTTP {resp.status}")
+                log.warning(f"下载音频失败: HTTP {resp.status} - {url[:70]}")
                 _safe_unlink(tmp_path)
                 return None
             with open(tmp_path, "wb") as f:
@@ -135,7 +144,7 @@ async def download_audio_via_bridge(url: str) -> Optional[str]:
     使用 Node.js 原生 http/https 模块下载（参考 lx-music-desktop request.ts）。
     跳过已知无法下载的代理 URL（.php?id= 模式），避免浪费时间。
     """
-    if ".php?" in url and "id=" in url:
+    if is_dead_proxy_url(url):
         log.debug(f"跳过代理 URL（.php?id= 模式）: {url[:80]}")
         return None
 

@@ -9,16 +9,24 @@ const ROOT = path.join(__dirname, '..');
 const RENDERER = path.join(ROOT, 'design', 'index.html');
 
 /**
+ * 运行模式判定：某些启动方式（如直接跑 electron.exe .）下 app.isPackaged 会误报 true，
+ * 所以用「resources 下是否存在 app.asar」来判定，源码目录运行时不依赖该标志。
+ */
+const PACKAGED = fs.existsSync(path.join(process.resourcesPath, 'app.asar'));
+
+/**
  * 数据目录（config.json / backend.log / queue.json / song_stats.json）：
  * - SONGBOT_DATA_DIR 环境变量可自定义任意路径；
- * - 便携版默认放在 exe 同级的 SongBotData，路径固定、用户可直接找到；
+ * - 免安装版默认放在 exe 同级的 SongBotData（单文件便携启动器会设 PORTABLE_EXECUTABLE_DIR，
+ *   解压文件夹版则直接用 exe 所在目录），路径固定、删目录即彻底清理；
  * - 只读目录（如 Program Files）自动回退到系统默认 %APPDATA%\SongBot。
  */
 function resolveDataDir() {
   const custom = (process.env.SONGBOT_DATA_DIR || '').trim();
   if (custom) return path.resolve(custom);
-  if (app.isPackaged && process.env.PORTABLE_EXECUTABLE_DIR) {
-    const beside = path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'SongBotData');
+  if (PACKAGED) {
+    const base = process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath);
+    const beside = path.join(base, 'SongBotData');
     try {
       fs.mkdirSync(beside, { recursive: true });
       fs.accessSync(beside, fs.constants.W_OK);
@@ -40,11 +48,11 @@ if (DATA_DIR !== LEGACY_DATA_DIR) {
   } catch { /* 忽略 */ }
 }
 
-const BACKEND_ROOT = app.isPackaged
+const BACKEND_ROOT = PACKAGED
   ? path.join(process.resourcesPath, 'app.asar.unpacked')
   : ROOT;
 // 打包版内置的 Windows 运行时（Python / Node / ffplay），放在 resources/runtime。
-const RUNTIME_ROOT = app.isPackaged ? path.join(process.resourcesPath, 'runtime') : '';
+const RUNTIME_ROOT = PACKAGED ? path.join(process.resourcesPath, 'runtime') : '';
 
 const BASE_PORT = Number(process.env.SONGBOT_API_PORT || 8790);
 const PORT_RANGE = 10;
@@ -148,7 +156,12 @@ function pythonCommand() {
     const bundled = path.join(RUNTIME_ROOT, 'python', 'python.exe');
     if (fs.existsSync(bundled)) return { cmd: bundled, args: [] };
   }
-  if (process.platform === 'win32') return { cmd: 'python', args: [] };
+  if (process.platform === 'win32') {
+    // 开发调试：优先用项目内 venv，避免依赖系统 Python 的全局包。
+    const venvPython = path.join(ROOT, 'venv', 'Scripts', 'python.exe');
+    if (fs.existsSync(venvPython)) return { cmd: venvPython, args: [] };
+    return { cmd: 'python', args: [] };
+  }
   return { cmd: 'python3', args: [] };
 }
 
@@ -190,10 +203,12 @@ function readTail(file, maxBytes = 512 * 1024) {
 /**
  * 后端配置文件路径：开发时用项目根 config.json；
  * 打包后放在用户可写目录，首次启动从 config.example.json 播种。
+ * 两种模式都做一次播种，避免缺少 config.json 时后端直接报错退出。
  */
 function backendConfigPath() {
-  if (!app.isPackaged) return path.join(ROOT, 'config.json');
-  const target = path.join(app.getPath('userData'), 'config.json');
+  const target = PACKAGED
+    ? path.join(app.getPath('userData'), 'config.json')
+    : path.join(ROOT, 'config.json');
   try {
     if (!fs.existsSync(target)) {
       const seed = path.join(BACKEND_ROOT, 'config.example.json');
@@ -280,7 +295,7 @@ async function startBackend() {
     return;
   }
 
-  if (app.isPackaged && !fs.existsSync(path.join(BACKEND_ROOT, 'main.py'))) {
+  if (PACKAGED && !fs.existsSync(path.join(BACKEND_ROOT, 'main.py'))) {
     setBackend({ status: 'offline', error: '未找到后端文件（asar 解包失败）' });
     return;
   }

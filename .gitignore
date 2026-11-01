@@ -14,6 +14,9 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+# 本机开发用虚拟环境（依赖由 requirements 声明，不入库）
+venv/
+.venv/
 
 # Node（桌面外壳打包）
 node_modules/
@@ -25,6 +28,11 @@ build-runtime/
 # 构建工作区（产物 musicSdk_bundle.cjs 提交，中间物不提交）
 tools/build_music_sdk/src_fetched/
 tools/build_music_sdk/work/
+
+# 临时截图 / 上传回执 / HTML 分享包（一次性产物，不入库）
+.screenshots/
+.uploads/
+.trae-html-share-packages/
 
 # 测试与 QA 运行残留
 qa/tmp_srcdirs/

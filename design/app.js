@@ -1,12 +1,12 @@
 /* ============================================================
    SongBot Desktop · Fluent 2 交互层 + 真实后端数据
    动效：100/150/250/280ms · standard / decelerate / accelerate
-   数据：/api/snapshot 每秒轮询；日志/弹幕增量拉取
+   数据：/api/snapshot 每 2 秒轮询；日志/弹幕增量拉取
    ============================================================ */
 (() => {
   'use strict';
 
-  const ORDER = ['dashboard', 'request', 'queue', 'live', 'sources', 'logs'];
+  const ORDER = ['request', 'live', 'settings'];
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   const bridge = window.songbot || null;
@@ -17,13 +17,15 @@
   const pageTitle = $('#pageTitle');
   const pageEyebrow = $('#pageEyebrow');
 
-  let current = 'dashboard';
+  let current = 'request';
 
   /* ---------------------------------------------------------------- 基础工具 */
 
   const state = {
     snapshot: null,
     settings: null,
+    settingsLoaded: false,
+    hasSessdata: true,
     sources: null,
     backend: { status: 'starting', port: null, external: false, error: '' },
     searchResults: [],
@@ -228,11 +230,11 @@
   }
 
   function onPageShown(id) {
-    if (id === 'sources') {
+    if (id === 'settings') {
       if (!state.settingsLoaded) loadSettings();
       fetchSources();
+      fetchLogs();
     }
-    if (id === 'logs') fetchLogs();
     if (id === 'request') renderSearch();
   }
 
@@ -261,7 +263,7 @@
     if (!online && next.status === 'offline' && !state.backendNotified) {
       state.backendNotified = true;
       const dir = next.dataDir ? `${next.dataDir}\\backend.log` : 'backend.log';
-      toast(`后端未就绪：可在「日志」页直接查看 ${dir}`);
+      toast(`后端未就绪：可在「设置」页直接查看 ${dir}`);
     }
     if (online) state.backendNotified = false;
   }
@@ -296,7 +298,7 @@
 
   function setPlayIcon(playing) {
     const href = playing ? '#i-pause' : '#i-play';
-    ['#pbPlay use', '#npToggle use', '#qToggle use', '#flyoutPlay use'].forEach(sel => {
+    ['#pbPlay use', '#flyoutPlay use'].forEach(sel => {
       const use = $(sel);
       if (use) use.setAttribute('href', href);
     });
@@ -311,17 +313,7 @@
     const pos = fmtTime(pb.position);
     const dur = fmtTime(pb.duration);
 
-    // 概览「现在播放」
-    $('#npTitle').textContent = song ? song.name : '暂无播放';
-    $('#npArtist').textContent = song
-      ? [song.singer, song.platform_name, pb.requester ? `@${pb.requester}` : '', `已播 ${pos} / ${dur}`].filter(Boolean).join(' · ')
-      : '等待点歌入队';
-    $('#npHint').textContent = song ? (pb.paused ? '已暂停' : '正在播放') : '等待队列';
-    $('#npTag').textContent = song ? backend : '—';
-    setCover($('#npCover'), song ? song.name : '—', 'flip-source');
-    setProgress($('#npBar'), pct);
-
-    // 队列页当前项
+    // 点歌台「正在播放」
     $('#qTitle').textContent = song ? song.name : '暂无播放';
     $('#qSub').textContent = song
       ? [song.singer, pb.requester ? `@${pb.requester}` : '', `已播 ${pos} / ${dur}`].filter(Boolean).join(' · ')
@@ -331,7 +323,7 @@
 
     // 播放条
     $('#pbTitle').textContent = song ? song.name : '暂无播放';
-    $('#pbTag').textContent = song ? (song.platform || '—') : '—';
+    $('#pbTag').textContent = song ? (song.platform_name || song.platform || '—') : '—';
     $('#pbArtist').textContent = song
       ? [song.singer, backend].filter(Boolean).join(' · ')
       : '等待点歌入队';
@@ -369,27 +361,9 @@
     setCounter($('#queueChip'), size);
     const badge = $('#navQueueBadge');
     if (badge) { badge.textContent = String(size); badge.style.display = size ? 'grid' : 'none'; }
-    $('#dashQueueHint').textContent = `待播 ${pending.length} 首`;
     $('#queuePendingCount').textContent = String(pending.length);
-    $('#queueMeta').textContent = `待播 ${pending.length} 首 · 共 ${size} 项 · 持久化到 queue.json`;
+    $('#queueMeta').textContent = `待播 ${pending.length} 首 · 共 ${size} 项`;
     $('#queueEmpty').style.display = pending.length ? 'none' : '';
-
-    const dash = $('#dashQueue');
-    dash.textContent = '';
-    if (!pending.length) {
-      const row = document.createElement('div');
-      row.className = 'row';
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      const t = document.createElement('div'); t.className = 't'; t.textContent = '队列为空';
-      const s = document.createElement('div'); s.className = 's'; s.textContent = '弹幕发送 /play 歌名 即可点歌';
-      meta.append(t, s);
-      row.append(meta);
-      dash.append(row);
-    }
-    pending.slice(0, 3).forEach((item, i) => {
-      dash.append(queueRow(item, String(i + 1).padStart(2, '0'), false));
-    });
 
     const list = $('#queueList');
     list.textContent = '';
@@ -478,98 +452,7 @@
 
   function renderStats(stats) {
     if (!stats) return;
-    setCounter($('#kpiSongs'), stats.songs_today || 0);
-    setCounter($('#liveSongs'), stats.songs_today || 0);
-    setCounter($('#kpiRate'), stats.danmaku_rate || 0);
-    setCounter($('#liveRate'), stats.danmaku_rate || 0);
     $('#dmRate').textContent = `${stats.danmaku_rate || 0} 条 / 分`;
-
-    const uptime = Number(stats.uptime || 0);
-    const hours = Math.floor(uptime / 3600);
-    const minutes = Math.floor((uptime % 3600) / 60);
-    setCounter($('#kpiUptime'), hours >= 1 ? hours : minutes);
-    $('#kpiUptimeUnit').textContent = hours >= 1 ? 'h' : 'm';
-
-    renderTop(stats.top || []);
-  }
-
-  function renderTop(top) {
-    const bars = $('#topBars');
-    bars.textContent = '';
-    if (!top.length) {
-      const hint = document.createElement('div');
-      hint.className = 'empty-hint';
-      hint.style.marginTop = '0';
-      hint.textContent = '暂无点歌记录。';
-      bars.append(hint);
-    } else {
-      const max = Math.max(1, ...top.map(it => Number(it.count) || 0));
-      top.forEach((item, i) => {
-        const row = document.createElement('div');
-        row.className = 'bar-row';
-        const rk = document.createElement('span');
-        rk.className = 'rk'; rk.textContent = String(i + 1).padStart(2, '0');
-        const track = document.createElement('div');
-        track.className = 'bar-track';
-        const fill = document.createElement('span');
-        fill.className = 'bar-fill';
-        fill.style.setProperty('--v', `${(Number(item.count) / max) * 100}%`);
-        track.append(fill);
-        const num = document.createElement('span');
-        num.className = 'num'; num.textContent = fmt(item.count);
-        row.append(rk, track, num);
-        bars.append(row);
-      });
-    }
-
-    const list = $('#reqTopList');
-    list.textContent = '';
-    if (!top.length) {
-      const row = document.createElement('div');
-      row.className = 'row';
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      const t = document.createElement('div'); t.className = 't'; t.textContent = '暂无记录';
-      meta.append(t);
-      row.append(meta);
-      list.append(row);
-    }
-    top.forEach((item, i) => {
-      const row = document.createElement('div');
-      row.className = 'row';
-      const idx = document.createElement('span');
-      idx.className = 'idx'; idx.textContent = String(i + 1).padStart(2, '0');
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      const t = document.createElement('div'); t.className = 't'; t.textContent = item.name;
-      const s = document.createElement('div'); s.className = 's'; s.textContent = `点歌 ${item.count} 次`;
-      meta.append(t, s);
-      row.append(idx, meta);
-      list.append(row);
-    });
-  }
-
-  function renderActivity(activity) {
-    const values = Array.isArray(activity) ? activity : [];
-    if (!values.length) return;
-    const path = $('#activityPath');
-    if (path) path.setAttribute('d', sparkPath(values, 600, 74, 8));
-    const live = $('#livePath');
-    if (live) live.setAttribute('d', sparkPath(values.slice(-10), 300, 60, 8));
-    const peak = Math.max(0, ...values);
-    const total = values.reduce((a, b) => a + b, 0);
-    $('#activityPeak').textContent = `峰值 ${peak}/10s`;
-    $('#activityMeta').textContent = `${total} 条`;
-  }
-
-  function sparkPath(values, width, height, pad) {
-    const max = Math.max(1, ...values);
-    const step = values.length > 1 ? width / (values.length - 1) : width;
-    return values.map((v, i) => {
-      const x = (i * step).toFixed(1);
-      const y = (height - pad - (Number(v) / max) * (height - pad * 2)).toFixed(1);
-      return `${i === 0 ? 'M' : 'L'}${x} ${y}`;
-    }).join(' ');
   }
 
   function renderRoom(snap) {
@@ -578,7 +461,6 @@
     $('#tbRoomText').textContent = `直播间 ${room.id || '—'} · ${room.connected ? '已连接' : '未连接'}`;
     const dot = $('#tbDot');
     if (dot) dot.style.background = room.connected ? 'var(--ok)' : 'var(--err)';
-    setCounter($('#viewers'), snap.viewers || 0);
 
     $('#liveRoom').textContent = room.id || '—';
     $('#liveConnected').textContent = room.connected ? '已连接' : '未连接';
@@ -601,29 +483,14 @@
     renderPlayback(snap.playback);
     renderQueue(snap.queue);
     renderStats(snap.stats);
-    renderActivity(snap.activity);
-
-    const sources = snap.sources || {};
-    $('#reqSourcesTag').textContent = sources.ready === sources.total && sources.total ? '全部就绪' : '部分就绪';
-    $('#reqSourcesTotal').textContent = String(sources.total || 0);
-    $('#reqSourcesReady').textContent = String(sources.ready || 0);
-    $('#reqSourcesPlatforms').textContent = (sources.platforms || []).length
-      ? (sources.platforms || []).join(' / ')
-      : '—';
-
-    const rate = Number(snap.stats && snap.stats.danmaku_rate || 0);
-    const liveBadge = $('#navLiveBadge');
-    if (liveBadge) { liveBadge.textContent = String(rate); liveBadge.style.display = rate ? 'grid' : 'none'; }
 
     const recent = snap.danmaku || [];
     if (!state.lastDmId && recent.length) {
       state.danmaku = recent.slice(-200);
       state.lastDmId = state.danmaku[state.danmaku.length - 1].id;
       renderFeed();
-    }
-
-    if (!state.settingsLoaded && snap.room) {
-      // 设置页首次展示时再拉取，避免启动瞬间的额外请求
+    } else if (!state.danmaku.length) {
+      renderFeed();   // 空列表也要刷新空状态文案（连接状态会变）
     }
   }
 
@@ -634,6 +501,15 @@
     if (!feed) return;
     const visible = state.danmaku.filter(item => item.kind === 'request' || state.dmFilter === 'all');
     feed.textContent = '';
+    if (!visible.length) {
+      const empty = document.createElement('div');
+      empty.className = 'dm-empty';
+      empty.textContent = state.dmFilter === 'request'
+        ? '暂无点歌弹幕'
+        : (state.snapshot && state.snapshot.connected ? '暂无弹幕，观众发弹幕后会实时出现在这里' : '弹幕监听未连接，连上直播间后会实时显示');
+      feed.append(empty);
+      return;
+    }
     visible.slice(-60).forEach(item => {
       const row = document.createElement('div');
       row.className = `dm${item.kind === 'request' ? ' type-request' : ''}`;
@@ -658,6 +534,7 @@
   }
 
   async function sendDanmaku() {
+    if (!state.hasSessdata) { toast('未配置 SESSDATA，请到「设置」页填写后再发送'); return; }
     const input = $('#dmInput');
     const text = input.value.trim();
     if (!text) { toast('请输入弹幕内容'); input.focus(); return; }
@@ -809,8 +686,10 @@
       $('#searchHint').textContent = state.searchSuggestion ? '未命中' : '输入歌名或歌手开始搜索';
       return;
     }
-    $('#searchHint').textContent = `${results.length} 条命中 · 按置信度排序`;
-    results.forEach(item => {
+    $('#searchHint').textContent = state.searchPlatform === 'all'
+      ? `${results.length} 条命中 · 首条为最佳匹配，其余为同歌备选源`
+      : `${results.length} 条命中 · 当前平台可用源`;
+    results.forEach((item, index) => {
       const row = document.createElement('div');
       row.className = 'row';
       row.append(coverNode(item));
@@ -828,6 +707,14 @@
       scoreTag.className = `tag${Number(item.score) < 80 ? ' amber' : ''}`;
       scoreTag.textContent = `置信 ${item.score ?? '—'}`;
       row.append(pTag, scoreTag);
+      // 备选源标注：后端固定把第 1 条作解析结果、其后为同歌跨平台候选，
+      // 平铺展示容易被误当成"另一首歌"，误点后听到的版本与预期不符（播错歌）
+      if (index > 0) {
+        const altTag = document.createElement('span');
+        altTag.className = 'tag';
+        altTag.textContent = '备选源';
+        row.append(altTag);
+      }
 
       const actions = document.createElement('div');
       actions.className = 'actions';
@@ -916,7 +803,7 @@
     const snap = state.snapshot;
     if (!snap || !snap.queue || !snap.queue.size) { toast('队列已经为空'); return; }
     const data = await queueAction('/api/queue/clear');
-    if (data) toast('队列已清空（正在播放保留）');
+    if (data) toast(snap.queue.current ? '队列已清空（正在播放保留）' : '队列已清空');
   }
 
   async function skipCurrent() {
@@ -1045,7 +932,15 @@
     $('#setSessdata').placeholder = s.has_sessdata ? `当前 ${s.sessdata_hint}（留空不修改）` : '未配置';
     $('#setJct').placeholder = s.jct_hint ? `当前 ${s.jct_hint}（留空不修改）` : '未配置';
     $('#setBuvid3').placeholder = s.buvid3_hint ? `当前 ${s.buvid3_hint}（留空不修改）` : '未配置';
-    $('#sessHint').textContent = s.has_sessdata ? '保存后自动热重载，无需重启' : '尚未配置 SESSDATA，无法发送弹幕';
+    $('#sessHint').textContent = s.has_sessdata
+      ? (s.cookie_valid ? s.cookie_status || '保存后自动热重载，无需重启' : '已失效，请更新 SESSDATA 后保存')
+      : '尚未配置 SESSDATA，无法发送弹幕';
+    state.hasSessdata = !!s.has_sessdata;
+    const sendBtn = $('#dmSend');
+    if (sendBtn) {
+      sendBtn.disabled = !state.hasSessdata;
+      sendBtn.title = state.hasSessdata ? '' : '需先在「设置」页填写 SESSDATA';
+    }
     $('#buvidHint').textContent = s.buvid3_hint ? '风控校验；保存后热更新' : '缺失时启动自动获取';
     const cookieTag = $('#cookieTag');
     cookieTag.textContent = s.cookie_valid ? '有效' : (s.has_sessdata ? '已失效' : '未配置');
@@ -1054,6 +949,8 @@
     $('#setRoomCurrent').textContent = s.room_id ? `房间 ${s.room_id}` : '—';
 
     $$('#setBackend button').forEach(btn => {
+      const available = (s.backends || ['ffplay']).includes(btn.dataset.backend);
+      btn.style.display = available ? '' : 'none';
       btn.classList.toggle('on', btn.dataset.backend === (s.player_backend || 'ffplay'));
     });
 
@@ -1092,6 +989,13 @@
     if (!body.bili_jct) delete body.bili_jct;
     if (!body.bili_buvid3) delete body.bili_buvid3;
     if (!body.bili_room_id) delete body.bili_room_id;
+    else if (!/^\d+$/.test(body.bili_room_id)) { toast('房间号需为纯数字'); return; }
+    if (!body.api_port || body.api_port < 1024 || body.api_port > 65000) {
+      toast('API 端口需在 1024-65000 之间'); return;
+    }
+    if (!Number.isFinite(body.max_msg_per_minute) || !Number.isFinite(body.danmaku_interval)) {
+      toast('弹幕上限与间隔需为数字'); return;
+    }
 
     const res = await api('/api/settings', 'PUT', body);
     if (!res.ok || !res.data || !res.data.ok) { toast(desc(res)); return; }
@@ -1099,6 +1003,8 @@
       state.settings = res.data.settings;
       populateSettings(res.data.settings);
     }
+    const changed = res.data.changed || [];
+    if (!changed.length) { toast('没有需要保存的修改'); return; }
     const restart = res.data.restart_required || [];
     toast(restart.length ? `已保存；需重启后端：${restart.join('、')}` : '设置已保存并热更新');
   }
@@ -1139,22 +1045,6 @@
       `${clockTime(item.ts)} [${item.level}] [${item.name}] ${item.msg}`).join('\n');
     download(`songbot-logs-${new Date().toISOString().slice(0, 10)}.txt`, text);
     toast('日志已导出');
-  }
-
-  async function copyConn() {
-    let port = state.backend.port;
-    if (!port && bridge && typeof bridge.getBackendState === 'function') {
-      const st = await bridge.getBackendState();
-      port = st && st.port;
-    }
-    if (!port) { toast('后端端口尚不可用'); return; }
-    const text = `SongBot 本地接口：http://127.0.0.1:${port}`;
-    try {
-      await navigator.clipboard.writeText(text);
-      toast('连接信息已复制');
-    } catch {
-      toast(text);
-    }
   }
 
   /* ---------------------------------------------------------------- 轮询 */
@@ -1297,7 +1187,7 @@
     // 队列操作
     if (target.dataset.pin !== undefined) {
       queueAction('/api/queue/pin', { index: Number(target.dataset.pin) })
-        .then(data => { if (data) toast('已置顶到队首'); });
+        .then(data => { if (data) toast('已置顶到下一首'); });
       return;
     }
     if (target.dataset.remove !== undefined) {
@@ -1320,7 +1210,7 @@
       if (target.dataset.toast) target.dataset.toast = '';
       return;
     }
-    if (action === 'copy-conn') { copyConn(); return; }
+    if (action === 'copy-conn') return;
     if (action === 'open-log') {
       if (bridge && typeof bridge.openLog === 'function') bridge.openLog();
       else toast('仅桌面应用可打开日志目录');
@@ -1355,13 +1245,11 @@
     if (target.id === 'saveBtn') { saveSettings(); return; }
     if (target.id === 'saveReset') { loadSettings().then(() => toast('已恢复为已保存配置')); return; }
 
-    if (target.id === 'pbPlay' || target.id === 'npToggle' || target.id === 'qToggle'
-      || target.id === 'flyoutPlay') {
+    if (target.id === 'pbPlay' || target.id === 'flyoutPlay') {
       togglePlayback();
       return;
     }
-    if (target.id === 'pbSkip' || target.id === 'npSkip' || target.id === 'qSkip'
-      || target.id === 'flyoutSkip') {
+    if (target.id === 'pbSkip' || target.id === 'flyoutSkip') {
       skipCurrent();
       return;
     }
@@ -1387,23 +1275,25 @@
       if (ev.target && ev.target.id === 'dmInput') { ev.preventDefault(); sendDanmaku(); }
     }
     if (ev.key !== 'Escape') return;
-    if (playerOverlay.classList.contains('open')) closePlayer();
+    if (playerOverlay && playerOverlay.classList.contains('open')) closePlayer();
   });
 
   if (playerOverlay) playerOverlay.addEventListener('click', ev => { if (ev.target === playerOverlay) closePlayer(); });
 
-  $('#dmInput').addEventListener('input', ev => {
-    $('#dmCounter').textContent = `${ev.target.value.length} / 20`;
-  });
+  const dmInput = $('#dmInput');
+  if (dmInput) {
+    dmInput.addEventListener('input', ev => {
+      $('#dmCounter').textContent = `${ev.target.value.length} / 20`;
+    });
+  }
 
-  $('#logFilter').addEventListener('input', ev => {
-    state.logKeyword = ev.target.value.trim();
-    renderLogs();
-  });
-
-  $('#searchInput').addEventListener('keydown', ev => {
-    if (ev.key === 'Enter') { ev.preventDefault(); doSearch(); }
-  });
+  const logFilter = $('#logFilter');
+  if (logFilter) {
+    logFilter.addEventListener('input', ev => {
+      state.logKeyword = ev.target.value.trim();
+      renderLogs();
+    });
+  }
 
   /* ---------------------------------------------------------------- 初始化 */
 
@@ -1413,5 +1303,5 @@
   });
 
   fetchSnapshot(true).catch(() => {});
-  setInterval(() => { fetchSnapshot(true).catch(() => {}); }, 1000);
+  setInterval(() => { fetchSnapshot().catch(() => {}); }, 1000);
 })();

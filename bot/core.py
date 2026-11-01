@@ -335,10 +335,15 @@ class BiliMusicBot:
         批量验证复用此方法，确保验证与单曲解析完全一致。
         """
         best: Optional[SongInfo] = None
-        for song_name, singer in split_play_query(query):
+        cands = split_play_query(query)
+        for song_name, singer in cands:
             song = await search_song(self.session, song_name, singer)
             if song and (best is None or song.score > best.score):
                 best = song
+                # 已拿到高置信命中（精确歌名匹配，score>=135）即停止后续候选：
+                # 后续候选只会白等一次完整搜索窗口，是"搜索慢"的主因。
+                if best.score >= 135:
+                    break
         if best is None:
             no_space = query.replace(" ", "")
             if no_space != query:

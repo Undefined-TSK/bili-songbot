@@ -9,10 +9,7 @@
   "scripts": {
     "start": "electron .",
     "runtime:win": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/build_windows_runtime.ps1",
-    "dist:win": "npm run runtime:win && electron-builder --win portable",
-    "dist:win:nsis": "npm run runtime:win && electron-builder --win nsis",
-    "dist": "electron-builder --win nsis",
-    "dist:portable": "electron-builder --win portable",
+    "dist": "npm run runtime:win && electron-builder --win zip",
     "dist:dir": "electron-builder --win dir"
   },
   "devDependencies": {
@@ -60,26 +57,20 @@
         "to": "runtime/ffmpeg"
       }
     ],
-    "portable": {
-      "artifactName": "SongBot-Portable-${version}.exe"
-    },
+    "artifactName": "SongBot-${version}-win-x64.zip",
     "win": {
       "target": [
         {
-          "target": "nsis",
+          "target": "zip",
           "arch": [
             "x64"
           ]
         }
       ],
+      "electronLanguages": [
+        "zh-CN"
+      ],
       "icon": "desktop/build/icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "shortcutName": "SongBot 点歌台"
     }
   }
 }

@@ -63,7 +63,7 @@ async def main():
     try:
         if degraded:
             log.error(degraded)
-            log.error("已进入降级模式：本地 API 保持在线，可在「音源与设置」修改配置后重启应用")
+            log.error("已进入降级模式：本地 API 保持在线，可在「设置」页修改配置后重启应用")
             await asyncio.Event().wait()   # 等待外壳退出（taskkill）
         else:
             await bot.run()
