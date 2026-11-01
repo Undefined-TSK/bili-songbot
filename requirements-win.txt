@@ -1,0 +1,21 @@
+# Windows 内置运行时依赖（tools/build_windows_runtime.ps1 使用）
+# 仅用于准备 build-runtime/python，运行时不读取本文件。
+# 说明：本机 Python 只负责下载 wheel，最终产物是 Windows x64 / CPython 3.12。
+aiohttp>=3.9.0
+bilibili-api-python>=17.0.0
+rapidfuzz>=3.0,<4
+pypinyin>=0.51,<1
+typing_extensions>=4.8
+pillow>=10
+pycryptodomex>=3.20
+pyyaml>=6
+PyJWT>=2
+beautifulsoup4>=4
+brotli>=1.0
+qrcode>=7
+apscheduler>=3.10,<4
+tzlocal>=5
+
+# 以下两个只发布源码包，由脚本用 --no-deps 单独安装：
+# jieba>=0.42.1
+# qrcode-terminal>=0.8

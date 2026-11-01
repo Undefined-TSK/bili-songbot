@@ -8,6 +8,9 @@
   "main": "desktop/main.js",
   "scripts": {
     "start": "electron .",
+    "runtime:win": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/build_windows_runtime.ps1",
+    "dist:win": "npm run runtime:win && electron-builder --win portable",
+    "dist:win:nsis": "npm run runtime:win && electron-builder --win nsis",
     "dist": "electron-builder --win nsis",
     "dist:portable": "electron-builder --win portable",
     "dist:dir": "electron-builder --win dir"
