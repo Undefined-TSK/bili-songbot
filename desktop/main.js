@@ -10,6 +10,8 @@ const RENDERER = path.join(ROOT, 'design', 'index.html');
 const BACKEND_ROOT = app.isPackaged
   ? path.join(process.resourcesPath, 'app.asar.unpacked')
   : ROOT;
+// 打包版内置的 Windows 运行时（Python / Node / ffplay），放在 resources/runtime。
+const RUNTIME_ROOT = app.isPackaged ? path.join(process.resourcesPath, 'runtime') : '';
 
 const BASE_PORT = Number(process.env.SONGBOT_API_PORT || 8790);
 const PORT_RANGE = 10;
@@ -107,8 +109,22 @@ function findFreePort(start) {
 
 function pythonCommand() {
   if (process.env.SONGBOT_PYTHON) return { cmd: process.env.SONGBOT_PYTHON, args: [] };
+  if (RUNTIME_ROOT && process.platform === 'win32') {
+    const bundled = path.join(RUNTIME_ROOT, 'python', 'python.exe');
+    if (fs.existsSync(bundled)) return { cmd: bundled, args: [] };
+  }
   if (process.platform === 'win32') return { cmd: 'python', args: [] };
   return { cmd: 'python3', args: [] };
+}
+
+/** 把内置运行时目录插到 PATH 前面：node.exe 与 ffplay.exe 按名称即可解析。 */
+function runtimePath() {
+  if (!RUNTIME_ROOT) return '';
+  return [
+    path.join(RUNTIME_ROOT, 'python'),
+    path.join(RUNTIME_ROOT, 'node'),
+    path.join(RUNTIME_ROOT, 'ffmpeg', 'bin'),
+  ].filter((dir) => fs.existsSync(dir)).join(path.delimiter);
 }
 
 function logFile() {
@@ -138,14 +154,25 @@ function backendConfigPath() {
 function spawnBackend(port) {
   const py = pythonCommand();
   const out = fs.createWriteStream(logFile(), { flags: 'a' });
-  const child = spawn(py.cmd, [...py.args, 'main.py'], {
+  const extraPath = runtimePath();
+  // 内置 Python 带 ._pth（隔离模式），不会自动把脚本目录加入 sys.path，
+  // 因此用 runpy 显式把后端根目录插入后再执行 main.py。
+  const bootstrap = [
+    'import os,sys,runpy',
+    'sys.path.insert(0,os.getcwd())',
+    "sys.argv=['main.py']",
+    "runpy.run_path('main.py',run_name='__main__')",
+  ].join(';');
+  const child = spawn(py.cmd, [...py.args, '-c', bootstrap], {
     cwd: BACKEND_ROOT,
     env: {
       ...process.env,
+      ...(extraPath ? { PATH: `${extraPath}${path.delimiter}${process.env.PATH || ''}` } : {}),
       SONGBOT_API_PORT: String(port),
       SONGBOT_API_TOKEN: TOKEN,
       SONGBOT_CONFIG: backendConfigPath(),
       PYTHONUNBUFFERED: '1',
+      PYTHONUTF8: '1',
     },
     windowsHide: true,
     stdio: ['ignore', 'pipe', 'pipe'],

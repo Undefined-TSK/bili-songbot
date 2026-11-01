@@ -19,6 +19,9 @@ htmlcov/
 node_modules/
 release/
 
+# 内置 Windows 运行时（下载/组装产物，不入库）
+build-runtime/
+
 # 构建工作区（产物 musicSdk_bundle.cjs 提交，中间物不提交）
 tools/build_music_sdk/src_fetched/
 tools/build_music_sdk/work/

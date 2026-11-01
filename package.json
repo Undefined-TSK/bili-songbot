@@ -43,6 +43,23 @@
       "sources/**/*",
       "config.example.json"
     ],
+    "extraResources": [
+      {
+        "from": "build-runtime/python",
+        "to": "runtime/python"
+      },
+      {
+        "from": "build-runtime/node",
+        "to": "runtime/node"
+      },
+      {
+        "from": "build-runtime/ffmpeg",
+        "to": "runtime/ffmpeg"
+      }
+    ],
+    "portable": {
+      "artifactName": "SongBot-Portable-${version}.exe"
+    },
     "win": {
       "target": [
         {
