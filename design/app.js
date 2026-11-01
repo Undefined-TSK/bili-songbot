@@ -250,11 +250,12 @@
     if (sub) {
       sub.textContent = online
         ? `127.0.0.1:${next.port} · ${next.external ? '外部后端' : '本地进程'}`
-        : (next.error || '等待 Python 后端…');
+        : (next.error || (next.status === 'starting' ? '首次启动可能需要 30-60 秒…' : '等待 Python 后端…'));
     }
     if (!online && next.status === 'offline' && !state.backendNotified) {
       state.backendNotified = true;
-      toast('后端未就绪：请检查 Python 环境与 backend.log');
+      const dir = next.dataDir ? `${next.dataDir}\\backend.log` : 'backend.log';
+      toast(`后端未就绪：日志在 ${dir}，可点左下角「打开日志」`);
     }
     if (online) state.backendNotified = false;
   }
@@ -1254,6 +1255,16 @@
       return;
     }
     if (action === 'copy-conn') { copyConn(); return; }
+    if (action === 'open-log') {
+      if (bridge && typeof bridge.openLog === 'function') bridge.openLog();
+      else toast('仅桌面应用可打开日志目录');
+      return;
+    }
+    if (action === 'open-data') {
+      if (bridge && typeof bridge.openDataDir === 'function') bridge.openDataDir();
+      else toast('仅桌面应用可打开配置目录');
+      return;
+    }
 
     if (target.id === 'srcHealthyOnly') {
       state.healthyOnly = !state.healthyOnly;

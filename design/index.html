@@ -91,6 +91,7 @@
       </div>
       <div class="foot-actions">
         <button class="btn sm ghost" data-action="copy-conn" title="复制连接信息" aria-label="复制连接信息"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg><span>复制连接</span></button>
+        <button class="btn sm ghost" data-action="open-log" title="打开 backend.log 所在位置" aria-label="打开日志"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-terminal"/></svg><span>打开日志</span></button>
       </div>
     </div>
   </aside>
@@ -370,6 +371,7 @@
           <input class="input" id="logFilter" placeholder="过滤关键字…" style="max-width:220px;height:32px" />
           <button class="chip on" id="logAuto"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg>自动滚动</button>
           <button class="chip" data-action="export-logs"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg>导出</button>
+          <button class="chip" data-action="open-log"><svg stroke-linecap="round" stroke-linejoin="round"><use href="#i-terminal"/></svg>打开日志文件夹</button>
         </div>
         <div class="log-panel" style="margin-top:12px" id="logPanel"></div>
       </section>

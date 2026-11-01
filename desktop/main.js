@@ -42,6 +42,7 @@ function publicState() {
     port: backend.port,
     external: backend.external,
     error: backend.error,
+    dataDir: app.getPath('userData'),
   };
 }
 
@@ -200,7 +201,7 @@ function spawnBackend(port) {
   return child;
 }
 
-async function waitForBackend(port, timeoutMs = 25000) {
+async function waitForBackend(port, timeoutMs = 60000) {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
     if (await probePort(port, 1200)) return true;
@@ -248,7 +249,12 @@ async function startBackend() {
   if (ok) {
     setBackend({ status: 'online', port: backend.port });
   } else {
-    setBackend({ status: 'offline', error: '后端启动超时，请查看 backend.log' });
+    setBackend({ status: 'offline', error: '后端启动超时，正在后台重试（首次启动可能较慢）' });
+    // 便携版每次启动都要解压并被杀毒扫描，可能超过首轮等待时间：后台继续探测，迟到也能上线
+    waitForBackend(port, 90000).then((late) => {
+      const alive = backend.child && backend.child.exitCode === null;
+      if (late && alive) setBackend({ status: 'online', port: backend.port, error: '' });
+    });
   }
 }
 
@@ -325,6 +331,14 @@ ipcMain.handle('window:close', () => win?.close());
 ipcMain.handle('window:is-maximized', () => Boolean(win?.isMaximized()));
 
 ipcMain.handle('backend:get-state', () => publicState());
+
+/** 打开后端日志 / 配置目录：便携版用户很难自己找到 %APPDATA%\\SongBot。 */
+ipcMain.handle('app:open-log', () => {
+  const file = logFile();
+  if (fs.existsSync(file)) shell.showItemInFolder(file);
+  else return shell.openPath(app.getPath('userData'));
+});
+ipcMain.handle('app:open-data', () => shell.openPath(app.getPath('userData')));
 
 /**
  * 渲染层通过主进程代理访问本地 API：避免 file:// 的 CORS 限制，
