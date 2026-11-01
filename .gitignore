@@ -1,6 +1,9 @@
 # 运行时产物与个人数据
-config.json          # 含个人 Cookie/房间号，仓库提供 config.example.json
-queue.json           # 队列持久化（重启恢复用，属运行时数据）
+# 含个人 Cookie/房间号，仓库只提供 config.example.json
+config.json
+# 队列/统计持久化（重启恢复用，属运行时数据）
+queue.json
+song_stats.json
 bot/tmp/
 logs/
 *.log
