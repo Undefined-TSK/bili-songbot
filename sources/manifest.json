@@ -3,7 +3,7 @@
   "total": 45,
   "loaded": 44,
   "failed": 1,
-  "note": "LX 标准音源清单；official_pdone=true 的音源同时在 config.json 的 source_urls 写入官方 GitHub 链接，开机自动更新。",
+  "note": "LX 标准音源清单；可导入 lxserver 使用，官方源请在 lxserver 管理端或在线源市场更新。",
   "sources": [
     {
       "file": "HUIBQ音源.js",

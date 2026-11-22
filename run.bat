@@ -1,7 +1,6 @@
 @echo off
 cd /d "%~dp0"
-echo ==========================================
-echo   Bilibili Live Karaoke Bot Starting...
-echo ==========================================
-"%~dp0venv\Scripts\python.exe" main.py
+if not exist node_modules call npm install
+if not exist server\node_modules call npm run server:install
+call npm start
 pause

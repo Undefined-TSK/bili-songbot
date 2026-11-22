@@ -1,19 +1,35 @@
 {
-  "bili_room_id": "你的直播间号",
+  "bili_room_id": "",
   "bili_sessdata": "",
   "bili_jct": "",
   "bili_buvid3": "",
   "bili_buvid4": "",
-  "source_dir": "sources",
-  "node_path": "node",
+
+  "lxserver_url": "http://127.0.0.1:9527",
+
   "ffplay_path": "ffplay",
   "ffplay_args": ["-nodisp", "-autoexit", "-loglevel", "quiet"],
   "player_backend": "ffplay",
-  "mpv_options": {},
-  "source_urls": [],
+  "min_quality": "flac24bit",
+  "url_fetch_timeout": 15,
+
+  "enable_lyrics_search": true,
+  "enable_pinyin_fuzzy": true,
   "search_cache_ttl": 60,
   "url_cache_ttl": 240,
   "cache_max_entries": 256,
+
+  "max_msg_per_minute": 20,
+  "danmaku_interval": 5,
+  "danmaku_max_len": 20,
+  "api_rate_interval": 1.0,
+  "room_check_interval": 60,
+  "vote_duration": 30,
+  "vote_broadcast_interval": 5,
+  "max_batch_songs": 10,
+
+  "api_port": 8790,
   "queue_file": "queue.json",
-  "stats_file": "song_stats.json"
+  "stats_file": "song_stats.json",
+  "log_file": "logs/bot.log"
 }

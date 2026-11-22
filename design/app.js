@@ -256,7 +256,7 @@
     if (sub) {
       sub.textContent = online
         ? `127.0.0.1:${next.port} · ${next.external ? '外部后端' : '本地进程'}`
-        : (next.error || (next.status === 'starting' ? '首次启动可能需要 30-60 秒…' : '等待 Python 后端…'));
+        : (next.error || (next.status === 'starting' ? '首次启动可能需要 30-60 秒…' : '等待本地后端…'));
     }
     const dirHint = $('#dataDirHint');
     if (dirHint && next.dataDir) dirHint.textContent = next.dataDir;

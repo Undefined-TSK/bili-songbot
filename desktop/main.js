@@ -51,7 +51,7 @@ if (DATA_DIR !== LEGACY_DATA_DIR) {
 const BACKEND_ROOT = PACKAGED
   ? path.join(process.resourcesPath, 'app.asar.unpacked')
   : ROOT;
-// 打包版内置的 Windows 运行时（Python / Node / ffplay），放在 resources/runtime。
+// 打包版内置的 Windows 运行时（仅 ffplay），放在 resources/runtime。
 const RUNTIME_ROOT = PACKAGED ? path.join(process.resourcesPath, 'runtime') : '';
 
 const BASE_PORT = Number(process.env.SONGBOT_API_PORT || 8790);
@@ -148,31 +148,18 @@ function findFreePort(start) {
   });
 }
 
-/* ---------------------------------------------------------------- Python 后端 */
+/* ---------------------------------------------------------------- Node 后端 */
 
-function pythonCommand() {
-  if (process.env.SONGBOT_PYTHON) return { cmd: process.env.SONGBOT_PYTHON, args: [] };
-  if (RUNTIME_ROOT && process.platform === 'win32') {
-    const bundled = path.join(RUNTIME_ROOT, 'python', 'python.exe');
-    if (fs.existsSync(bundled)) return { cmd: bundled, args: [] };
-  }
-  if (process.platform === 'win32') {
-    // 开发调试：优先用项目内 venv，避免依赖系统 Python 的全局包。
-    const venvPython = path.join(ROOT, 'venv', 'Scripts', 'python.exe');
-    if (fs.existsSync(venvPython)) return { cmd: venvPython, args: [] };
-    return { cmd: 'python', args: [] };
-  }
-  return { cmd: 'python3', args: [] };
+function backendEntry() {
+  return path.join(BACKEND_ROOT, 'server', 'dist', 'index.js');
 }
 
-/** 把内置运行时目录插到 PATH 前面：node.exe 与 ffplay.exe 按名称即可解析。 */
+/** 把内置 ffmpeg 目录插到 PATH 前面：ffplay.exe 按名称即可解析。 */
 function runtimePath() {
   if (!RUNTIME_ROOT) return '';
-  return [
-    path.join(RUNTIME_ROOT, 'python'),
-    path.join(RUNTIME_ROOT, 'node'),
-    path.join(RUNTIME_ROOT, 'ffmpeg', 'bin'),
-  ].filter((dir) => fs.existsSync(dir)).join(path.delimiter);
+  return [path.join(RUNTIME_ROOT, 'ffmpeg', 'bin')]
+    .filter((dir) => fs.existsSync(dir))
+    .join(path.delimiter);
 }
 
 function logFile() {
@@ -221,27 +208,18 @@ function backendConfigPath() {
 }
 
 function spawnBackend(port) {
-  const py = pythonCommand();
   const out = fs.createWriteStream(logFile(), { flags: 'a' });
   const extraPath = runtimePath();
-  // 内置 Python 带 ._pth（隔离模式），不会自动把脚本目录加入 sys.path，
-  // 因此用 runpy 显式把后端根目录插入后再执行 main.py。
-  const bootstrap = [
-    'import os,sys,runpy',
-    'sys.path.insert(0,os.getcwd())',
-    "sys.argv=['main.py']",
-    "runpy.run_path('main.py',run_name='__main__')",
-  ].join(';');
-  const child = spawn(py.cmd, [...py.args, '-c', bootstrap], {
+  // 直接复用 Electron 自带的 Node（ELECTRON_RUN_AS_NODE），无需额外打包 node.exe。
+  const child = spawn(process.execPath, [backendEntry()], {
     cwd: BACKEND_ROOT,
     env: {
       ...process.env,
+      ELECTRON_RUN_AS_NODE: '1',
       ...(extraPath ? { PATH: `${extraPath}${path.delimiter}${process.env.PATH || ''}` } : {}),
       SONGBOT_API_PORT: String(port),
       SONGBOT_API_TOKEN: TOKEN,
       SONGBOT_CONFIG: backendConfigPath(),
-      PYTHONUNBUFFERED: '1',
-      PYTHONUTF8: '1',
     },
     windowsHide: true,
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -255,7 +233,7 @@ function spawnBackend(port) {
     process.stderr.write(chunk);
   });
   child.on('error', (err) => {
-    setBackend({ status: 'offline', error: `无法启动 Python 后端: ${err.message}` });
+    setBackend({ status: 'offline', error: `无法启动 Node 后端: ${err.message}` });
   });
   child.on('exit', (code, signal) => {
     if (quitting) return;
@@ -295,8 +273,8 @@ async function startBackend() {
     return;
   }
 
-  if (PACKAGED && !fs.existsSync(path.join(BACKEND_ROOT, 'main.py'))) {
-    setBackend({ status: 'offline', error: '未找到后端文件（asar 解包失败）' });
+  if (PACKAGED && !fs.existsSync(backendEntry())) {
+    setBackend({ status: 'offline', error: '未找到后端文件（server/dist 未打包）' });
     return;
   }
 
